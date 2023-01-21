@@ -1,0 +1,2 @@
+# ghalint
+GitHub Actions linter
