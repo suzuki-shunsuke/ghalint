@@ -18,10 +18,8 @@ $ ghalint run
 
 ## Why not `actionlint`?
 
-- We don't think ghalint can replace `actionlint`
-- We use both `actionlint` and `ghalint`
-- `ghalint` doesn't support features that `actionlint` supports
-- We develop `ghalint` to support our policies that `actionlint` doesn't cover
+We develop `ghalint` to support our policies that [actionlint](https://github.com/rhysd/actionlint) doesn't cover.
+We don't aim to replace actionlint to ghalint. We use both `actionlint` and `ghalint`.
 
 ## LICENSE
 
