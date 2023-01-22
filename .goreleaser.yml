@@ -38,9 +38,6 @@ signs:
       - github
       - ${artifact}
 
-archives:
-  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-
 release:
   prerelease: true # we update release note manually before releasing
   header: |
