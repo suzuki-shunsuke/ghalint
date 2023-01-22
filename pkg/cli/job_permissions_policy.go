@@ -15,6 +15,9 @@ func (policy *JobPermissionsPolicy) Name() string {
 
 func (policy *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, wf *Workflow) error {
 	failed := false
+	if wf.Permissions != nil && len(wf.Permissions) == 0 {
+		return nil
+	}
 	for jobName, job := range wf.Jobs {
 		if job.Permissions == nil {
 			failed = true

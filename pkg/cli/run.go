@@ -53,9 +53,10 @@ type Policy interface {
 }
 
 type Workflow struct {
-	FilePath string `yaml:"-"`
-	Jobs     map[string]*Job
-	Env      map[string]string
+	FilePath    string `yaml:"-"`
+	Jobs        map[string]*Job
+	Env         map[string]string
+	Permissions map[string]string
 }
 
 type Job struct {
