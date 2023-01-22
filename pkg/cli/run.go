@@ -11,11 +11,12 @@ import (
 )
 
 func (runner *Runner) Run(ctx *cli.Context) error {
+	logE := log.New(runner.flags.Version)
 	filePaths, err := listWorkflows()
 	if err != nil {
+		logE.Error(err)
 		return err
 	}
-	logE := log.New(runner.flags.Version)
 	policies := []Policy{
 		&JobPermissionsPolicy{},
 		NewWorkflowSecretsPolicy(),
@@ -36,7 +37,6 @@ func (runner *Runner) Run(ctx *cli.Context) error {
 			logE := logE.WithField("policy_name", policy.Name())
 			if err := policy.Apply(ctx.Context, logE, wf); err != nil {
 				failed = true
-				logerr.WithError(logE, err).Error("apply a policy")
 				continue
 			}
 		}
