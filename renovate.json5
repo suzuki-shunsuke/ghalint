@@ -4,5 +4,6 @@
     "helpers:pinGitHubActionDigests",
     "github>suzuki-shunsuke/renovate-config#1.1.1",
     "github>aquaproj/aqua-renovate-config#1.5.1",
+    "github>aquaproj/aqua-renovate-config:file#1.5.1(aqua/.*\\.ya?ml)",
   ],
 }
