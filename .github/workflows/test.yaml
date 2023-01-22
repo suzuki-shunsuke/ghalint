@@ -5,8 +5,7 @@ env:
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+  pull_request: {}
 permissions: {}
 jobs:
   test:
@@ -14,3 +13,10 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
+
+  ghalint:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3
+      - run: go run ./cmd/ghalint run
