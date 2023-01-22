@@ -15,6 +15,8 @@ GitHub Actions linter
 :x:
 
 ```yaml
+permissions:
+  contents: read
 jobs:
   hello:
     runs-on: ubuntu-latest
@@ -29,7 +31,8 @@ jobs:
 jobs:
   hello:
     runs-on: ubuntu-latest
-    permissions: {} # Set permissions
+    permissions: # Set permissions
+      contents: read
     steps:
       - run: echo hello
 ```
