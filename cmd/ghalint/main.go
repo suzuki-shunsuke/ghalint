@@ -29,5 +29,5 @@ func core() error {
 		Commit:  commit,
 		Date:    date,
 	})
-	return app.RunContext(ctx, os.Args)
+	return app.RunContext(ctx, os.Args) //nolint:wrapcheck
 }

@@ -13,19 +13,11 @@ type WorkflowSecretsPolicy struct {
 	githubTokenPattern *regexp.Regexp
 }
 
-func NewWorkflowSecretsPolicy() (*WorkflowSecretsPolicy, error) {
-	secretPattern, err := regexp.Compile(`\${{ *secrets\.[^ ]+ *}}`)
-	if err != nil {
-		return nil, err
-	}
-	githubTokenPattern, err := regexp.Compile(`\${{ *github\.token+ *}}`)
-	if err != nil {
-		return nil, err
-	}
+func NewWorkflowSecretsPolicy() *WorkflowSecretsPolicy {
 	return &WorkflowSecretsPolicy{
-		secretPattern:      secretPattern,
-		githubTokenPattern: githubTokenPattern,
-	}, nil
+		secretPattern:      regexp.MustCompile(`\${{ *secrets\.[^ ]+ *}}`),
+		githubTokenPattern: regexp.MustCompile(`\${{ *github\.token+ *}}`),
+	}
 }
 
 func (policy *WorkflowSecretsPolicy) Name() string {
