@@ -4,11 +4,16 @@ GitHub Actions linter
 
 ## Policies
 
-- `job_permissions`: All jobs should have `permissions` unless workflow's `permissions` is empty `{}`
+- `job_permissions`: All jobs should have `permissions`
   - Why: For least privilege
+  - Exceptions
+    - workflow's `permissions` is empty `{}`
+    - workflow has only one job and the workflow has `permissions`
 - `workflow_secrets`: Workflow should not set secrets to environment variables
   - How to fix: set secrets to jobs
   - Why: To limit the scope of secrets
+  - Exceptions
+    - workflow has only one job
 
 ### job_permissions
 
@@ -18,34 +23,50 @@ GitHub Actions linter
 permissions:
   contents: read
 jobs:
-  hello:
+  foo:
     runs-on: ubuntu-latest
     # Without permissions
     steps:
       - run: echo hello
+  bar:
+    runs-on: ubuntu-latest
+    # Without permissions
+    steps:
+      - uses: actions/checkout@v3
 ```
 
 :o:
 
 ```yaml
 jobs:
-  hello:
+  foo:
+    runs-on: ubuntu-latest
+    permissions: {} # Set permissions
+    steps:
+      - run: echo hello
+  bar:
     runs-on: ubuntu-latest
     permissions: # Set permissions
       contents: read
     steps:
-      - run: echo hello
+      - uses: actions/checkout@v3
 ```
 
 Or
 
 ```yaml
-permissions: {} # Set permissions
+permissions: {} # empty permissions
 jobs:
-  hello:
+  foo:
     runs-on: ubuntu-latest
     steps:
       - run: echo hello
+  bar:
+    runs-on: ubuntu-latest
+    permissions: # Set permissions
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
 ```
 
 ### workflow_secrets

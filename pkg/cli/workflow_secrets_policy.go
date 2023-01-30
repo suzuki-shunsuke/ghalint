@@ -25,6 +25,9 @@ func (policy *WorkflowSecretsPolicy) Name() string {
 }
 
 func (policy *WorkflowSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, wf *Workflow) error {
+	if len(wf.Jobs) < 2 { //nolint:gomnd
+		return nil
+	}
 	failed := false
 	for envName, envValue := range wf.Env {
 		if policy.secretPattern.MatchString(envValue) {
