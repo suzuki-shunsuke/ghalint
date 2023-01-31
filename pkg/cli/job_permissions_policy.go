@@ -13,7 +13,7 @@ func (policy *JobPermissionsPolicy) Name() string {
 	return "job_permissions"
 }
 
-func (policy *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, wf *Workflow) error {
+func (policy *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
 	failed := false
 	if wf.Permissions != nil && len(wf.Permissions) == 0 {
 		return nil

@@ -14,6 +14,11 @@ GitHub Actions linter
   - Why: To limit the scope of secrets
   - Exceptions
     - workflow has only one job
+- `job_secrets`: Job should not set secrets to environment variables
+  - How to fix: set secrets to steps
+  - Why: To limit the scope of secrets
+  - Exceptions
+    - job has only one step
 
 ### job_permissions
 
@@ -112,6 +117,38 @@ jobs:
       - run: echo bar
 ```
 
+### job_secrets
+
+:x:
+
+```yaml
+jobs:
+  foo:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GITHUB_TOKEN: ${{github.token}} # secret is set in job
+    steps:
+      - run: echo foo
+      - run: gh label create bug
+```
+
+:o:
+
+```yaml
+jobs:
+  foo:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - run: echo foo
+      - run: gh label create bug
+        env:
+          GITHUB_TOKEN: ${{github.token}} # secret is set in step
+```
+
 ## How to install
 
 - [Download a pre-built binary from GitHub Releases](https://github.com/suzuki-shunsuke/ghalint/releases) and locate an executable binary `ghalint` in `PATH`
@@ -130,6 +167,23 @@ ERRO[0000] read a workflow file                          error="parse a workflow
 ERRO[0000] github.token should not be set to workflow's env  env_name=GITHUB_TOKEN policy_name=workflow_secrets program=ghalint version= workflow_file_path=.github/workflows/test.yaml
 ERRO[0000] secret should not be set to workflow's env    env_name=DATADOG_API_KEY policy_name=workflow_secrets program=ghalint version= workflow_file_path=.github/workflows/test.yaml
 ```
+
+## Configuration file
+
+Configuration file path: `^\.?ghalint\.ya?ml$`
+
+You can exclude the policy `job_secrets`.
+
+e.g.
+
+```yaml
+excludes:
+  - policy_name: job_secrets
+    workflow_file_path: .github/workflows/actionlint.yaml
+    job_name: actionlint
+```
+
+* policy_name: Only `job_secrets` is supported
 
 ## How does it works?
 
