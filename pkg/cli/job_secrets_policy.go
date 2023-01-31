@@ -34,9 +34,6 @@ func checkExcludes(policyName string, wf *Workflow, jobName string, cfg *Config)
 }
 
 func (policy *JobSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
-	if len(wf.Jobs) < 2 { //nolint:gomnd
-		return nil
-	}
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)
