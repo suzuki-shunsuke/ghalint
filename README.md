@@ -185,6 +185,10 @@ excludes:
 
 * policy_name: Only `job_secrets` is supported
 
+## Environment variables
+
+* `GHALINT_LOG_COLOR`: Configure log color. One of `auto` (default), `always`, and `never`.
+
 ## How does it works?
 
 ghalint reads GitHub Actions Workflows `^\.github/workflows/.*\.ya?ml$` and validates them.
