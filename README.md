@@ -189,6 +189,21 @@ excludes:
 
 * `GHALINT_LOG_COLOR`: Configure log color. One of `auto` (default), `always`, and `never`.
 
+💡 If you want to enable log color in GitHub Actions, please try `GHALINT_LOG_COLOR=always` 
+
+```yaml
+env:
+  GHALINT_LOG_COLOR: always
+```
+
+AS IS
+
+<img width="986" alt="image" src="https://user-images.githubusercontent.com/13323303/216190768-cb09597f-5669-4907-b443-78d96b4491ab.png">
+
+TO BE
+
+<img width="1023" alt="image" src="https://user-images.githubusercontent.com/13323303/216190842-0c015088-dda2-4e6f-8dbe-2db89cfbf438.png">
+
 ## How does it works?
 
 ghalint reads GitHub Actions Workflows `^\.github/workflows/.*\.ya?ml$` and validates them.
