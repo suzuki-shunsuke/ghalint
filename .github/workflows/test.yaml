@@ -108,6 +108,7 @@ jobs:
       - test
       - test_fork
       - renovate-config-validator
+      - ghalint
     permissions: {}
     if: failure()
     steps:
