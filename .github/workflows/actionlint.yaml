@@ -18,11 +18,3 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
-
-  actionlint_fork:
-    uses: suzuki-shunsuke/actionlint-workflow/.github/workflows/actionlint_fork.yaml@67b3612237144931fa976f6ef10e257b4c601492 # v0.4.0
-    if: github.event.pull_request.head.repo.fork
-    with:
-      aqua_version: v1.32.3
-      aqua_policy_config: aqua-policy.yaml
-    permissions: {}
