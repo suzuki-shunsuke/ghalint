@@ -33,37 +33,17 @@ jobs:
 
   update-aqua-checksums:
     # Update aqua-checksums.json and push a commit
-    runs-on: ubuntu-latest
     needs: path-filter
-    permissions: {}
-    if: |
-      needs.path-filter.outputs.update-aqua-checksums == 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3
-      - name: Generate token
-        id: generate_token
-        if: "! github.event.pull_request.head.repo.fork"
-        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # v1
-        with:
-          app_id: ${{secrets.APP_ID}}
-          private_key: ${{secrets.APP_PRIVATE_KEY}}
-      - uses: aquaproj/aqua-installer@61e2563dfe7674cbf74fe6ec212e444198a3bb00 # v2.0.2
-        # Install ghcp
-        with:
-          aqua_version: v1.32.3
-        env:
-          AQUA_GITHUB_TOKEN: ${{github.token}}
-      - uses: aquaproj/update-checksum-action@4bb09f359f2ecdb20aa9bc61684f5f9d185be909 # v0.1.4
-        with:
-          prune: true
-          skip_push: ${{github.event.pull_request.head.repo.fork}}
-        env:
-          # To trigger GitHub Actions Workflow by pushing a commit, GitHub App token is required.
-          # github.token doesn't trigger GitHub Actions Workflow.
-          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
-          # > When you use the repository's GITHUB_TOKEN to perform tasks, events triggered by the GITHUB_TOKEN, with the exception of workflow_dispatch and repository_dispatch, will not create a new workflow run.
-          GITHUB_TOKEN: ${{steps.generate_token.outputs.token}}
+    if: needs.path-filter.outputs.update-aqua-checksums == 'true'
+    uses: aquaproj/update-checksum-action/.github/workflows/update-checksum.yaml@feat/add-reusable-workflow-2
+    permissions:
+      contents: read
+    with:
+      aqua_policy_config: aqua-policy.yaml
+      aqua_version: v1.32.3
+    secrets:
+      gh_app_id: ${{secrets.APP_ID}}
+      gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
 
   renovate-config-validator:
     # Validate Renovate Configuration by renovate-config-validator.
