@@ -35,12 +35,13 @@ jobs:
     # Update aqua-checksums.json and push a commit
     needs: path-filter
     if: needs.path-filter.outputs.update-aqua-checksums == 'true'
-    uses: aquaproj/update-checksum-action/.github/workflows/update-checksum.yaml@feat/add-reusable-workflow-2
+    uses: aquaproj/update-checksum-action/.github/workflows/update-checksum.yaml@main
     permissions:
       contents: read
     with:
       aqua_policy_config: aqua-policy.yaml
       aqua_version: v1.32.3
+      prune: true
     secrets:
       gh_app_id: ${{secrets.APP_ID}}
       gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
