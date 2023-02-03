@@ -116,6 +116,8 @@ jobs:
   test:
     uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@2bdeeb26dac484af74f203a6eca9e7784a29f48c # v0.3.1
     if: "! github.event.pull_request.head.repo.fork"
+    with:
+      aqua_version: v1.32.3
     permissions:
       pull-requests: write
       contents: read
