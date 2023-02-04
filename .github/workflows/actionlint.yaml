@@ -1,5 +1,6 @@
 ---
 # Separate the workflow for actionlint to other workflows, because if a workflow for actionlint is broken actionlint isn't run
+
 name: actionlint
 on:
   pull_request:
