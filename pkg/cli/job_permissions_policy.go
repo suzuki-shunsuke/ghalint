@@ -15,14 +15,17 @@ func (policy *JobPermissionsPolicy) Name() string {
 
 func (policy *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
 	failed := false
-	if wf.Permissions != nil && len(wf.Permissions) == 0 {
+	wfPermissions := wf.Permissions.Permissions()
+	if wfPermissions != nil && len(wfPermissions) == 0 {
+		// workflow's permissions is `{}`
 		return nil
 	}
-	if len(wf.Jobs) < 2 && wf.Permissions != nil {
+	if len(wf.Jobs) < 2 && wfPermissions != nil {
+		// workflow permissions is set and there is only one job
 		return nil
 	}
 	for jobName, job := range wf.Jobs {
-		if job.Permissions == nil {
+		if job.Permissions.IsNil() {
 			failed = true
 			logE.WithField("job_name", jobName).Error("job should have permissions")
 		}

@@ -11,10 +11,10 @@ import (
 func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
-		name string
-		cfg  *cli.Config
-		wf   *cli.Workflow
-		exp  bool
+		name  string
+		cfg   *cli.Config
+		wf    *cli.Workflow
+		isErr bool
 	}{
 		{
 			name: "exclude",
@@ -86,7 +86,7 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			exp: false,
+			isErr: true,
 		},
 		{
 			name: "github token should not be set to job's env",
@@ -109,7 +109,7 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			exp: false,
+			isErr: true,
 		},
 		{
 			name: "pass",
@@ -145,12 +145,12 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := policy.Apply(ctx, logE, d.cfg, d.wf); err != nil {
-				if d.exp {
+				if !d.isErr {
 					t.Fatal(err)
 				}
 				return
 			}
-			if d.exp {
+			if d.isErr {
 				t.Fatal("error must be returned")
 			}
 		})
