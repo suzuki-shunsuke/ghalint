@@ -1,27 +1,28 @@
-package cli_test
+package cli
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
 )
 
-func TestJobPermissionsPolicy_Apply(t *testing.T) {
+func TestJobPermissionsPolicy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
-		name string
-		cfg  *cli.Config
-		wf   *cli.Workflow
-		exp  bool
+		name  string
+		cfg   *Config
+		wf    *Workflow
+		isErr bool
 	}{
 		{
 			name: "workflow permissions is empty",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Permissions: map[string]string{},
-				Jobs: map[string]*cli.Job{
+			cfg:  &Config{},
+			wf: &Workflow{
+				Permissions: &Permissions{
+					m: map[string]string{},
+				},
+				Jobs: map[string]*Job{
 					"foo": {},
 					"bar": {},
 				},
@@ -29,29 +30,31 @@ func TestJobPermissionsPolicy_Apply(t *testing.T) {
 		},
 		{
 			name: "workflow has only one job",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Permissions: map[string]string{
-					"contents": "read",
+			cfg:  &Config{},
+			wf: &Workflow{
+				Permissions: &Permissions{
+					m: map[string]string{
+						"contents": "read",
+					},
 				},
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*Job{
 					"foo": {},
 				},
 			},
 		},
 		{
 			name: "job should have permissions",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &Config{},
+			wf: &Workflow{
+				Jobs: map[string]*Job{
 					"foo": {},
 					"bar": {},
 				},
 			},
-			exp: false,
+			isErr: true,
 		},
 	}
-	policy := &cli.JobPermissionsPolicy{}
+	policy := &JobPermissionsPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	ctx := context.Background()
 	for _, d := range data {
@@ -59,12 +62,12 @@ func TestJobPermissionsPolicy_Apply(t *testing.T) {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := policy.Apply(ctx, logE, d.cfg, d.wf); err != nil {
-				if d.exp {
+				if !d.isErr {
 					t.Fatal(err)
 				}
 				return
 			}
-			if d.exp {
+			if d.isErr {
 				t.Fatal("error must be returned")
 			}
 		})

@@ -9,6 +9,10 @@ GitHub Actions linter
   - Exceptions
     - workflow's `permissions` is empty `{}`
     - workflow has only one job and the workflow has `permissions`
+- `deny_read_all_permission`: `read-all` permission should not be used
+  - Why: For least privilege
+- `deny_write_all_permission`: `write-all` permission should not be used
+  - Why: For least privilege
 - `workflow_secrets`: Workflow should not set secrets to environment variables
   - How to fix: set secrets to jobs
   - Why: To limit the scope of secrets
@@ -73,6 +77,37 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 ```
+
+### deny_read_all_permission
+
+:x:
+
+```yaml
+name: test
+jobs:
+  foo:
+    runs-on: ubuntu-latest
+    permissions: read-all # Don't use read-all
+    steps:
+      - run: echo foo
+```
+
+:o:
+
+```yaml
+name: test
+jobs:
+  foo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - run: echo foo
+```
+
+### deny_write_all_permission
+
+Same with `deny_read_all_permission`.
 
 ### workflow_secrets
 
