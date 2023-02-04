@@ -134,7 +134,7 @@ func (permissions *Permissions) UnmarshalYAML(unmarshal func(interface{}) error)
 	return convPermissions(val, permissions)
 }
 
-func convPermissions(src interface{}, dest *Permissions) error {
+func convPermissions(src interface{}, dest *Permissions) error { //nolint:cyclop
 	switch p := src.(type) {
 	case string:
 		switch p {
