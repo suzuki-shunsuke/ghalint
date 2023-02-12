@@ -2,6 +2,8 @@
 
 GitHub Actions linter
 
+[Blog post](https://dev.to/suzukishunsuke/minimize-the-scope-of-secrets-and-permissions-in-github-actions-444b)
+
 ## Policies
 
 - `job_permissions`: All jobs should have `permissions`
