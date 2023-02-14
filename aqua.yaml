@@ -2,7 +2,7 @@
 # https://github.com/aquaproj/aqua
 registries:
   - type: standard
-    ref: v3.131.0 # renovate: depName=aquaproj/aqua-registry
+    ref: v3.132.0 # renovate: depName=aquaproj/aqua-registry
 packages:
   - import: aqua/*.yaml
   - name: suzuki-shunsuke/cmdx@v1.6.1
