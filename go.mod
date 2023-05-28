@@ -6,7 +6,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13
 	github.com/sirupsen/logrus v1.9.2
 	github.com/suzuki-shunsuke/logrus-error v0.1.4
-	github.com/urfave/cli/v2 v2.25.3
+	github.com/urfave/cli/v2 v2.25.4
 	gopkg.in/yaml.v3 v3.0.1
 )
 
