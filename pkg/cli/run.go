@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"errors"
+	"io"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -59,6 +60,10 @@ func (runner *Runner) validateWorkflow(ctx *cli.Context, logE *logrus.Entry, cfg
 		FilePath: filePath,
 	}
 	if err := readWorkflow(filePath, wf); err != nil {
+		if errors.Is(err, io.EOF) {
+			logE.WithError(err).Debug("the workflow file seems to be empty")
+			return false
+		}
 		logerr.WithError(logE, err).Error("read a workflow file")
 		return true
 	}

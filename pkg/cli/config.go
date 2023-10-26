@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -34,6 +35,9 @@ func readConfig(cfg *Config, filePath string) error {
 	}
 	defer f.Close()
 	if err := yaml.NewDecoder(f).Decode(cfg); err != nil {
+		if errors.Is(err, io.EOF) {
+			return nil
+		}
 		return fmt.Errorf("parse configuration file as YAML: %w", err)
 	}
 	return nil
