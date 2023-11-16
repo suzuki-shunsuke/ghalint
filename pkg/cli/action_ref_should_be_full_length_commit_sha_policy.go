@@ -20,7 +20,7 @@ func NewActionRefShouldBeSHA1Policy() *ActionRefShouldBeSHA1Policy {
 }
 
 func (p *ActionRefShouldBeSHA1Policy) Name() string {
-	return "action_ref_should_be_sha1"
+	return "action_ref_should_be_full_length_commit_sha"
 }
 
 func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*Exclude) bool {

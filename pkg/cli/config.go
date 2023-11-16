@@ -46,9 +46,9 @@ func validateConfig(cfg *Config) error {
 			return errors.New(`policy_name is required`)
 		}
 		switch exclude.PolicyName {
-		case "action_ref_should_be_sha1":
+		case "action_ref_should_be_full_length_commit_sha":
 			if exclude.ActionName == "" {
-				return errors.New(`action_name is required to exclude action_ref_should_be_sha1`)
+				return errors.New(`action_name is required to exclude action_ref_should_be_full_length_commit_sha`)
 			}
 		case "job_secrets":
 			if exclude.WorkflowFilePath == "" {
@@ -58,7 +58,7 @@ func validateConfig(cfg *Config) error {
 				return errors.New(`jobName is required`)
 			}
 		default:
-			return errors.New(`only the policy "job_secrets" and "action_ref_should_be_sha1" can be excluded`)
+			return errors.New(`only the policy "job_secrets" and "action_ref_should_be_full_length_commit_sha" can be excluded`)
 		}
 	}
 	return nil
