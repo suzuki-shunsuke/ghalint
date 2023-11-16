@@ -39,35 +39,42 @@ func (p *ActionRefShouldBeSHA1Policy) Apply(ctx context.Context, logE *logrus.En
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)
-		if action := p.checkUses(job.Uses); action != "" {
-			if p.excluded(action, cfg.Excludes) {
-				continue
-			}
+		if p.applyJob(logE, cfg, job) {
 			failed = true
-			logE.WithField("uses", job.Uses).Error("action ref should be full length SHA1")
-		}
-		for _, step := range job.Steps {
-			action := p.checkUses(step.Uses)
-			if action == "" || p.excluded(action, cfg.Excludes) {
-				continue
-			}
-			failed = true
-			fields := logrus.Fields{
-				"uses": step.Uses,
-			}
-			if step.ID != "" {
-				fields["step_id"] = step.ID
-			}
-			if step.Name != "" {
-				fields["step_name"] = step.Name
-			}
-			logE.WithFields(fields).Error("action ref should be full length SHA1")
 		}
 	}
 	if failed {
 		return errors.New("workflow violates policies")
 	}
 	return nil
+}
+
+func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *Config, job *Job) bool {
+	if action := p.checkUses(job.Uses); action != "" {
+		if p.excluded(action, cfg.Excludes) {
+			return false
+		}
+		logE.WithField("uses", job.Uses).Error("action ref should be full length SHA1")
+		return true
+	}
+	for _, step := range job.Steps {
+		action := p.checkUses(step.Uses)
+		if action == "" || p.excluded(action, cfg.Excludes) {
+			continue
+		}
+		fields := logrus.Fields{
+			"uses": step.Uses,
+		}
+		if step.ID != "" {
+			fields["step_id"] = step.ID
+		}
+		if step.Name != "" {
+			fields["step_name"] = step.Name
+		}
+		logE.WithFields(fields).Error("action ref should be full length SHA1")
+		return true
+	}
+	return false
 }
 
 func (p *ActionRefShouldBeSHA1Policy) checkUses(uses string) string {
