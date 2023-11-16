@@ -40,6 +40,7 @@ func (runner *Runner) Run(ctx *cli.Context) error {
 		NewJobSecretsPolicy(),
 		&DenyReadAllPermissionPolicy{},
 		&DenyWriteAllPermissionPolicy{},
+		&DenyInheritSecretsPolicy{},
 	}
 	failed := false
 	for _, filePath := range filePaths {
@@ -90,6 +91,7 @@ type Job struct {
 	Permissions *Permissions
 	Env         map[string]string
 	Steps       []interface{}
+	Secrets     *JobSecrets
 }
 
 type Permissions struct {

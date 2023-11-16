@@ -1,6 +1,6 @@
 # ghalint
 
-GitHub Actions linter
+GitHub Actions linter for security best practices.
 
 [Blog post](https://dev.to/suzukishunsuke/minimize-the-scope-of-secrets-and-permissions-in-github-actions-444b)
 
@@ -15,6 +15,8 @@ GitHub Actions linter
   - Why: For least privilege
 - `deny_write_all_permission`: `write-all` permission should not be used
   - Why: For least privilege
+- `deny_inherit_secrets`: `secrets: inherit` should not be used
+  - Why: Secrets should be exposed to only required jobs
 - `workflow_secrets`: Workflow should not set secrets to environment variables
   - How to fix: set secrets to jobs
   - Why: To limit the scope of secrets
@@ -110,6 +112,28 @@ jobs:
 ### deny_write_all_permission
 
 Same with `deny_read_all_permission`.
+
+## deny_inherit_secrets
+
+:x:
+
+```yaml
+jobs:
+  release:
+    uses: suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v0.4.4
+    secrets: inherit # `inherit` should not be used
+```
+
+:o:
+
+```yaml
+jobs:
+  release:
+    uses: suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v0.4.4
+    secrets: # Only required secrets should be passed
+      gh_app_id: ${{ secrets.APP_ID }}
+      gh_app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+```
 
 ### workflow_secrets
 
