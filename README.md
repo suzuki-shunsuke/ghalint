@@ -12,6 +12,7 @@ GitHub Actions linter for security best practices.
 - [deny_inherit_secrets](docs/policies/004.md): `secrets: inherit` should not be used
 - [workflow_secrets](docs/policies/005.md): Workflow should not set secrets to environment variables
 - [job_secrets](docs/policies/006.md): Job should not set secrets to environment variables
+- [deny_job_container_latest_image](docs/policies/007.md)
 
 ## How to install
 
