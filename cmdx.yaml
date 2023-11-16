@@ -7,6 +7,13 @@ tasks:
     description: test
     usage: test
     script: go test ./... -race -covermode=atomic
+  - name: coverage
+    short: c
+    description: coverage test
+    usage: coverage test
+    script: "bash scripts/coverage.sh {{.target}}"
+    args:
+      - name: target
   - name: vet
     short: v
     description: go vet
