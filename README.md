@@ -12,7 +12,8 @@ GitHub Actions linter for security best practices.
 - [deny_inherit_secrets](docs/policies/004.md): `secrets: inherit` should not be used
 - [workflow_secrets](docs/policies/005.md): Workflow should not set secrets to environment variables
 - [job_secrets](docs/policies/006.md): Job should not set secrets to environment variables
-- [deny_job_container_latest_image](docs/policies/007.md)
+- [deny_job_container_latest_image](docs/policies/007.md): Job's container image tag should not be `latest`
+- [action_ref_should_be_sha1](docs/policies/008.md): action's ref should be full length commit SHA
 
 ## How to install
 
@@ -37,7 +38,7 @@ ERRO[0000] secret should not be set to workflow's env    env_name=DATADOG_API_KE
 
 Configuration file path: `^\.?ghalint\.ya?ml$`
 
-You can exclude the policy `job_secrets`.
+You can exclude the policy `job_secrets` and `action_ref_should_be_sha1`.
 
 e.g.
 
@@ -46,9 +47,11 @@ excludes:
   - policy_name: job_secrets
     workflow_file_path: .github/workflows/actionlint.yaml
     job_name: actionlint
+  - policy_name: action_ref_should_be_sha1
+    action_name: slsa-framework/slsa-github-generator
 ```
 
-* policy_name: Only `job_secrets` is supported
+* policy_name: Only `job_secrets` and `action_ref_should_be_sha1` is supported
 
 ## Environment variables
 

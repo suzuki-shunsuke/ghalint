@@ -34,13 +34,9 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []interface{}{
-							map[string]interface{}{
-								"run": "echo hello",
-							},
-							map[string]interface{}{
-								"run": "echo bar",
-							},
+						Steps: []*cli.Step{
+							{},
+							{},
 						},
 					},
 				},
@@ -56,10 +52,8 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []interface{}{
-							map[string]interface{}{
-								"run": "echo hello",
-							},
+						Steps: []*cli.Step{
+							{},
 						},
 					},
 				},
@@ -75,13 +69,9 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{secrets.GITHUB_TOKEN}}",
 						},
-						Steps: []interface{}{
-							map[string]interface{}{
-								"run": "echo hello",
-							},
-							map[string]interface{}{
-								"run": "echo bar",
-							},
+						Steps: []*cli.Step{
+							{},
+							{},
 						},
 					},
 				},
@@ -98,13 +88,9 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []interface{}{
-							map[string]interface{}{
-								"run": "echo hello",
-							},
-							map[string]interface{}{
-								"run": "echo bar",
-							},
+						Steps: []*cli.Step{
+							{},
+							{},
 						},
 					},
 				},
@@ -121,16 +107,9 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 						Env: map[string]string{
 							"FOO": "foo",
 						},
-						Steps: []interface{}{
-							map[string]interface{}{
-								"run": "echo hello",
-								"env": map[string]string{
-									"GITHUB_TOKEN": "${{github.token}}",
-								},
-							},
-							map[string]interface{}{
-								"run": "echo bar",
-							},
+						Steps: []*cli.Step{
+							{},
+							{},
 						},
 					},
 				},
