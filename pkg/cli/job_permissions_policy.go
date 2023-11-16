@@ -9,11 +9,11 @@ import (
 
 type JobPermissionsPolicy struct{}
 
-func (policy *JobPermissionsPolicy) Name() string {
+func (p *JobPermissionsPolicy) Name() string {
 	return "job_permissions"
 }
 
-func (policy *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
 	failed := false
 	wfPermissions := wf.Permissions.Permissions()
 	if wfPermissions != nil && len(wfPermissions) == 0 {

@@ -20,21 +20,21 @@ func NewWorkflowSecretsPolicy() *WorkflowSecretsPolicy {
 	}
 }
 
-func (policy *WorkflowSecretsPolicy) Name() string {
+func (p *WorkflowSecretsPolicy) Name() string {
 	return "workflow_secrets"
 }
 
-func (policy *WorkflowSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *WorkflowSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
 	if len(wf.Jobs) < 2 { //nolint:gomnd
 		return nil
 	}
 	failed := false
 	for envName, envValue := range wf.Env {
-		if policy.secretPattern.MatchString(envValue) {
+		if p.secretPattern.MatchString(envValue) {
 			failed = true
 			logE.WithField("env_name", envName).Error("secret should not be set to workflow's env")
 		}
-		if policy.githubTokenPattern.MatchString(envValue) {
+		if p.githubTokenPattern.MatchString(envValue) {
 			failed = true
 			logE.WithField("env_name", envName).Error("github.token should not be set to workflow's env")
 		}

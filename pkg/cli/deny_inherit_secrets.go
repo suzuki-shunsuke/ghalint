@@ -9,11 +9,11 @@ import (
 
 type DenyInheritSecretsPolicy struct{}
 
-func (policy *DenyInheritSecretsPolicy) Name() string {
+func (p *DenyInheritSecretsPolicy) Name() string {
 	return "deny_inherit_secrets"
 }
 
-func (policy *DenyInheritSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *DenyInheritSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)

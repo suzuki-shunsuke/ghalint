@@ -20,7 +20,7 @@ func NewJobSecretsPolicy() *JobSecretsPolicy {
 	}
 }
 
-func (policy *JobSecretsPolicy) Name() string {
+func (p *JobSecretsPolicy) Name() string {
 	return "job_secrets"
 }
 
@@ -33,22 +33,22 @@ func checkExcludes(policyName string, wf *Workflow, jobName string, cfg *Config)
 	return false
 }
 
-func (policy *JobSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *JobSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)
-		if checkExcludes(policy.Name(), wf, jobName, cfg) {
+		if checkExcludes(p.Name(), wf, jobName, cfg) {
 			continue
 		}
 		if len(job.Steps) < 2 { //nolint:gomnd
 			continue
 		}
 		for envName, envValue := range job.Env {
-			if policy.secretPattern.MatchString(envValue) {
+			if p.secretPattern.MatchString(envValue) {
 				failed = true
 				logE.WithField("env_name", envName).Error("secret should not be set to job's env")
 			}
-			if policy.githubTokenPattern.MatchString(envValue) {
+			if p.githubTokenPattern.MatchString(envValue) {
 				failed = true
 				logE.WithField("env_name", envName).Error("github.token should not be set to job's env")
 			}

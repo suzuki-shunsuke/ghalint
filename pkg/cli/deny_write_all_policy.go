@@ -9,11 +9,11 @@ import (
 
 type DenyWriteAllPermissionPolicy struct{}
 
-func (policy *DenyWriteAllPermissionPolicy) Name() string {
+func (p *DenyWriteAllPermissionPolicy) Name() string {
 	return "deny_write_all_permission"
 }
 
-func (policy *DenyWriteAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *DenyWriteAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
 	failed := false
 	wfWriteAll := wf.Permissions.WriteAll()
 	for jobName, job := range wf.Jobs {
