@@ -9,11 +9,11 @@ import (
 
 type DenyReadAllPermissionPolicy struct{}
 
-func (policy *DenyReadAllPermissionPolicy) Name() string {
+func (p *DenyReadAllPermissionPolicy) Name() string {
 	return "deny_read_all_permission"
 }
 
-func (policy *DenyReadAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *DenyReadAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
 	failed := false
 	wfReadAll := wf.Permissions.ReadAll()
 	for jobName, job := range wf.Jobs {

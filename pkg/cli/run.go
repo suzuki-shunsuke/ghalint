@@ -11,8 +11,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func (runner *Runner) Run(ctx *cli.Context) error {
-	logE := log.New(runner.flags.Version)
+func (r *Runner) Run(ctx *cli.Context) error {
+	logE := log.New(r.flags.Version)
 
 	if color := os.Getenv("GHALINT_LOG_COLOR"); color != "" {
 		log.SetColor(color, logE)
@@ -45,7 +45,7 @@ func (runner *Runner) Run(ctx *cli.Context) error {
 	failed := false
 	for _, filePath := range filePaths {
 		logE := logE.WithField("workflow_file_path", filePath)
-		if runner.validateWorkflow(ctx, logE, cfg, policies, filePath) {
+		if r.validateWorkflow(ctx, logE, cfg, policies, filePath) {
 			failed = true
 		}
 	}
@@ -55,7 +55,7 @@ func (runner *Runner) Run(ctx *cli.Context) error {
 	return nil
 }
 
-func (runner *Runner) validateWorkflow(ctx *cli.Context, logE *logrus.Entry, cfg *Config, policies []Policy, filePath string) bool {
+func (r *Runner) validateWorkflow(ctx *cli.Context, logE *logrus.Entry, cfg *Config, policies []Policy, filePath string) bool {
 	wf := &Workflow{
 		FilePath: filePath,
 	}
