@@ -3,8 +3,8 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"os"
 
+	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,17 +19,17 @@ type Exclude struct {
 	ActionName       string `yaml:"action_name"`
 }
 
-func findConfig() string {
+func findConfig(fs afero.Fs) string {
 	for _, filePath := range []string{"ghalint.yaml", ".ghalint.yaml", "ghalint.yml", ".ghalint.yml"} {
-		if _, err := os.Stat(filePath); err == nil {
+		if _, err := fs.Stat(filePath); err == nil {
 			return filePath
 		}
 	}
 	return ""
 }
 
-func readConfig(cfg *Config, filePath string) error {
-	f, err := os.Open(filePath)
+func readConfig(fs afero.Fs, cfg *Config, filePath string) error {
+	f, err := fs.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("open a configuration file: %w", err)
 	}

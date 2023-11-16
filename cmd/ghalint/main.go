@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
 )
 
@@ -27,6 +28,6 @@ func core() error {
 		Version: version,
 		Commit:  commit,
 		Date:    date,
-	})
+	}, afero.NewOsFs())
 	return app.RunContext(ctx, os.Args) //nolint:wrapcheck
 }

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/spf13/afero"
 	"github.com/urfave/cli/v2"
 )
 
@@ -16,9 +17,10 @@ func (f *LDFlags) AppVersion() string {
 
 type Runner struct {
 	flags *LDFlags
+	fs    afero.Fs
 }
 
-func New(flags *LDFlags) *cli.App {
+func New(flags *LDFlags, fs afero.Fs) *cli.App {
 	app := cli.NewApp()
 	app.Name = "ghalint"
 	app.Usage = "GitHub Actions linter"
@@ -28,6 +30,7 @@ func New(flags *LDFlags) *cli.App {
 	}
 	runner := &Runner{
 		flags: flags,
+		fs:    fs,
 	}
 	app.Commands = []*cli.Command{
 		{

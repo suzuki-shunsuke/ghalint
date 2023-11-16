@@ -2,15 +2,16 @@ package cli
 
 import (
 	"fmt"
-	"path/filepath"
+
+	"github.com/spf13/afero"
 )
 
-func listWorkflows() ([]string, error) {
-	files, err := filepath.Glob(".github/workflows/*.yml")
+func listWorkflows(fs afero.Fs) ([]string, error) {
+	files, err := afero.Glob(fs, ".github/workflows/*.yml")
 	if err != nil {
 		return nil, fmt.Errorf("find .github/workflows/*.yml: %w", err)
 	}
-	files2, err := filepath.Glob(".github/workflows/*.yaml")
+	files2, err := afero.Glob(fs, ".github/workflows/*.yaml")
 	if err != nil {
 		return nil, fmt.Errorf("find .github/workflows/*.yaml: %w", err)
 	}

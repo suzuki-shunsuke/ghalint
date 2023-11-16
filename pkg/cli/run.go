@@ -18,9 +18,13 @@ func (r *Runner) Run(ctx *cli.Context) error {
 		log.SetColor(color, logE)
 	}
 
+	return r.run(ctx.Context, logE)
+}
+
+func (r *Runner) run(ctx context.Context, logE *logrus.Entry) error {
 	cfg := &Config{}
-	if cfgFilePath := findConfig(); cfgFilePath != "" {
-		if err := readConfig(cfg, cfgFilePath); err != nil {
+	if cfgFilePath := findConfig(r.fs); cfgFilePath != "" {
+		if err := readConfig(r.fs, cfg, cfgFilePath); err != nil {
 			logE.WithError(err).Error("read a configuration file")
 			return err
 		}
@@ -29,7 +33,7 @@ func (r *Runner) Run(ctx *cli.Context) error {
 		logE.WithError(err).Error("validate a configuration file")
 		return err
 	}
-	filePaths, err := listWorkflows()
+	filePaths, err := listWorkflows(r.fs)
 	if err != nil {
 		logE.Error(err)
 		return err
@@ -57,11 +61,11 @@ func (r *Runner) Run(ctx *cli.Context) error {
 	return nil
 }
 
-func (r *Runner) validateWorkflow(ctx *cli.Context, logE *logrus.Entry, cfg *Config, policies []Policy, filePath string) bool {
+func (r *Runner) validateWorkflow(ctx context.Context, logE *logrus.Entry, cfg *Config, policies []Policy, filePath string) bool {
 	wf := &Workflow{
 		FilePath: filePath,
 	}
-	if err := readWorkflow(filePath, wf); err != nil {
+	if err := readWorkflow(r.fs, filePath, wf); err != nil {
 		logerr.WithError(logE, err).Error("read a workflow file")
 		return true
 	}
@@ -69,7 +73,7 @@ func (r *Runner) validateWorkflow(ctx *cli.Context, logE *logrus.Entry, cfg *Con
 	failed := false
 	for _, policy := range policies {
 		logE := logE.WithField("policy_name", policy.Name())
-		if err := policy.Apply(ctx.Context, logE, cfg, wf); err != nil {
+		if err := policy.Apply(ctx, logE, cfg, wf); err != nil {
 			failed = true
 			continue
 		}

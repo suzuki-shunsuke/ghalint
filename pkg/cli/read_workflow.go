@@ -2,13 +2,13 @@ package cli
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"
 )
 
-func readWorkflow(p string, wf *Workflow) error {
-	f, err := os.Open(p)
+func readWorkflow(fs afero.Fs, p string, wf *Workflow) error {
+	f, err := fs.Open(p)
 	if err != nil {
 		return fmt.Errorf("open a workflow file: %w", err)
 	}
