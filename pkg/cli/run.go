@@ -42,6 +42,7 @@ func (r *Runner) Run(ctx *cli.Context) error {
 		&DenyWriteAllPermissionPolicy{},
 		&DenyInheritSecretsPolicy{},
 		&DenyJobContainerLatestImagePolicy{},
+		NewActionRefShouldBeSHA1Policy(),
 	}
 	failed := false
 	for _, filePath := range filePaths {

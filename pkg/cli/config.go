@@ -16,6 +16,7 @@ type Exclude struct {
 	PolicyName       string `yaml:"policy_name"`
 	WorkflowFilePath string `yaml:"workflow_file_path"`
 	JobName          string `yaml:"job_name"`
+	ActionName       string `yaml:"action_name"`
 }
 
 func findConfig() string {
@@ -44,14 +45,20 @@ func validateConfig(cfg *Config) error {
 		if exclude.PolicyName == "" {
 			return errors.New(`policy_name is required`)
 		}
-		if exclude.PolicyName != "job_secrets" {
-			return errors.New(`only the policy "job_secrets" can be excluded`)
-		}
-		if exclude.WorkflowFilePath == "" {
-			return errors.New(`workflow_file_path is required`)
-		}
-		if exclude.JobName == "" {
-			return errors.New(`jobName is required`)
+		switch exclude.PolicyName {
+		case "action_ref_should_be_full_length_commit_sha":
+			if exclude.ActionName == "" {
+				return errors.New(`action_name is required to exclude action_ref_should_be_full_length_commit_sha`)
+			}
+		case "job_secrets":
+			if exclude.WorkflowFilePath == "" {
+				return errors.New(`workflow_file_path is required`)
+			}
+			if exclude.JobName == "" {
+				return errors.New(`jobName is required`)
+			}
+		default:
+			return errors.New(`only the policy "job_secrets" and "action_ref_should_be_full_length_commit_sha" can be excluded`)
 		}
 	}
 	return nil
