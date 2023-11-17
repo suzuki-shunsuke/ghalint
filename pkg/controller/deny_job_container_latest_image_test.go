@@ -1,29 +1,29 @@
-package cli_test
+package controller_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
+	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 )
 
 func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
-		cfg   *cli.Config
-		wf    *cli.Workflow
+		cfg   *controller.Config
+		wf    *controller.Workflow
 		isErr bool
 	}{
 		{
 			name: "pass",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
+				Jobs: map[string]*controller.Job{
 					"foo": {},
 					"bar": {
-						Container: &cli.Container{
+						Container: &controller.Container{
 							Image: "node:18",
 						},
 					},
@@ -32,11 +32,11 @@ func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "job container should have image",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
+				Jobs: map[string]*controller.Job{
 					"bar": {
-						Container: &cli.Container{},
+						Container: &controller.Container{},
 					},
 				},
 			},
@@ -44,11 +44,11 @@ func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "job container image should have tag",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
+				Jobs: map[string]*controller.Job{
 					"bar": {
-						Container: &cli.Container{
+						Container: &controller.Container{
 							Image: "node",
 						},
 					},
@@ -58,11 +58,11 @@ func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "latest",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
+				Jobs: map[string]*controller.Job{
 					"bar": {
-						Container: &cli.Container{
+						Container: &controller.Container{
 							Image: "node:latest",
 						},
 					},
@@ -71,7 +71,7 @@ func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 			isErr: true,
 		},
 	}
-	policy := &cli.DenyJobContainerLatestImagePolicy{}
+	policy := &controller.DenyJobContainerLatestImagePolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	ctx := context.Background()
 	for _, d := range data {

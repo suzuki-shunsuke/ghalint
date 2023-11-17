@@ -1,43 +1,43 @@
-package cli_test
+package controller_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
+	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 )
 
 func TestWorkflowSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
-		cfg   *cli.Config
-		wf    *cli.Workflow
+		cfg   *controller.Config
+		wf    *controller.Workflow
 		isErr bool
 	}{
 		{
 			name: "workflow has only one job",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
 				Env: map[string]string{
 					"GITHUB_TOKEN": "${{github.token}}",
 				},
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {},
 				},
 			},
 		},
 		{
 			name: "secret should not be set to workflow's env",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
 				Env: map[string]string{
 					"GITHUB_TOKEN": "${{secrets.GITHUB_TOKEN}}",
 				},
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {},
 					"bar": {},
 				},
@@ -46,13 +46,13 @@ func TestWorkflowSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "github token should not be set to workflow's env",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
 				Env: map[string]string{
 					"GITHUB_TOKEN": "${{github.token}}",
 				},
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {},
 					"bar": {},
 				},
@@ -61,20 +61,20 @@ func TestWorkflowSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "pass",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
 				Env: map[string]string{
 					"FOO": "foo",
 				},
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {},
 					"bar": {},
 				},
 			},
 		},
 	}
-	policy := cli.NewWorkflowSecretsPolicy()
+	policy := controller.NewWorkflowSecretsPolicy()
 	logE := logrus.NewEntry(logrus.New())
 	ctx := context.Background()
 	for _, d := range data {

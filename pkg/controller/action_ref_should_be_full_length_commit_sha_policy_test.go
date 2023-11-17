@@ -1,25 +1,25 @@
-package cli_test
+package controller_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
+	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 )
 
 func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
-		cfg   *cli.Config
-		wf    *cli.Workflow
+		cfg   *controller.Config
+		wf    *controller.Workflow
 		isErr bool
 	}{
 		{
 			name: "exclude",
-			cfg: &cli.Config{
-				Excludes: []*cli.Exclude{
+			cfg: &controller.Config{
+				Excludes: []*controller.Exclude{
 					{
 						PolicyName: "action_ref_should_be_full_length_commit_sha",
 						ActionName: "slsa-framework/slsa-github-generator",
@@ -30,10 +30,10 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			wf: &controller.Workflow{
+				Jobs: map[string]*controller.Job{
 					"release": {
-						Steps: []*cli.Step{
+						Steps: []*controller.Step{
 							{
 								Uses: "slsa-framework/slsa-github-generator@v1.5.0",
 							},
@@ -48,18 +48,18 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 		{
 			name:  "step error",
 			isErr: true,
-			cfg: &cli.Config{
-				Excludes: []*cli.Exclude{
+			cfg: &controller.Config{
+				Excludes: []*controller.Exclude{
 					{
 						PolicyName: "action_ref_should_be_full_length_commit_sha",
 						ActionName: "actions/checkout",
 					},
 				},
 			},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			wf: &controller.Workflow{
+				Jobs: map[string]*controller.Job{
 					"release": {
-						Steps: []*cli.Step{
+						Steps: []*controller.Step{
 							{
 								Uses: "slsa-framework/slsa-github-generator@v1.5.0",
 								ID:   "generate",
@@ -73,9 +73,9 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 		{
 			name:  "job error",
 			isErr: true,
-			cfg:   &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:   &controller.Config{},
+			wf: &controller.Workflow{
+				Jobs: map[string]*controller.Job{
 					"release": {
 						Uses: "suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v0.4.4",
 					},
@@ -83,7 +83,7 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 			},
 		},
 	}
-	p := cli.NewActionRefShouldBeSHA1Policy()
+	p := controller.NewActionRefShouldBeSHA1Policy()
 	ctx := context.Background()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {

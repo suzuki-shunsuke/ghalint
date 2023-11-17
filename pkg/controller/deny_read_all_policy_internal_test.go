@@ -1,4 +1,4 @@
-package cli
+package controller //nolint:dupl
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func TestJobPermissionsPolicy_Apply(t *testing.T) { //nolint:funlen
+func TestDenyReadAllPermissionPolicy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
@@ -16,45 +16,52 @@ func TestJobPermissionsPolicy_Apply(t *testing.T) { //nolint:funlen
 		isErr bool
 	}{
 		{
-			name: "workflow permissions is empty",
+			name: "don't use read-all",
 			cfg:  &Config{},
 			wf: &Workflow{
 				Permissions: &Permissions{
 					m: map[string]string{},
 				},
 				Jobs: map[string]*Job{
-					"foo": {},
-					"bar": {},
-				},
-			},
-		},
-		{
-			name: "workflow has only one job",
-			cfg:  &Config{},
-			wf: &Workflow{
-				Permissions: &Permissions{
-					m: map[string]string{
-						"contents": "read",
+					"foo": {
+						Permissions: &Permissions{
+							readAll: true,
+						},
 					},
-				},
-				Jobs: map[string]*Job{
-					"foo": {},
-				},
-			},
-		},
-		{
-			name: "job should have permissions",
-			cfg:  &Config{},
-			wf: &Workflow{
-				Jobs: map[string]*Job{
-					"foo": {},
-					"bar": {},
 				},
 			},
 			isErr: true,
 		},
+		{
+			name: "job permissions is null and workflow permissions is read-all",
+			cfg:  &Config{},
+			wf: &Workflow{
+				Permissions: &Permissions{
+					readAll: true,
+				},
+				Jobs: map[string]*Job{
+					"foo": {},
+				},
+			},
+			isErr: true,
+		},
+		{
+			name: "pass",
+			cfg:  &Config{},
+			wf: &Workflow{
+				Jobs: map[string]*Job{
+					"foo": {
+						Permissions: &Permissions{
+							m: map[string]string{
+								"contents": "read",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
-	policy := &JobPermissionsPolicy{}
+	policy := &DenyReadAllPermissionPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	ctx := context.Background()
 	for _, d := range data {

@@ -1,25 +1,25 @@
-package cli_test
+package controller_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
+	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 )
 
 func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
-		cfg   *cli.Config
-		wf    *cli.Workflow
+		cfg   *controller.Config
+		wf    *controller.Workflow
 		isErr bool
 	}{
 		{
 			name: "exclude",
-			cfg: &cli.Config{
-				Excludes: []*cli.Exclude{
+			cfg: &controller.Config{
+				Excludes: []*controller.Exclude{
 					{
 						PolicyName:       "job_secrets",
 						WorkflowFilePath: ".github/workflows/test.yaml",
@@ -27,14 +27,14 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			wf: &cli.Workflow{
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []*cli.Step{
+						Steps: []*controller.Step{
 							{},
 							{},
 						},
@@ -44,15 +44,15 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "job has only one step",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []*cli.Step{
+						Steps: []*controller.Step{
 							{},
 						},
 					},
@@ -61,15 +61,15 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "secret should not be set to job's env",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{secrets.GITHUB_TOKEN}}",
 						},
-						Steps: []*cli.Step{
+						Steps: []*controller.Step{
 							{},
 							{},
 						},
@@ -80,15 +80,15 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "github token should not be set to job's env",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []*cli.Step{
+						Steps: []*controller.Step{
 							{},
 							{},
 						},
@@ -99,15 +99,15 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "pass",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
+			cfg:  &controller.Config{},
+			wf: &controller.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*cli.Job{
+				Jobs: map[string]*controller.Job{
 					"foo": {
 						Env: map[string]string{
 							"FOO": "foo",
 						},
-						Steps: []*cli.Step{
+						Steps: []*controller.Step{
 							{},
 							{},
 						},
@@ -116,7 +116,7 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 			},
 		},
 	}
-	policy := cli.NewJobSecretsPolicy()
+	policy := controller.NewJobSecretsPolicy()
 	logE := logrus.NewEntry(logrus.New())
 	ctx := context.Background()
 	for _, d := range data {
