@@ -55,7 +55,7 @@ func Validate(cfg *Config) error {
 				return errors.New(`workflow_file_path is required`)
 			}
 			if exclude.JobName == "" {
-				return errors.New(`jobName is required`)
+				return errors.New(`job_name is required`)
 			}
 		default:
 			return errors.New(`only the policy "job_secrets" and "action_ref_should_be_full_length_commit_sha" can be excluded`)

@@ -1,4 +1,4 @@
-package policy_test
+package workflow_test
 
 import (
 	"testing"
