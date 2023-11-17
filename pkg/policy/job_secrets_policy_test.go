@@ -1,25 +1,27 @@
-package controller_test
+package policy_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
 func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
-		cfg   *controller.Config
-		wf    *controller.Workflow
+		cfg   *config.Config
+		wf    *workflow.Workflow
 		isErr bool
 	}{
 		{
 			name: "exclude",
-			cfg: &controller.Config{
-				Excludes: []*controller.Exclude{
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
 					{
 						PolicyName:       "job_secrets",
 						WorkflowFilePath: ".github/workflows/test.yaml",
@@ -27,14 +29,14 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			wf: &controller.Workflow{
+			wf: &workflow.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*controller.Job{
+				Jobs: map[string]*workflow.Job{
 					"foo": {
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []*controller.Step{
+						Steps: []*workflow.Step{
 							{},
 							{},
 						},
@@ -44,15 +46,15 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "job has only one step",
-			cfg:  &controller.Config{},
-			wf: &controller.Workflow{
+			cfg:  &config.Config{},
+			wf: &workflow.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*controller.Job{
+				Jobs: map[string]*workflow.Job{
 					"foo": {
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []*controller.Step{
+						Steps: []*workflow.Step{
 							{},
 						},
 					},
@@ -61,15 +63,15 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "secret should not be set to job's env",
-			cfg:  &controller.Config{},
-			wf: &controller.Workflow{
+			cfg:  &config.Config{},
+			wf: &workflow.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*controller.Job{
+				Jobs: map[string]*workflow.Job{
 					"foo": {
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{secrets.GITHUB_TOKEN}}",
 						},
-						Steps: []*controller.Step{
+						Steps: []*workflow.Step{
 							{},
 							{},
 						},
@@ -80,15 +82,15 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "github token should not be set to job's env",
-			cfg:  &controller.Config{},
-			wf: &controller.Workflow{
+			cfg:  &config.Config{},
+			wf: &workflow.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*controller.Job{
+				Jobs: map[string]*workflow.Job{
 					"foo": {
 						Env: map[string]string{
 							"GITHUB_TOKEN": "${{github.token}}",
 						},
-						Steps: []*controller.Step{
+						Steps: []*workflow.Step{
 							{},
 							{},
 						},
@@ -99,15 +101,15 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "pass",
-			cfg:  &controller.Config{},
-			wf: &controller.Workflow{
+			cfg:  &config.Config{},
+			wf: &workflow.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Jobs: map[string]*controller.Job{
+				Jobs: map[string]*workflow.Job{
 					"foo": {
 						Env: map[string]string{
 							"FOO": "foo",
 						},
-						Steps: []*controller.Step{
+						Steps: []*workflow.Step{
 							{},
 							{},
 						},
@@ -116,14 +118,14 @@ func TestJobSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 			},
 		},
 	}
-	policy := controller.NewJobSecretsPolicy()
+	p := policy.NewJobSecretsPolicy()
 	logE := logrus.NewEntry(logrus.New())
 	ctx := context.Background()
 	for _, d := range data {
 		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := policy.Apply(ctx, logE, d.cfg, d.wf); err != nil {
+			if err := p.Apply(ctx, logE, d.cfg, d.wf); err != nil {
 				if !d.isErr {
 					t.Fatal(err)
 				}

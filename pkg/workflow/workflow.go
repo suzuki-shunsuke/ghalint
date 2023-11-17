@@ -1,4 +1,4 @@
-package controller
+package workflow
 
 type Workflow struct {
 	FilePath    string `yaml:"-"`

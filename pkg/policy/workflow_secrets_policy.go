@@ -1,4 +1,4 @@
-package controller
+package policy
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"regexp"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
 type WorkflowSecretsPolicy struct {
@@ -24,7 +26,7 @@ func (p *WorkflowSecretsPolicy) Name() string {
 	return "workflow_secrets"
 }
 
-func (p *WorkflowSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *WorkflowSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	if len(wf.Jobs) < 2 { //nolint:gomnd
 		return nil
 	}

@@ -3,9 +3,13 @@ package controller
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
 
@@ -20,31 +24,28 @@ func New(fs afero.Fs) *Controller {
 }
 
 func (c *Controller) Run(ctx context.Context, logE *logrus.Entry) error {
-	cfg := &Config{}
-	if cfgFilePath := findConfig(c.fs); cfgFilePath != "" {
-		if err := readConfig(c.fs, cfg, cfgFilePath); err != nil {
-			logE.WithError(err).Error("read a configuration file")
-			return err
+	cfg := &config.Config{}
+	if cfgFilePath := config.Find(c.fs); cfgFilePath != "" {
+		if err := config.Read(c.fs, cfg, cfgFilePath); err != nil {
+			return fmt.Errorf("read a configuration file: %w", err)
 		}
 	}
-	if err := validateConfig(cfg); err != nil {
-		logE.WithError(err).Error("validate a configuration file")
-		return err
+	if err := config.Validate(cfg); err != nil {
+		return fmt.Errorf("validate a configuration file: %w", err)
 	}
-	filePaths, err := listWorkflows(c.fs)
+	filePaths, err := workflow.List(c.fs)
 	if err != nil {
-		logE.Error(err)
-		return err
+		return fmt.Errorf("find workflow files: %w", err)
 	}
 	policies := []Policy{
-		&JobPermissionsPolicy{},
-		NewWorkflowSecretsPolicy(),
-		NewJobSecretsPolicy(),
-		&DenyReadAllPermissionPolicy{},
-		&DenyWriteAllPermissionPolicy{},
-		&DenyInheritSecretsPolicy{},
-		&DenyJobContainerLatestImagePolicy{},
-		NewActionRefShouldBeSHA1Policy(),
+		&policy.JobPermissionsPolicy{},
+		policy.NewWorkflowSecretsPolicy(),
+		policy.NewJobSecretsPolicy(),
+		&policy.DenyReadAllPermissionPolicy{},
+		&policy.DenyWriteAllPermissionPolicy{},
+		&policy.DenyInheritSecretsPolicy{},
+		&policy.DenyJobContainerLatestImagePolicy{},
+		policy.NewActionRefShouldBeSHA1Policy(),
 	}
 	failed := false
 	for _, filePath := range filePaths {
@@ -59,11 +60,11 @@ func (c *Controller) Run(ctx context.Context, logE *logrus.Entry) error {
 	return nil
 }
 
-func (c *Controller) validateWorkflow(ctx context.Context, logE *logrus.Entry, cfg *Config, policies []Policy, filePath string) bool {
-	wf := &Workflow{
+func (c *Controller) validateWorkflow(ctx context.Context, logE *logrus.Entry, cfg *config.Config, policies []Policy, filePath string) bool {
+	wf := &workflow.Workflow{
 		FilePath: filePath,
 	}
-	if err := readWorkflow(c.fs, filePath, wf); err != nil {
+	if err := workflow.Read(c.fs, filePath, wf); err != nil {
 		logerr.WithError(logE, err).Error("read a workflow file")
 		return true
 	}
@@ -81,5 +82,5 @@ func (c *Controller) validateWorkflow(ctx context.Context, logE *logrus.Entry, c
 
 type Policy interface {
 	Name() string
-	Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error
+	Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error
 }

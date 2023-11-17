@@ -1,4 +1,4 @@
-package controller
+package workflow
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func readWorkflow(fs afero.Fs, p string, wf *Workflow) error {
+func Read(fs afero.Fs, p string, wf *Workflow) error {
 	f, err := fs.Open(p)
 	if err != nil {
 		return fmt.Errorf("open a workflow file: %w", err)

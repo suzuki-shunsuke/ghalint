@@ -1,4 +1,4 @@
-package controller
+package config
 
 import (
 	"errors"
@@ -19,7 +19,7 @@ type Exclude struct {
 	ActionName       string `yaml:"action_name"`
 }
 
-func findConfig(fs afero.Fs) string {
+func Find(fs afero.Fs) string {
 	for _, filePath := range []string{"ghalint.yaml", ".ghalint.yaml", "ghalint.yml", ".ghalint.yml"} {
 		if _, err := fs.Stat(filePath); err == nil {
 			return filePath
@@ -28,7 +28,7 @@ func findConfig(fs afero.Fs) string {
 	return ""
 }
 
-func readConfig(fs afero.Fs, cfg *Config, filePath string) error {
+func Read(fs afero.Fs, cfg *Config, filePath string) error {
 	f, err := fs.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("open a configuration file: %w", err)
@@ -40,7 +40,7 @@ func readConfig(fs afero.Fs, cfg *Config, filePath string) error {
 	return nil
 }
 
-func validateConfig(cfg *Config) error {
+func Validate(cfg *Config) error {
 	for _, exclude := range cfg.Excludes {
 		if exclude.PolicyName == "" {
 			return errors.New(`policy_name is required`)

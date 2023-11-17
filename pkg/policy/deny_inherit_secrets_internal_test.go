@@ -1,46 +1,36 @@
-package controller
+package policy
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
+	"gopkg.in/yaml.v3"
 )
 
 func TestDenyInheritSecretsPolicy_Apply(t *testing.T) {
 	t.Parallel()
 	data := []struct {
 		name  string
-		cfg   *Config
-		wf    *Workflow
+		cfg   *config.Config
+		wf    string
 		isErr bool
 	}{
 		{
 			name: "error",
-			wf: &Workflow{
-				Jobs: map[string]*Job{
-					"release": {
-						Secrets: &JobSecrets{
-							inherit: true,
-						},
-					},
-				},
-			},
+			wf: `jobs:
+  releases:
+    secrets: inherit`,
 			isErr: true,
 		},
 		{
 			name: "pass",
-			wf: &Workflow{
-				Jobs: map[string]*Job{
-					"release": {
-						Secrets: &JobSecrets{
-							m: map[string]string{
-								"foo": "${{secrets.API_KEY}}",
-							},
-						},
-					},
-				},
-			},
+			wf: `jobs:
+  release:
+    secrets:
+      foo: ${{secrets.API_KEY}}`,
 		},
 	}
 	p := &DenyInheritSecretsPolicy{}
@@ -50,7 +40,11 @@ func TestDenyInheritSecretsPolicy_Apply(t *testing.T) {
 		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.Apply(ctx, logE, d.cfg, d.wf); err != nil {
+			wf := &workflow.Workflow{}
+			if err := yaml.Unmarshal([]byte(d.wf), wf); err != nil {
+				t.Fatal(err)
+			}
+			if err := p.Apply(ctx, logE, d.cfg, wf); err != nil {
 				if d.isErr {
 					return
 				}

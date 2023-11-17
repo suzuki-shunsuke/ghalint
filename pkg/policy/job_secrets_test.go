@@ -1,9 +1,9 @@
-package controller_test
+package policy_test
 
 import (
 	"testing"
 
-	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,7 +28,7 @@ func TestJobSecrets_UnmarshalYAML(t *testing.T) {
 		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			js := &controller.JobSecrets{}
+			js := &workflow.JobSecrets{}
 			if err := yaml.Unmarshal([]byte(d.yaml), js); err != nil {
 				t.Fatal(err)
 			}

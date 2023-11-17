@@ -1,4 +1,4 @@
-package controller
+package policy
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
 type ActionRefShouldBeSHA1Policy struct {
@@ -23,7 +25,7 @@ func (p *ActionRefShouldBeSHA1Policy) Name() string {
 	return "action_ref_should_be_full_length_commit_sha"
 }
 
-func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*Exclude) bool {
+func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config.Exclude) bool {
 	for _, exclude := range excludes {
 		if exclude.PolicyName != p.Name() {
 			continue
@@ -35,7 +37,7 @@ func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*Exclud
 	return false
 }
 
-func (p *ActionRefShouldBeSHA1Policy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *ActionRefShouldBeSHA1Policy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)
@@ -49,7 +51,7 @@ func (p *ActionRefShouldBeSHA1Policy) Apply(ctx context.Context, logE *logrus.En
 	return nil
 }
 
-func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *Config, job *Job) bool {
+func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *config.Config, job *workflow.Job) bool {
 	if action := p.checkUses(job.Uses); action != "" {
 		if p.excluded(action, cfg.Excludes) {
 			return false

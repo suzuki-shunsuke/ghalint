@@ -1,4 +1,4 @@
-package controller
+package workflow
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func listWorkflows(fs afero.Fs) ([]string, error) {
+func List(fs afero.Fs) ([]string, error) {
 	files, err := afero.Glob(fs, ".github/workflows/*.yml")
 	if err != nil {
 		return nil, fmt.Errorf("find .github/workflows/*.yml: %w", err)
