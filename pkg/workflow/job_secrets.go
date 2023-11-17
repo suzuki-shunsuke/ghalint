@@ -12,6 +12,10 @@ type JobSecrets struct {
 	inherit bool
 }
 
+func (js *JobSecrets) Secrets() map[string]string {
+	return js.m
+}
+
 func (js *JobSecrets) Inherit() bool {
 	return js != nil && js.inherit
 }
