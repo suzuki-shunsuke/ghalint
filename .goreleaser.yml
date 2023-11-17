@@ -76,3 +76,12 @@ brews:
     # Default is empty.
     test: |
       system "#{bin}/ghalint --version"
+
+scoops:
+  - description: GitHub Actions linter for security best practices.
+    license: MIT
+    skip_upload: auto
+    repository:
+      owner: suzuki-shunsuke
+      name: scoop-bucket
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
