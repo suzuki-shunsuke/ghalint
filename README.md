@@ -17,14 +17,31 @@ GitHub Actions linter for security best practices.
 
 ## How to install
 
-- [Download a pre-built binary from GitHub Releases](https://github.com/suzuki-shunsuke/ghalint/releases) and locate an executable binary `ghalint` in `PATH`
-- Homebrew: `brew install suzuki-shunsuke/ghalint/ghalint`
-- [aqua](https://aquaproj.github.io/): `aqua g -i suzuki-shunsuke/ghalint`
+1. Homebrew:
+
+```sh
+brew install suzuki-shunsuke/ghalint/ghalint
+```
+
+2. [Scoop](https://scoop.sh/)
+
+```sh
+scoop bucket add suzuki-shunsuke https://github.com/suzuki-shunsuke/scoop-bucket
+scoop install ghalint
+```
+
+3. [aqua](https://aquaproj.github.io/)
+
+```sh
+aqua g -i suzuki-shunsuke/ghalint
+```
+
+4. [Download a pre-built binary from GitHub Releases](https://github.com/suzuki-shunsuke/ghalint/releases) and locate an executable binary `ghalint` in `PATH`
 
 ## How to use
 
-```console
-$ ghalint run
+```sh
+ghalint run
 ```
 
 ```console
@@ -77,11 +94,6 @@ TO BE
 ghalint reads GitHub Actions Workflows `^\.github/workflows/.*\.ya?ml$` and validates them.
 If there are violatation ghalint outputs error logs and fails.
 If there is no violation ghalint succeeds.
-
-## Why not `actionlint`?
-
-We develop `ghalint` to support our policies that [actionlint](https://github.com/rhysd/actionlint) doesn't cover.
-We don't aim to replace actionlint to ghalint. We use both `actionlint` and `ghalint`.
 
 ## LICENSE
 
