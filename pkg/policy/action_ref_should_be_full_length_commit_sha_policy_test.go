@@ -1,25 +1,27 @@
-package cli_test
+package policy_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
 func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
-		cfg   *cli.Config
-		wf    *cli.Workflow
+		cfg   *config.Config
+		wf    *workflow.Workflow
 		isErr bool
 	}{
 		{
 			name: "exclude",
-			cfg: &cli.Config{
-				Excludes: []*cli.Exclude{
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
 					{
 						PolicyName: "action_ref_should_be_full_length_commit_sha",
 						ActionName: "slsa-framework/slsa-github-generator",
@@ -30,10 +32,10 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			wf: &workflow.Workflow{
+				Jobs: map[string]*workflow.Job{
 					"release": {
-						Steps: []*cli.Step{
+						Steps: []*workflow.Step{
 							{
 								Uses: "slsa-framework/slsa-github-generator@v1.5.0",
 							},
@@ -48,18 +50,18 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 		{
 			name:  "step error",
 			isErr: true,
-			cfg: &cli.Config{
-				Excludes: []*cli.Exclude{
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
 					{
 						PolicyName: "action_ref_should_be_full_length_commit_sha",
 						ActionName: "actions/checkout",
 					},
 				},
 			},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			wf: &workflow.Workflow{
+				Jobs: map[string]*workflow.Job{
 					"release": {
-						Steps: []*cli.Step{
+						Steps: []*workflow.Step{
 							{
 								Uses: "slsa-framework/slsa-github-generator@v1.5.0",
 								ID:   "generate",
@@ -73,9 +75,9 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 		{
 			name:  "job error",
 			isErr: true,
-			cfg:   &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:   &config.Config{},
+			wf: &workflow.Workflow{
+				Jobs: map[string]*workflow.Job{
 					"release": {
 						Uses: "suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v0.4.4",
 					},
@@ -83,7 +85,7 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 			},
 		},
 	}
-	p := cli.NewActionRefShouldBeSHA1Policy()
+	p := policy.NewActionRefShouldBeSHA1Policy()
 	ctx := context.Background()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {

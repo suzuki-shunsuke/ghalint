@@ -1,29 +1,31 @@
-package cli_test
+package policy_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
 func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
-		cfg   *cli.Config
-		wf    *cli.Workflow
+		cfg   *config.Config
+		wf    *workflow.Workflow
 		isErr bool
 	}{
 		{
 			name: "pass",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &config.Config{},
+			wf: &workflow.Workflow{
+				Jobs: map[string]*workflow.Job{
 					"foo": {},
 					"bar": {
-						Container: &cli.Container{
+						Container: &workflow.Container{
 							Image: "node:18",
 						},
 					},
@@ -32,11 +34,11 @@ func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "job container should have image",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &config.Config{},
+			wf: &workflow.Workflow{
+				Jobs: map[string]*workflow.Job{
 					"bar": {
-						Container: &cli.Container{},
+						Container: &workflow.Container{},
 					},
 				},
 			},
@@ -44,11 +46,11 @@ func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "job container image should have tag",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &config.Config{},
+			wf: &workflow.Workflow{
+				Jobs: map[string]*workflow.Job{
 					"bar": {
-						Container: &cli.Container{
+						Container: &workflow.Container{
 							Image: "node",
 						},
 					},
@@ -58,11 +60,11 @@ func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "latest",
-			cfg:  &cli.Config{},
-			wf: &cli.Workflow{
-				Jobs: map[string]*cli.Job{
+			cfg:  &config.Config{},
+			wf: &workflow.Workflow{
+				Jobs: map[string]*workflow.Job{
 					"bar": {
-						Container: &cli.Container{
+						Container: &workflow.Container{
 							Image: "node:latest",
 						},
 					},
@@ -71,14 +73,14 @@ func TestDenyJobContainerLatestImagePolicy_Apply(t *testing.T) { //nolint:funlen
 			isErr: true,
 		},
 	}
-	policy := &cli.DenyJobContainerLatestImagePolicy{}
+	p := &policy.DenyJobContainerLatestImagePolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	ctx := context.Background()
 	for _, d := range data {
 		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := policy.Apply(ctx, logE, d.cfg, d.wf); err != nil {
+			if err := p.Apply(ctx, logE, d.cfg, d.wf); err != nil {
 				if !d.isErr {
 					t.Fatal(err)
 				}

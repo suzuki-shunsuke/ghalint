@@ -1,10 +1,12 @@
-package cli
+package policy
 
 import (
 	"context"
 	"errors"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
 type DenyWriteAllPermissionPolicy struct{}
@@ -13,7 +15,7 @@ func (p *DenyWriteAllPermissionPolicy) Name() string {
 	return "deny_write_all_permission"
 }
 
-func (p *DenyWriteAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *DenyWriteAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	wfWriteAll := wf.Permissions.WriteAll()
 	for jobName, job := range wf.Jobs {

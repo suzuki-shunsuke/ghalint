@@ -1,10 +1,12 @@
-package cli
+package policy
 
 import (
 	"context"
 	"errors"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
 type DenyReadAllPermissionPolicy struct{}
@@ -13,7 +15,7 @@ func (p *DenyReadAllPermissionPolicy) Name() string {
 	return "deny_read_all_permission"
 }
 
-func (p *DenyReadAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *Config, wf *Workflow) error {
+func (p *DenyReadAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	wfReadAll := wf.Permissions.ReadAll()
 	for jobName, job := range wf.Jobs {
