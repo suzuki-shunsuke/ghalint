@@ -16,10 +16,6 @@ type Job struct {
 	Uses        string
 }
 
-type Container struct {
-	Image string
-}
-
 type Step struct {
 	Uses string
 	ID   string
