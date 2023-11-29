@@ -26,6 +26,10 @@ func (p *JobSecretsPolicy) Name() string {
 	return "job_secrets"
 }
 
+func (p *JobSecretsPolicy) ID() string {
+	return "006"
+}
+
 func checkExcludes(policyName string, wf *workflow.Workflow, jobName string, cfg *config.Config) bool {
 	for _, exclude := range cfg.Excludes {
 		if exclude.PolicyName == policyName && wf.FilePath == exclude.WorkflowFilePath && jobName == exclude.JobName {

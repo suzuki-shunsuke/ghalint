@@ -15,6 +15,10 @@ func (p *DenyWriteAllPermissionPolicy) Name() string {
 	return "deny_write_all_permission"
 }
 
+func (p *DenyWriteAllPermissionPolicy) ID() string {
+	return "003"
+}
+
 func (p *DenyWriteAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	wfWriteAll := wf.Permissions.WriteAll()

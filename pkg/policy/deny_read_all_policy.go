@@ -15,6 +15,10 @@ func (p *DenyReadAllPermissionPolicy) Name() string {
 	return "deny_read_all_permission"
 }
 
+func (p *DenyReadAllPermissionPolicy) ID() string {
+	return "002"
+}
+
 func (p *DenyReadAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	wfReadAll := wf.Permissions.ReadAll()
