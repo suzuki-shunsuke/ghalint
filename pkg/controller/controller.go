@@ -27,11 +27,15 @@ func (c *Controller) Run(ctx context.Context, logE *logrus.Entry) error {
 	cfg := &config.Config{}
 	if cfgFilePath := config.Find(c.fs); cfgFilePath != "" {
 		if err := config.Read(c.fs, cfg, cfgFilePath); err != nil {
-			return fmt.Errorf("read a configuration file: %w", err)
+			return fmt.Errorf("read a configuration file: %w", logerr.WithFields(err, logrus.Fields{
+				"config_file": cfgFilePath,
+			}))
 		}
-	}
-	if err := config.Validate(cfg); err != nil {
-		return fmt.Errorf("validate a configuration file: %w", err)
+		if err := config.Validate(cfg); err != nil {
+			return fmt.Errorf("validate a configuration file: %w", logerr.WithFields(err, logrus.Fields{
+				"config_file": cfgFilePath,
+			}))
+		}
 	}
 	filePaths, err := workflow.List(c.fs)
 	if err != nil {
@@ -55,7 +59,7 @@ func (c *Controller) Run(ctx context.Context, logE *logrus.Entry) error {
 		}
 	}
 	if failed {
-		return errors.New("some workflow files are invalid")
+		return debugError(errors.New("some workflow files are invalid"))
 	}
 	return nil
 }
