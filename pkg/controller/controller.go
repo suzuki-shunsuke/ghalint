@@ -75,7 +75,10 @@ func (c *Controller) validateWorkflow(ctx context.Context, logE *logrus.Entry, c
 
 	failed := false
 	for _, policy := range policies {
-		logE := logE.WithField("policy_name", policy.Name())
+		logE := logE.WithFields(logrus.Fields{
+			"policy_name": policy.Name(),
+			"reference":   fmt.Sprintf("https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/policies/%s.md", policy.ID()),
+		})
 		if err := policy.Apply(ctx, logE, cfg, wf); err != nil {
 			failed = true
 			continue
@@ -86,5 +89,6 @@ func (c *Controller) validateWorkflow(ctx context.Context, logE *logrus.Entry, c
 
 type Policy interface {
 	Name() string
+	ID() string
 	Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error
 }

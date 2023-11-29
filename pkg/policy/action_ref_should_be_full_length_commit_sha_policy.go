@@ -25,6 +25,10 @@ func (p *ActionRefShouldBeSHA1Policy) Name() string {
 	return "action_ref_should_be_full_length_commit_sha"
 }
 
+func (p *ActionRefShouldBeSHA1Policy) ID() string {
+	return "008"
+}
+
 func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config.Exclude) bool {
 	for _, exclude := range excludes {
 		if exclude.PolicyName != p.Name() {

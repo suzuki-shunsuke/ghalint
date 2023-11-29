@@ -26,6 +26,10 @@ func (p *WorkflowSecretsPolicy) Name() string {
 	return "workflow_secrets"
 }
 
+func (p *WorkflowSecretsPolicy) ID() string {
+	return "005"
+}
+
 func (p *WorkflowSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	if len(wf.Jobs) < 2 { //nolint:gomnd
 		return nil

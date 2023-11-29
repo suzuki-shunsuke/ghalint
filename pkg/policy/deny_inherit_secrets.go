@@ -15,6 +15,10 @@ func (p *DenyInheritSecretsPolicy) Name() string {
 	return "deny_inherit_secrets"
 }
 
+func (p *DenyInheritSecretsPolicy) ID() string {
+	return "004"
+}
+
 func (p *DenyInheritSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
