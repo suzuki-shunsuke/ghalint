@@ -68,11 +68,11 @@ excludes:
     action_name: slsa-framework/slsa-github-generator
 ```
 
-* policy_name: Only `job_secrets` and `action_ref_should_be_full_length_commit_sha` is supported
+- policy_name: Only `job_secrets` and `action_ref_should_be_full_length_commit_sha` is supported
 
 ## Environment variables
 
-* `GHALINT_LOG_COLOR`: Configure log color. One of `auto` (default), `always`, and `never`.
+- `GHALINT_LOG_COLOR`: Configure log color. One of `auto` (default), `always`, and `never`.
 
 💡 If you want to enable log color in GitHub Actions, please try `GHALINT_LOG_COLOR=always` 
 
