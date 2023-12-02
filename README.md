@@ -2,7 +2,14 @@
 
 GitHub Actions linter for security best practices.
 
-[Blog post](https://dev.to/suzukishunsuke/minimize-the-scope-of-secrets-and-permissions-in-github-actions-444b)
+```console
+$ ghalint run
+ERRO[0000] read a workflow file                          error="parse a workflow file as YAML: yaml: line 10: could not find expected ':'" program=ghalint version= workflow_file_path=.github/workflows/release.yaml
+ERRO[0000] github.token should not be set to workflow's env  env_name=GITHUB_TOKEN policy_name=workflow_secrets program=ghalint version= workflow_file_path=.github/workflows/test.yaml
+ERRO[0000] secret should not be set to workflow's env    env_name=DATADOG_API_KEY policy_name=workflow_secrets program=ghalint version= workflow_file_path=.github/workflows/test.yaml
+```
+
+ghalint is a command line tool to check GitHub Actions Workflows for security policy compliance.
 
 ## Policies
 
@@ -42,20 +49,51 @@ aqua g -i suzuki-shunsuke/ghalint
 
 ## How to use
 
-```sh
-ghalint run
+```console
+$ ghalint help
+NAME:
+   ghalint - GitHub Actions linter
+
+USAGE:
+   ghalint [global options] command [command options] [arguments...]
+
+VERSION:
+    ()
+
+COMMANDS:
+   run      lint GitHub Actions Workflows
+   version  Show version
+   help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --log-color value         log color. auto(default)|always|never [$GHALINT_LOG_COLOR]
+   --log-level value         log level [$GHALINT_LOG_LEVEL]
+   --config value, -c value  configuration file path [$GHALINT_CONFIG]
+   --help, -h                show help
+   --version, -v             print the version
 ```
 
 ```console
-$ ghalint run
-ERRO[0000] read a workflow file                          error="parse a workflow file as YAML: yaml: line 10: could not find expected ':'" program=ghalint version= workflow_file_path=.github/workflows/release.yaml
-ERRO[0000] github.token should not be set to workflow's env  env_name=GITHUB_TOKEN policy_name=workflow_secrets program=ghalint version= workflow_file_path=.github/workflows/test.yaml
-ERRO[0000] secret should not be set to workflow's env    env_name=DATADOG_API_KEY policy_name=workflow_secrets program=ghalint version= workflow_file_path=.github/workflows/test.yaml
+$ ghalint help run
+NAME:
+   ghalint run - lint GitHub Actions Workflows
+
+USAGE:
+   ghalint run [command options] [arguments...]
+
+OPTIONS:
+   --help, -h  show help
 ```
 
 ## Configuration file
 
 Configuration file path: `^\.?ghalint\.ya?ml$`
+
+You can specify the configuration file with the command line option `-config (-c)` or the environment variable `GHALINT_CONFIG`.
+
+```sh
+ghalint -c foo.yaml run
+```
 
 You can exclude the policy `job_secrets` and `action_ref_should_be_full_length_commit_sha`.
 
@@ -84,6 +122,8 @@ Required. You can exclude only the following policies.
 
 ## Environment variables
 
+- `GHALINT_CONFIG`: Configuration file path
+- `GHALINT_LOG_LEVEL`: Log level One of `panic`, `fatal`, `error`, `warn`, `warning`, `info` (default), `debug`, `trace`
 - `GHALINT_LOG_COLOR`: Configure log color. One of `auto` (default), `always`, and `never`.
 
 💡 If you want to enable log color in GitHub Actions, please try `GHALINT_LOG_COLOR=always` 
