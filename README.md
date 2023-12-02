@@ -15,6 +15,7 @@ GitHub Actions linter for security best practices.
 - [deny_job_container_latest_image](docs/policies/007.md): Job's container image tag should not be `latest`
 - [action_ref_should_be_full_length_commit_sha](docs/policies/008.md): action's ref should be full length commit SHA
 - [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
+- [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
 
 ## How to install
 
