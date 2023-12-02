@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/urfave/cli/v2"
 )
@@ -18,9 +19,10 @@ func (f *LDFlags) AppVersion() string {
 type Runner struct {
 	flags *LDFlags
 	fs    afero.Fs
+	logE  *logrus.Entry
 }
 
-func New(flags *LDFlags, fs afero.Fs) *cli.App {
+func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
 	app := cli.NewApp()
 	app.Name = "ghalint"
 	app.Usage = "GitHub Actions linter"
@@ -33,11 +35,18 @@ func New(flags *LDFlags, fs afero.Fs) *cli.App {
 				"GHALINT_LOG_COLOR",
 			},
 		},
-		// &cli.StringFlag{Name: "log-level", Usage: "log level"},
+		&cli.StringFlag{
+			Name:  "log-level",
+			Usage: "log level",
+			EnvVars: []string{
+				"GHALINT_LOG_LEVEL",
+			},
+		},
 	}
 	runner := &Runner{
 		flags: flags,
 		fs:    fs,
+		logE:  logE,
 	}
 	app.Commands = []*cli.Command{
 		{

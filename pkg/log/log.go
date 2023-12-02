@@ -20,7 +20,7 @@ func SetLevel(level string, logE *logrus.Entry) {
 		logE.WithField("log_level", level).WithError(err).Error("the log level is invalid")
 		return
 	}
-	logrus.SetLevel(lvl)
+	logE.Logger.Level = lvl
 }
 
 func SetColor(color string, logE *logrus.Entry) {
