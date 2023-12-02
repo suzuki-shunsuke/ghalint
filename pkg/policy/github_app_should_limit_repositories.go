@@ -48,7 +48,7 @@ func (p *GitHubAppShouldLimitRepositoriesPolicy) applyJob(logE *logrus.Entry, cf
 
 var errRepositoriesIsRequired = errors.New("the input `repositories` is required")
 
-func (p *GitHubAppShouldLimitRepositoriesPolicy) applyStep(logE *logrus.Entry, cfg *config.Config, wfFilePath, jobName string, step *workflow.Step) (ge error) {
+func (p *GitHubAppShouldLimitRepositoriesPolicy) applyStep(logE *logrus.Entry, cfg *config.Config, wfFilePath, jobName string, step *workflow.Step) (ge error) { //nolint:cyclop
 	action := p.checkUses(step.Uses)
 	if action == "" {
 		return nil
