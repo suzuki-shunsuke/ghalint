@@ -3,8 +3,11 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/logrus-error/logerr"
 	"gopkg.in/yaml.v3"
 )
 
@@ -35,7 +38,13 @@ func Read(fs afero.Fs, cfg *Config, filePath string) error {
 	}
 	defer f.Close()
 	if err := yaml.NewDecoder(f).Decode(cfg); err != nil {
-		return fmt.Errorf("parse configuration file as YAML: %w", err)
+		err := fmt.Errorf("parse configuration file as YAML: %w", err)
+		if errors.Is(err, io.EOF) {
+			return logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
+				"reference": "https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/codes/002.md",
+			})
+		}
+		return err
 	}
 	return nil
 }
