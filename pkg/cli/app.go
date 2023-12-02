@@ -26,6 +26,13 @@ func New(flags *LDFlags, fs afero.Fs) *cli.App {
 	app.Usage = "GitHub Actions linter"
 	app.Version = flags.AppVersion()
 	app.Flags = []cli.Flag{
+		&cli.StringFlag{
+			Name:  "log-color",
+			Usage: "log color. auto(default)|always|never",
+			EnvVars: []string{
+				"GHALINT_LOG_COLOR",
+			},
+		},
 		// &cli.StringFlag{Name: "log-level", Usage: "log level"},
 	}
 	runner := &Runner{

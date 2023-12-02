@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"os"
-
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 	"github.com/suzuki-shunsuke/ghalint/pkg/log"
 	"github.com/urfave/cli/v2"
@@ -11,7 +9,7 @@ import (
 func (r *Runner) Run(ctx *cli.Context) error {
 	logE := log.New(r.flags.Version)
 
-	if color := os.Getenv("GHALINT_LOG_COLOR"); color != "" {
+	if color := ctx.String("log-color"); color != "" {
 		log.SetColor(color, logE)
 	}
 
