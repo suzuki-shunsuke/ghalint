@@ -20,4 +20,5 @@ type Step struct {
 	Uses string
 	ID   string
 	Name string
+	With map[string]string
 }

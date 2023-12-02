@@ -14,6 +14,7 @@ GitHub Actions linter for security best practices.
 - [job_secrets](docs/policies/006.md): Job should not set secrets to environment variables
 - [deny_job_container_latest_image](docs/policies/007.md): Job's container image tag should not be `latest`
 - [action_ref_should_be_full_length_commit_sha](docs/policies/008.md): action's ref should be full length commit SHA
+- [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
 
 ## How to install
 
@@ -66,9 +67,19 @@ excludes:
     job_name: actionlint
   - policy_name: action_ref_should_be_full_length_commit_sha
     action_name: slsa-framework/slsa-github-generator
+  - policy_name: github_app_should_limit_repositories
+    workflow_file_path: .github/workflows/test.yaml
+    job_name: test
+    step_id: create_token
 ```
 
-- policy_name: Only `job_secrets` and `action_ref_should_be_full_length_commit_sha` is supported
+### excludes[].policy_name
+
+Required. You can exclude only the following policies.
+
+- [job_secrets](docs/policies/006.md)
+- [action_ref_should_be_full_length_commit_sha](docs/policies/008.md)
+- [github_app_should_limit_repositories](docs/policies/009.md)
 
 ## Environment variables
 
