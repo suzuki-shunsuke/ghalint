@@ -7,10 +7,14 @@ import (
 )
 
 func (r *Runner) Run(ctx *cli.Context) error {
-	logE := log.New(r.flags.Version)
+	logE := r.logE
 
 	if color := ctx.String("log-color"); color != "" {
 		log.SetColor(color, logE)
+	}
+
+	if logLevel := ctx.String("log-level"); logLevel != "" {
+		log.SetLevel(logLevel, logE)
 	}
 
 	ctrl := controller.New(r.fs)
