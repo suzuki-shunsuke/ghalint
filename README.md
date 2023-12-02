@@ -49,6 +49,9 @@ aqua g -i suzuki-shunsuke/ghalint
 
 ## How to use
 
+Run the command `ghalint run` on the repository root directory.
+Then ghalint validates workflow files `^\.github/workflows/.*\.ya?ml$`.
+
 ```console
 $ ghalint help
 NAME:
