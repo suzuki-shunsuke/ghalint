@@ -20,6 +20,7 @@ type Exclude struct {
 	WorkflowFilePath string `yaml:"workflow_file_path"`
 	JobName          string `yaml:"job_name"`
 	ActionName       string `yaml:"action_name"`
+	StepID           string `yaml:"step_id"`
 }
 
 func Find(fs afero.Fs) string {

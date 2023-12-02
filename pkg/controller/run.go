@@ -30,6 +30,7 @@ func (c *Controller) Run(ctx context.Context, logE *logrus.Entry, cfgFilePath st
 		&policy.DenyWriteAllPermissionPolicy{},
 		&policy.DenyInheritSecretsPolicy{},
 		&policy.DenyJobContainerLatestImagePolicy{},
+		&policy.GitHubAppShouldLimitRepositoriesPolicy{},
 		policy.NewActionRefShouldBeSHA1Policy(),
 	}
 	failed := false
