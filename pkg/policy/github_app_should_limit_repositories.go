@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
+	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
 
 type GitHubAppShouldLimitRepositoriesPolicy struct{}
@@ -38,40 +39,49 @@ func (p *GitHubAppShouldLimitRepositoriesPolicy) applyJob(logE *logrus.Entry, cf
 	failed := false
 	for _, step := range job.Steps {
 		if err := p.applyStep(logE, cfg, wfFilePath, jobName, step); err != nil {
-			logE.WithError(err).Error(`the input "repositories" is required`)
+			logerr.WithError(logE, err).WithField("step_id", step.ID).Error(`the step violates the policy`)
 			failed = true
 		}
 	}
 	return failed
 }
 
-func (p *GitHubAppShouldLimitRepositoriesPolicy) applyStep(logE *logrus.Entry, cfg *config.Config, wfFilePath, jobName string, step *workflow.Step) error {
+var errRepositoriesIsRequired = errors.New("the input `repositories` is required")
+
+func (p *GitHubAppShouldLimitRepositoriesPolicy) applyStep(logE *logrus.Entry, cfg *config.Config, wfFilePath, jobName string, step *workflow.Step) (ge error) {
 	action := p.checkUses(step.Uses)
 	if action == "" {
 		return nil
 	}
+	defer func() {
+		if ge != nil {
+			ge = logerr.WithFields(ge, logrus.Fields{
+				"action": action,
+			})
+		}
+	}()
 	if p.excluded(cfg.Excludes, wfFilePath, jobName, step.ID) {
 		logE.Debug("this step is ignored")
 		return nil
 	}
 	if action == "tibdex/github-app-token" {
 		if step.With == nil {
-			return errors.New(`the input "repositories" is required`)
+			return errRepositoriesIsRequired
 		}
 		if _, ok := step.With["repositories"]; !ok {
-			return errors.New(`the input "repositories" is required`)
+			return errRepositoriesIsRequired
 		}
 		return nil
 	}
 	if action == "actions/create-github-app-token" {
 		if step.With == nil {
-			return errors.New(`the input "repositories" is required`)
+			return errRepositoriesIsRequired
 		}
 		if _, ok := step.With["repositories"]; ok {
 			return nil
 		}
 		if _, ok := step.With["owner"]; ok {
-			return errors.New(`the input "repositories" is required`)
+			return errRepositoriesIsRequired
 		}
 		return nil
 	}
