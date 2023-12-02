@@ -19,5 +19,5 @@ func (r *Runner) Run(ctx *cli.Context) error {
 
 	ctrl := controller.New(r.fs)
 
-	return ctrl.Run(ctx.Context, logE) //nolint:wrapcheck
+	return ctrl.Run(ctx.Context, logE, ctx.String("config")) //nolint:wrapcheck
 }
