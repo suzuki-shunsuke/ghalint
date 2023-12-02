@@ -42,6 +42,14 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
 				"GHALINT_LOG_LEVEL",
 			},
 		},
+		&cli.StringFlag{
+			Name:    "config",
+			Aliases: []string{"c"},
+			Usage:   "configuration file path",
+			EnvVars: []string{
+				"GHALINT_CONFIG",
+			},
+		},
 	}
 	runner := &Runner{
 		flags: flags,
