@@ -1,63 +1,33 @@
 {
   "checksums": [
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.50.1/golangci-lint-1.50.1-darwin-amd64.tar.gz",
-      "checksum": "0F615FB8C364F6E4A213F2ED2FF7AA1FC2B208ADDF29511E89C03534067BBF57",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.55.2/golangci-lint-1.55.2-darwin-amd64.tar.gz",
+      "checksum": "632E96E6D5294FBBE7B2C410A49C8FA01C60712A0AF85A567DE85BCC1623EA21",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.50.1/golangci-lint-1.50.1-darwin-arm64.tar.gz",
-      "checksum": "3CA9753D7804B34F9165427FBE339DBEA69BD80BE8A10E3F02C6037393B2E1C4",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.55.2/golangci-lint-1.55.2-darwin-arm64.tar.gz",
+      "checksum": "234463F059249F82045824AFDCDD5DB5682D0593052F58F6A3039A0A1C3899F6",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.50.1/golangci-lint-1.50.1-linux-amd64.tar.gz",
-      "checksum": "4ba1dc9dbdf05b7bdc6f0e04bdfe6f63aa70576f51817be1b2540bbce017b69a",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.55.2/golangci-lint-1.55.2-linux-amd64.tar.gz",
+      "checksum": "CA21C961A33BE3BC15E4292DC40C98C8DCC5463A7B6768A3AFC123761630C09C",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.50.1/golangci-lint-1.50.1-linux-arm64.tar.gz",
-      "checksum": "3ea0a6d5946340f6831646e2c67a317dd9b35bdc4e09b2df953a86f09ba05d74",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.55.2/golangci-lint-1.55.2-linux-arm64.tar.gz",
+      "checksum": "8EB0CEE9B1DBF0EAA49871798C7F8A5B35F2960C52D776A5F31EB7D886B92746",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.50.1/golangci-lint-1.50.1-windows-amd64.zip",
-      "checksum": "8c2da214884db02fb7f3d929672c515ae3b9d10defad4dd661c4ab365a316d68",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.55.2/golangci-lint-1.55.2-windows-amd64.zip",
+      "checksum": "F57D434D231D43417DFA631587522F8C1991220B43C8FFADB9C7BD279508BF81",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.50.1/golangci-lint-1.50.1-windows-arm64.zip",
-      "checksum": "7fd52d1da270fa8448c975d2500b6ef2d19db143b6cfc205de16612d6f4effa9",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.51.0/golangci-lint-1.51.0-darwin-amd64.tar.gz",
-      "checksum": "6BD74840486969D20EC7C1F7F62C7CBC13B16D2ABE15956559C787AF796B5876",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.51.0/golangci-lint-1.51.0-darwin-arm64.tar.gz",
-      "checksum": "71AFBC9C2E01D7FE609CE0AE7DBD9E18FC3A4FE8E24F80AB73F8A2DA345133D2",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.51.0/golangci-lint-1.51.0-linux-amd64.tar.gz",
-      "checksum": "38C25AE0BA5BFEBD3EC42E9230547BD6461B179E47D7BA4D86950623BF28862A",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.51.0/golangci-lint-1.51.0-linux-arm64.tar.gz",
-      "checksum": "8487D4441434626694608A10C1A5AD1D906CEC8DF761A875015D5EA15E6B15E9",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.51.0/golangci-lint-1.51.0-windows-amd64.zip",
-      "checksum": "5E8173AB78C41E35903634C4E98971E2346488EA6B3DD1D58F2D3991F34D61F7",
-      "algorithm": "sha256"
-    },
-    {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.51.0/golangci-lint-1.51.0-windows-arm64.zip",
-      "checksum": "B531640AD3AA7084823C630CA098626C937CBFA2190A7294E0F1207C0B053232",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.55.2/golangci-lint-1.55.2-windows-arm64.zip",
+      "checksum": "FD7DC8F4C6829EE6FAFB252A4D81D2155CD35DA7833665CBB25D53CE7CECD990",
       "algorithm": "sha256"
     },
     {
