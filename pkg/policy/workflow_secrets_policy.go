@@ -45,7 +45,7 @@ func (p *WorkflowSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, c
 		}
 	}
 	if failed {
-		return workflowViolatePolicyError
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }

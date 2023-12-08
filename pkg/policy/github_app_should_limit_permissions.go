@@ -29,7 +29,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) Apply(ctx context.Context, logE 
 		}
 	}
 	if failed {
-		return workflowViolatePolicyError
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }
@@ -43,7 +43,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) applyJob(logE *logrus.Entry, cfg
 		}
 	}
 	if failed {
-		return jobViolatePolicyError
+		return errJobViolatePolicy
 	}
 	return nil
 }

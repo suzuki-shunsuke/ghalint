@@ -60,7 +60,7 @@ func (p *JobSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *c
 		}
 	}
 	if failed {
-		return workflowViolatePolicyError
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }

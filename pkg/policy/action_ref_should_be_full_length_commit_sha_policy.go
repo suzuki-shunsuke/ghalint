@@ -49,7 +49,7 @@ func (p *ActionRefShouldBeSHA1Policy) Apply(ctx context.Context, logE *logrus.En
 		}
 	}
 	if failed {
-		return workflowViolatePolicyError
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }
@@ -60,7 +60,7 @@ func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *config.C
 			return nil
 		}
 		logE.WithField("uses", job.Uses).Error("action ref should be full length SHA1")
-		return jobViolatePolicyError
+		return errJobViolatePolicy
 	}
 	failed := false
 	for _, step := range job.Steps {
@@ -81,7 +81,7 @@ func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *config.C
 		failed = true
 	}
 	if failed {
-		return jobViolatePolicyError
+		return errJobViolatePolicy
 	}
 	return nil
 }

@@ -36,7 +36,7 @@ func (p *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cf
 		}
 	}
 	if failed {
-		return workflowViolatePolicyError
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }

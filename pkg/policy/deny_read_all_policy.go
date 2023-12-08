@@ -33,7 +33,7 @@ func (p *DenyReadAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.En
 		}
 	}
 	if failed {
-		return workflowViolatePolicyError
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }

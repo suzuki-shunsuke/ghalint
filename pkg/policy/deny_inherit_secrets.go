@@ -28,7 +28,7 @@ func (p *DenyInheritSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry
 		}
 	}
 	if failed {
-		return workflowViolatePolicyError
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }

@@ -43,7 +43,7 @@ func (p *DenyJobContainerLatestImagePolicy) Apply(ctx context.Context, logE *log
 		}
 	}
 	if failed {
-		return workflowViolatePolicyError
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }
