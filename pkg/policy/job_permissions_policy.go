@@ -2,7 +2,6 @@ package policy
 
 import (
 	"context"
-	"errors"
 
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
@@ -37,7 +36,7 @@ func (p *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cf
 		}
 	}
 	if failed {
-		return errors.New("workflow violates policies")
+		return workflowViolatePolicyError
 	}
 	return nil
 }

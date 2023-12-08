@@ -2,7 +2,6 @@ package policy
 
 import (
 	"context"
-	"errors"
 	"regexp"
 	"strings"
 
@@ -45,24 +44,25 @@ func (p *ActionRefShouldBeSHA1Policy) Apply(ctx context.Context, logE *logrus.En
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)
-		if p.applyJob(logE, cfg, job) {
+		if err := p.applyJob(logE, cfg, job); err != nil {
 			failed = true
 		}
 	}
 	if failed {
-		return errors.New("workflow violates policies")
+		return workflowViolatePolicyError
 	}
 	return nil
 }
 
-func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *config.Config, job *workflow.Job) bool {
+func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *config.Config, job *workflow.Job) error {
 	if action := p.checkUses(job.Uses); action != "" {
 		if p.excluded(action, cfg.Excludes) {
-			return false
+			return nil
 		}
 		logE.WithField("uses", job.Uses).Error("action ref should be full length SHA1")
-		return true
+		return jobViolatePolicyError
 	}
+	failed := false
 	for _, step := range job.Steps {
 		action := p.checkUses(step.Uses)
 		if action == "" || p.excluded(action, cfg.Excludes) {
@@ -78,9 +78,12 @@ func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *config.C
 			fields["step_name"] = step.Name
 		}
 		logE.WithFields(fields).Error("action ref should be full length SHA1")
-		return true
+		failed = true
 	}
-	return false
+	if failed {
+		return jobViolatePolicyError
+	}
+	return nil
 }
 
 func (p *ActionRefShouldBeSHA1Policy) checkUses(uses string) string {

@@ -2,7 +2,6 @@ package policy
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -44,7 +43,7 @@ func (p *DenyJobContainerLatestImagePolicy) Apply(ctx context.Context, logE *log
 		}
 	}
 	if failed {
-		return errors.New("workflow violates policies")
+		return workflowViolatePolicyError
 	}
 	return nil
 }

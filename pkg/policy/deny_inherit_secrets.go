@@ -2,7 +2,6 @@ package policy
 
 import (
 	"context"
-	"errors"
 
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
@@ -29,7 +28,7 @@ func (p *DenyInheritSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry
 		}
 	}
 	if failed {
-		return errors.New("workflow violates policies")
+		return workflowViolatePolicyError
 	}
 	return nil
 }
