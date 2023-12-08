@@ -38,7 +38,7 @@ func checkExcludes(policyName string, wf *workflow.Workflow, jobName string, cfg
 	return false
 }
 
-func (p *JobSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
+func (p *JobSecretsPolicy) Apply(_ context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)

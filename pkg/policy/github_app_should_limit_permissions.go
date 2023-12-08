@@ -20,7 +20,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) ID() string {
 	return "010"
 }
 
-func (p *GitHubAppShouldLimitPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
+func (p *GitHubAppShouldLimitPermissionsPolicy) Apply(_ context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)

@@ -18,7 +18,7 @@ func (p *DenyInheritSecretsPolicy) ID() string {
 	return "004"
 }
 
-func (p *DenyInheritSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
+func (p *DenyInheritSecretsPolicy) Apply(_ context.Context, logE *logrus.Entry, _ *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)

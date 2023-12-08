@@ -40,7 +40,7 @@ func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config
 	return false
 }
 
-func (p *ActionRefShouldBeSHA1Policy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
+func (p *ActionRefShouldBeSHA1Policy) Apply(_ context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)
