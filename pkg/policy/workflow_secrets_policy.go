@@ -2,7 +2,6 @@ package policy
 
 import (
 	"context"
-	"errors"
 	"regexp"
 
 	"github.com/sirupsen/logrus"
@@ -46,7 +45,7 @@ func (p *WorkflowSecretsPolicy) Apply(ctx context.Context, logE *logrus.Entry, c
 		}
 	}
 	if failed {
-		return errors.New("workflow violates policies")
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }

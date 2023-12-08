@@ -2,7 +2,6 @@ package policy
 
 import (
 	"context"
-	"errors"
 
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
@@ -34,7 +33,7 @@ func (p *DenyReadAllPermissionPolicy) Apply(ctx context.Context, logE *logrus.En
 		}
 	}
 	if failed {
-		return errors.New("workflow violates policies")
+		return errWorkflowViolatePolicy
 	}
 	return nil
 }
