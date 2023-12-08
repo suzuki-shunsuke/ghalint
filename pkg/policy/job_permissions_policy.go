@@ -19,7 +19,7 @@ func (p *JobPermissionsPolicy) ID() string {
 	return "001"
 }
 
-func (p *JobPermissionsPolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
+func (p *JobPermissionsPolicy) Apply(_ context.Context, logE *logrus.Entry, _ *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	wfPermissions := wf.Permissions.Permissions()
 	if wfPermissions != nil && len(wfPermissions) == 0 {

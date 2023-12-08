@@ -20,7 +20,7 @@ func (p *DenyJobContainerLatestImagePolicy) ID() string {
 	return "007"
 }
 
-func (p *DenyJobContainerLatestImagePolicy) Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
+func (p *DenyJobContainerLatestImagePolicy) Apply(_ context.Context, logE *logrus.Entry, _ *config.Config, wf *workflow.Workflow) error {
 	failed := false
 	for jobName, job := range wf.Jobs {
 		logE := logE.WithField("job_name", jobName)
