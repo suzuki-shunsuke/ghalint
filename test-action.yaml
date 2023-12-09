@@ -1,0 +1,52 @@
+name: test
+description: test
+inputs:
+  github_token:
+    description: ""
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    # action_ref_should_be_full_length_commit_sha
+    - uses: tibdex/github-app-token@v2.1.0
+      id: token1
+      with:
+        app_id: ${{secrets.APP_ID}}
+        private_key: ${{secrets.PRIVATE_KEY}}
+        # github_app_should_limit_repositories
+        # github_app_should_limit_permissions
+
+    - uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+      id: token2
+      with:
+        app_id: ${{secrets.APP_ID}}
+        private_key: ${{secrets.PRIVATE_KEY}}
+        repositories: >-
+          ["${{github.event.repository.name}}"]
+        permissions: >-
+          {
+            "contents": "write"
+          }
+
+    - uses: actions/create-github-app-token@46e4a501e119d39574a54e53a06c9a705efc55c9 # v1.6.1
+      id: token3
+      with:
+        app-id: ${{vars.APP_ID}}
+        private-key: ${{secrets.PRIVATE_KEY}}
+        owner: ${{github.repository_owner}}
+        # github_app_should_limit_repositories
+
+    - uses: actions/create-github-app-token@46e4a501e119d39574a54e53a06c9a705efc55c9 # v1.6.1
+      id: token4
+      with:
+        app-id: ${{vars.APP_ID}}
+        private-key: ${{secrets.PRIVATE_KEY}}
+        owner: ${{github.repository_owner}}
+        repositories: "repo1,repo2"
+
+    - uses: actions/create-github-app-token@46e4a501e119d39574a54e53a06c9a705efc55c9 # v1.6.1
+      id: token5
+      with:
+        app-id: ${{vars.APP_ID}}
+        private-key: ${{secrets.PRIVATE_KEY}}

@@ -144,9 +144,13 @@ func (c *Controller) applyStepPolicies(logE *logrus.Entry, cfg *config.Config, w
 func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobs map[string]*workflow.Job, stepPolicy StepPolicy) bool {
 	failed := false
 	for jobName, job := range jobs {
-		jobCtx := &policy.JobContext{
-			Workflow: wfCtx,
-			Name:     jobName,
+		stepCtx := &policy.StepContext{
+			FilePath: wfCtx.FilePath,
+			Job: &policy.JobContext{
+				Name:     jobName,
+				Workflow: wfCtx,
+				Job:      job,
+			},
 		}
 		logE := logE.WithField("job_name", jobName)
 		for _, step := range job.Steps {
@@ -157,7 +161,7 @@ func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, wfC
 			if step.Name != "" {
 				logE = logE.WithField("step_name", step.Name)
 			}
-			if err := stepPolicy.ApplyStep(logE, cfg, jobCtx, step); err != nil {
+			if err := stepPolicy.ApplyStep(logE, cfg, stepCtx, step); err != nil {
 				if err.Error() != "" {
 					logerr.WithError(logE, err).Error("the step violates policies")
 				}

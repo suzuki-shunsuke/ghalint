@@ -51,7 +51,7 @@ func (p *ActionRefShouldBeSHA1Policy) ApplyJob(_ *logrus.Entry, cfg *config.Conf
 	return errors.New("action ref should be full length SHA1")
 }
 
-func (p *ActionRefShouldBeSHA1Policy) ApplyStep(_ *logrus.Entry, cfg *config.Config, _ *JobContext, step *workflow.Step) error {
+func (p *ActionRefShouldBeSHA1Policy) ApplyStep(_ *logrus.Entry, cfg *config.Config, _ *StepContext, step *workflow.Step) error {
 	action := p.checkUses(step.Uses)
 	if action == "" || p.excluded(action, cfg.Excludes) {
 		return nil

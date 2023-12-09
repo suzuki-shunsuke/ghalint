@@ -64,6 +64,15 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
 			Flags:  []cli.Flag{},
 		},
 		{
+			Name: "run-action",
+			Aliases: []string{
+				"act",
+			},
+			Usage:  "lint actions",
+			Action: runner.Run,
+			Flags:  []cli.Flag{},
+		},
+		{
 			Name:  "version",
 			Usage: "Show version",
 			Action: func(ctx *cli.Context) error {

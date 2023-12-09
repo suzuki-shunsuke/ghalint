@@ -19,7 +19,7 @@ func (p *GitHubAppShouldLimitRepositoriesPolicy) ID() string {
 	return "009"
 }
 
-func (p *GitHubAppShouldLimitRepositoriesPolicy) ApplyStep(logE *logrus.Entry, cfg *config.Config, jobCtx *JobContext, step *workflow.Step) (ge error) { //nolint:cyclop
+func (p *GitHubAppShouldLimitRepositoriesPolicy) ApplyStep(logE *logrus.Entry, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) (ge error) { //nolint:cyclop
 	action := p.checkUses(step.Uses)
 	if action == "" {
 		return nil
@@ -31,7 +31,7 @@ func (p *GitHubAppShouldLimitRepositoriesPolicy) ApplyStep(logE *logrus.Entry, c
 			})
 		}
 	}()
-	if p.excluded(cfg.Excludes, jobCtx.Workflow.FilePath, jobCtx.Name, step.ID) {
+	if p.excluded(cfg.Excludes, stepCtx.FilePath, stepCtx.Job.Name, step.ID) {
 		logE.Debug("this step is ignored")
 		return nil
 	}
@@ -75,7 +75,7 @@ func (p *GitHubAppShouldLimitRepositoriesPolicy) excluded(excludes []*config.Exc
 		if exclude.WorkflowFilePath != wfFilePath {
 			continue
 		}
-		if exclude.JobName != jobName {
+		if jobName != "" && exclude.JobName != jobName {
 			continue
 		}
 		if exclude.StepID != stepID {
