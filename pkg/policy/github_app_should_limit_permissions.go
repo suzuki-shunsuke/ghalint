@@ -1,7 +1,6 @@
 package policy
 
 import (
-	"context"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -20,35 +19,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) ID() string {
 	return "010"
 }
 
-func (p *GitHubAppShouldLimitPermissionsPolicy) Apply(_ context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
-	failed := false
-	for jobName, job := range wf.Jobs {
-		logE := logE.WithField("job_name", jobName)
-		if err := p.applyJob(logE, cfg, wf.FilePath, jobName, job); err != nil {
-			failed = true
-		}
-	}
-	if failed {
-		return errWorkflowViolatePolicy
-	}
-	return nil
-}
-
-func (p *GitHubAppShouldLimitPermissionsPolicy) applyJob(logE *logrus.Entry, cfg *config.Config, wfFilePath, jobName string, job *workflow.Job) error {
-	failed := false
-	for _, step := range job.Steps {
-		if err := p.applyStep(logE, cfg, wfFilePath, jobName, step); err != nil {
-			logerr.WithError(logE, err).WithField("step_id", step.ID).Error(`the step violates the policy`)
-			failed = true
-		}
-	}
-	if failed {
-		return errJobViolatePolicy
-	}
-	return nil
-}
-
-func (p *GitHubAppShouldLimitPermissionsPolicy) applyStep(logE *logrus.Entry, cfg *config.Config, wfFilePath, jobName string, step *workflow.Step) (ge error) {
+func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(logE *logrus.Entry, cfg *config.Config, jobCtx *JobContext, step *workflow.Step) (ge error) {
 	action := p.checkUses(step.Uses)
 	if action == "" {
 		return nil
@@ -60,7 +31,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) applyStep(logE *logrus.Entry, cf
 			})
 		}
 	}()
-	if p.excluded(cfg.Excludes, wfFilePath, jobName, step.ID) {
+	if p.excluded(cfg.Excludes, jobCtx.Workflow.FilePath, jobCtx.Name, step.ID) {
 		logE.Debug("this step is ignored")
 		return nil
 	}

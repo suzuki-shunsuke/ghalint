@@ -1,7 +1,6 @@
 package policy_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
@@ -10,7 +9,7 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
-func TestWorkflowSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
+func TestWorkflowSecretsPolicy_ApplyWorkflow(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
@@ -78,12 +77,11 @@ func TestWorkflowSecretsPolicy_Apply(t *testing.T) { //nolint:funlen
 	}
 	p := policy.NewWorkflowSecretsPolicy()
 	logE := logrus.NewEntry(logrus.New())
-	ctx := context.Background()
 	for _, d := range data {
 		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.Apply(ctx, logE, d.cfg, d.wf); err != nil {
+			if err := p.ApplyWorkflow(logE, d.cfg, nil, d.wf); err != nil {
 				if !d.isErr {
 					t.Fatal(err)
 				}

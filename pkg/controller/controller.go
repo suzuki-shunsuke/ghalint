@@ -1,11 +1,10 @@
 package controller
 
 import (
-	"context"
-
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
@@ -19,8 +18,20 @@ func New(fs afero.Fs) *Controller {
 	}
 }
 
-type Policy interface {
+type WorkflowPolicy interface {
 	Name() string
 	ID() string
-	Apply(ctx context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error
+	ApplyWorkflow(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, wf *workflow.Workflow) error
+}
+
+type JobPolicy interface {
+	Name() string
+	ID() string
+	ApplyJob(logE *logrus.Entry, cfg *config.Config, jobCtx *policy.JobContext, job *workflow.Job) error
+}
+
+type StepPolicy interface {
+	Name() string
+	ID() string
+	ApplyStep(logE *logrus.Entry, cfg *config.Config, jobCtx *policy.JobContext, step *workflow.Step) error
 }

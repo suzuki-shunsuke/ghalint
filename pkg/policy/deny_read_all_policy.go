@@ -1,7 +1,7 @@
 package policy
 
 import (
-	"context"
+	"errors"
 
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
@@ -18,22 +18,13 @@ func (p *DenyReadAllPermissionPolicy) ID() string {
 	return "002"
 }
 
-func (p *DenyReadAllPermissionPolicy) Apply(_ context.Context, logE *logrus.Entry, _ *config.Config, wf *workflow.Workflow) error {
-	failed := false
-	wfReadAll := wf.Permissions.ReadAll()
-	for jobName, job := range wf.Jobs {
-		if job.Permissions.ReadAll() {
-			failed = true
-			logE.WithField("job_name", jobName).Error("don't use read-all permission")
-			continue
-		}
-		if job.Permissions.IsNil() && wfReadAll {
-			failed = true
-			logE.WithField("job_name", jobName).Error("don't use read-all permission")
-		}
+func (p *DenyReadAllPermissionPolicy) ApplyJob(_ *logrus.Entry, _ *config.Config, jobCtx *JobContext, job *workflow.Job) error {
+	wfReadAll := jobCtx.Workflow.Workflow.Permissions.ReadAll()
+	if job.Permissions.ReadAll() {
+		return errors.New("don't use read-all permission")
 	}
-	if failed {
-		return errWorkflowViolatePolicy
+	if job.Permissions.IsNil() && wfReadAll {
+		return errors.New("don't use read-all permission")
 	}
 	return nil
 }
