@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
+	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
 
 type ActionRefShouldBeSHA1Policy struct {
@@ -41,22 +42,21 @@ func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config
 }
 
 func (p *ActionRefShouldBeSHA1Policy) ApplyJob(_ *logrus.Entry, cfg *config.Config, _ *JobContext, job *workflow.Job) error {
-	action := p.checkUses(job.Uses)
-	if action == "" {
-		return nil
-	}
-	if p.excluded(action, cfg.Excludes) {
-		return nil
-	}
-	return errors.New("action ref should be full length SHA1")
+	return p.apply(cfg, job.Uses)
 }
 
 func (p *ActionRefShouldBeSHA1Policy) ApplyStep(_ *logrus.Entry, cfg *config.Config, _ *StepContext, step *workflow.Step) error {
-	action := p.checkUses(step.Uses)
+	return p.apply(cfg, step.Uses)
+}
+
+func (p *ActionRefShouldBeSHA1Policy) apply(cfg *config.Config, uses string) error {
+	action := p.checkUses(uses)
 	if action == "" || p.excluded(action, cfg.Excludes) {
 		return nil
 	}
-	return errors.New("action ref should be full length SHA1")
+	return logerr.WithFields(errors.New("action ref should be full length SHA1"), logrus.Fields{ //nolint:wrapcheck
+		"action": action,
+	})
 }
 
 func (p *ActionRefShouldBeSHA1Policy) checkUses(uses string) string {

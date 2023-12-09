@@ -31,7 +31,7 @@ func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath stri
 	}
 	failed := false
 	for _, filePath := range filePaths {
-		logE := logE.WithField("workflow_file_path", filePath)
+		logE := logE.WithField("action_file_path", filePath)
 		if c.validateAction(logE, cfg, stepPolicies, filePath) {
 			failed = true
 		}
