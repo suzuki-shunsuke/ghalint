@@ -1,7 +1,7 @@
 package policy
 
 import (
-	"context"
+	"errors"
 	"regexp"
 	"strings"
 
@@ -40,50 +40,23 @@ func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config
 	return false
 }
 
-func (p *ActionRefShouldBeSHA1Policy) Apply(_ context.Context, logE *logrus.Entry, cfg *config.Config, wf *workflow.Workflow) error {
-	failed := false
-	for jobName, job := range wf.Jobs {
-		logE := logE.WithField("job_name", jobName)
-		if err := p.applyJob(logE, cfg, job); err != nil {
-			failed = true
-		}
+func (p *ActionRefShouldBeSHA1Policy) ApplyJob(_ *logrus.Entry, cfg *config.Config, _ *JobContext, job *workflow.Job) error {
+	action := p.checkUses(job.Uses)
+	if action == "" {
+		return nil
 	}
-	if failed {
-		return errWorkflowViolatePolicy
+	if p.excluded(action, cfg.Excludes) {
+		return nil
 	}
-	return nil
+	return errors.New("action ref should be full length SHA1")
 }
 
-func (p *ActionRefShouldBeSHA1Policy) applyJob(logE *logrus.Entry, cfg *config.Config, job *workflow.Job) error {
-	if action := p.checkUses(job.Uses); action != "" {
-		if p.excluded(action, cfg.Excludes) {
-			return nil
-		}
-		logE.WithField("uses", job.Uses).Error("action ref should be full length SHA1")
-		return errJobViolatePolicy
+func (p *ActionRefShouldBeSHA1Policy) ApplyStep(_ *logrus.Entry, cfg *config.Config, _ *JobContext, step *workflow.Step) error {
+	action := p.checkUses(step.Uses)
+	if action == "" || p.excluded(action, cfg.Excludes) {
+		return nil
 	}
-	failed := false
-	for _, step := range job.Steps {
-		action := p.checkUses(step.Uses)
-		if action == "" || p.excluded(action, cfg.Excludes) {
-			continue
-		}
-		fields := logrus.Fields{
-			"uses": step.Uses,
-		}
-		if step.ID != "" {
-			fields["step_id"] = step.ID
-		}
-		if step.Name != "" {
-			fields["step_name"] = step.Name
-		}
-		logE.WithFields(fields).Error("action ref should be full length SHA1")
-		failed = true
-	}
-	if failed {
-		return errJobViolatePolicy
-	}
-	return nil
+	return errors.New("action ref should be full length SHA1")
 }
 
 func (p *ActionRefShouldBeSHA1Policy) checkUses(uses string) string {

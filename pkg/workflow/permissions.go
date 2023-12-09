@@ -13,6 +13,14 @@ type Permissions struct {
 	writeAll bool
 }
 
+func NewPermissions(readAll, writeAll bool, m map[string]string) *Permissions {
+	return &Permissions{
+		m:        m,
+		readAll:  readAll,
+		writeAll: writeAll,
+	}
+}
+
 func (ps *Permissions) Permissions() map[string]string {
 	if ps == nil {
 		return nil

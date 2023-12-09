@@ -1,7 +1,6 @@
 package policy_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/sirupsen/logrus"
@@ -10,12 +9,12 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
-func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
+func TestActionRefShouldBeSHA1Policy_ApplyJob(t *testing.T) {
 	t.Parallel()
 	data := []struct {
 		name  string
 		cfg   *config.Config
-		wf    *workflow.Workflow
+		job   *workflow.Job
 		isErr bool
 	}{
 		{
@@ -32,19 +31,66 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			wf: &workflow.Workflow{
-				Jobs: map[string]*workflow.Job{
-					"release": {
-						Steps: []*workflow.Step{
-							{
-								Uses: "slsa-framework/slsa-github-generator@v1.5.0",
-							},
-						},
-					},
-					"release2": {
-						Uses: "suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v0.4.4",
+			job: &workflow.Job{
+				Steps: []*workflow.Step{
+					{
+						Uses: "slsa-framework/slsa-github-generator@v1.5.0",
 					},
 				},
+			},
+		},
+		{
+			name:  "job error",
+			isErr: true,
+			cfg:   &config.Config{},
+			job: &workflow.Job{
+				Uses: "suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v0.4.4",
+			},
+		},
+	}
+	p := policy.NewActionRefShouldBeSHA1Policy()
+	logE := logrus.NewEntry(logrus.New())
+	for _, d := range data {
+		d := d
+		t.Run(d.name, func(t *testing.T) {
+			t.Parallel()
+			if err := p.ApplyJob(logE, d.cfg, nil, d.job); err != nil {
+				if d.isErr {
+					return
+				}
+				t.Fatal(err)
+			}
+			if d.isErr {
+				t.Fatal("error must be returned")
+			}
+		})
+	}
+}
+
+func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) {
+	t.Parallel()
+	data := []struct {
+		name  string
+		cfg   *config.Config
+		step  *workflow.Step
+		isErr bool
+	}{
+		{
+			name: "exclude",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "slsa-framework/slsa-github-generator",
+					},
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml",
+					},
+				},
+			},
+			step: &workflow.Step{
+				Uses: "slsa-framework/slsa-github-generator@v1.5.0",
 			},
 		},
 		{
@@ -58,41 +104,20 @@ func TestActionRefShouldBeSHA1Policy_Apply(t *testing.T) { //nolint:funlen
 					},
 				},
 			},
-			wf: &workflow.Workflow{
-				Jobs: map[string]*workflow.Job{
-					"release": {
-						Steps: []*workflow.Step{
-							{
-								Uses: "slsa-framework/slsa-github-generator@v1.5.0",
-								ID:   "generate",
-								Name: "Generate SLSA Provenance",
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name:  "job error",
-			isErr: true,
-			cfg:   &config.Config{},
-			wf: &workflow.Workflow{
-				Jobs: map[string]*workflow.Job{
-					"release": {
-						Uses: "suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v0.4.4",
-					},
-				},
+			step: &workflow.Step{
+				Uses: "slsa-framework/slsa-github-generator@v1.5.0",
+				ID:   "generate",
+				Name: "Generate SLSA Provenance",
 			},
 		},
 	}
 	p := policy.NewActionRefShouldBeSHA1Policy()
-	ctx := context.Background()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
 		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.Apply(ctx, logE, d.cfg, d.wf); err != nil {
+			if err := p.ApplyStep(logE, d.cfg, nil, d.step); err != nil {
 				if d.isErr {
 					return
 				}

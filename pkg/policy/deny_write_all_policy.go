@@ -1,7 +1,7 @@
 package policy
 
 import (
-	"context"
+	"errors"
 
 	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
@@ -18,22 +18,13 @@ func (p *DenyWriteAllPermissionPolicy) ID() string {
 	return "003"
 }
 
-func (p *DenyWriteAllPermissionPolicy) Apply(_ context.Context, logE *logrus.Entry, _ *config.Config, wf *workflow.Workflow) error {
-	failed := false
-	wfWriteAll := wf.Permissions.WriteAll()
-	for jobName, job := range wf.Jobs {
-		if job.Permissions.WriteAll() {
-			failed = true
-			logE.WithField("job_name", jobName).Error("don't use write-all permission")
-			continue
-		}
-		if job.Permissions.IsNil() && wfWriteAll {
-			failed = true
-			logE.WithField("job_name", jobName).Error("don't use write-all permission")
-		}
+func (p *DenyWriteAllPermissionPolicy) ApplyJob(_ *logrus.Entry, _ *config.Config, jobCtx *JobContext, job *workflow.Job) error {
+	wfWriteAll := jobCtx.Workflow.Workflow.Permissions.WriteAll()
+	if job.Permissions.WriteAll() {
+		return errors.New("don't use write-all permission")
 	}
-	if failed {
-		return errWorkflowViolatePolicy
+	if job.Permissions.IsNil() && wfWriteAll {
+		return errors.New("don't use write-all permission")
 	}
 	return nil
 }

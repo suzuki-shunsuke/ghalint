@@ -1,7 +1,7 @@
 package policy
 
 import (
-	"context"
+	"errors"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -19,31 +19,19 @@ func (p *DenyJobContainerLatestImagePolicy) ID() string {
 	return "007"
 }
 
-func (p *DenyJobContainerLatestImagePolicy) Apply(_ context.Context, logE *logrus.Entry, _ *config.Config, wf *workflow.Workflow) error {
-	failed := false
-	for jobName, job := range wf.Jobs {
-		logE := logE.WithField("job_name", jobName)
-		if job.Container == nil {
-			continue
-		}
-		if job.Container.Image == "" {
-			logE.Error("job container should have image")
-			failed = true
-			continue
-		}
-		_, tag, ok := strings.Cut(job.Container.Image, ":")
-		if !ok {
-			logE.Error("job container image should be <image name>:<tag>")
-			failed = true
-			continue
-		}
-		if tag == "latest" {
-			logE.Error("job container image tag should not be `latest`")
-			failed = true
-		}
+func (p *DenyJobContainerLatestImagePolicy) ApplyJob(_ *logrus.Entry, _ *config.Config, _ *JobContext, job *workflow.Job) error {
+	if job.Container == nil {
+		return nil
 	}
-	if failed {
-		return errWorkflowViolatePolicy
+	if job.Container.Image == "" {
+		return errors.New("job container should have image")
+	}
+	_, tag, ok := strings.Cut(job.Container.Image, ":")
+	if !ok {
+		return errors.New("job container image should be <image name>:<tag>")
+	}
+	if tag == "latest" {
+		return errors.New("job container image tag should not be `latest`")
 	}
 	return nil
 }
