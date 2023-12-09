@@ -17,10 +17,12 @@ type Job struct {
 }
 
 type Step struct {
-	Uses string
-	ID   string
-	Name string
-	With map[string]string
+	Uses  string
+	ID    string
+	Name  string
+	Run   string
+	Shell string
+	With  map[string]string
 }
 
 type Action struct {

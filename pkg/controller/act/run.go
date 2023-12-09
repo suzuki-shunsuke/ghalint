@@ -27,6 +27,7 @@ func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath stri
 	stepPolicies := []controller.StepPolicy{
 		&policy.GitHubAppShouldLimitRepositoriesPolicy{},
 		&policy.GitHubAppShouldLimitPermissionsPolicy{},
+		&policy.ActionShellIsRequiredPolicy{},
 		policy.NewActionRefShouldBeSHA1Policy(),
 	}
 	failed := false

@@ -50,3 +50,6 @@ runs:
       with:
         app-id: ${{vars.APP_ID}}
         private-key: ${{secrets.PRIVATE_KEY}}
+
+    - run: echo hello
+      # action_shell_is_required
