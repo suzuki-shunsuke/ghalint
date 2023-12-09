@@ -33,6 +33,7 @@ ghalint is a command line tool to check GitHub Actions Workflows anc action.yaml
 1. [action_ref_should_be_full_length_commit_sha](docs/policies/008.md): action's ref should be full length commit SHA
 1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
 1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
+1. [action_shell_is_required](docs/policies/011.md): `shell` is required if `run` is set
 
 ## How to install
 
