@@ -41,3 +41,7 @@ tasks:
     description: go install
     usage: go install
     script: go install ./cmd/ghalint
+  - name: usage
+    description: Update usage.md
+    usage: Update usage.md
+    script: bash scripts/generate-usage.sh

@@ -53,24 +53,41 @@ func Read(fs afero.Fs, cfg *Config, filePath string) error {
 
 func Validate(cfg *Config) error {
 	for _, exclude := range cfg.Excludes {
-		if exclude.PolicyName == "" {
-			return errors.New(`policy_name is required`)
+		if err := validate(exclude); err != nil {
+			return err
 		}
-		switch exclude.PolicyName {
-		case "action_ref_should_be_full_length_commit_sha":
-			if exclude.ActionName == "" {
-				return errors.New(`action_name is required to exclude action_ref_should_be_full_length_commit_sha`)
-			}
-		case "job_secrets":
-			if exclude.WorkflowFilePath == "" {
-				return errors.New(`workflow_file_path is required`)
-			}
-			if exclude.JobName == "" {
-				return errors.New(`job_name is required`)
-			}
-		default:
-			return errors.New(`only the policy "job_secrets" and "action_ref_should_be_full_length_commit_sha" can be excluded`)
+	}
+	return nil
+}
+
+func validate(exclude *Exclude) error { //nolint:cyclop
+	if exclude.PolicyName == "" {
+		return errors.New(`policy_name is required`)
+	}
+	switch exclude.PolicyName {
+	case "action_ref_should_be_full_length_commit_sha":
+		if exclude.ActionName == "" {
+			return errors.New(`action_name is required to exclude action_ref_should_be_full_length_commit_sha`)
 		}
+	case "job_secrets":
+		if exclude.WorkflowFilePath == "" {
+			return errors.New(`workflow_file_path is required to exclude job_secrets`)
+		}
+		if exclude.JobName == "" {
+			return errors.New(`job_name is required to exclude job_secrets`)
+		}
+	case "github_app_should_limit_repositories":
+		if exclude.WorkflowFilePath == "" && exclude.ActionFilePath == "" {
+			return errors.New(`workflow_file_path or action_file_path is required to exclude github_app_should_limit_repositories`)
+		}
+		if exclude.WorkflowFilePath != "" && exclude.JobName == "" {
+			return errors.New(`job_name is required to exclude github_app_should_limit_repositories`)
+		}
+		if exclude.StepID == "" {
+			return errors.New(`step_id is required to exclude github_app_should_limit_repositories`)
+		}
+	default:
+		return errors.New(`the policy can't be excluded`)
 	}
 	return nil
 }
