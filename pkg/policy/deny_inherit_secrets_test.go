@@ -1,9 +1,10 @@
-package policy
+package policy_test
 
 import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"gopkg.in/yaml.v3"
 )
@@ -26,7 +27,7 @@ func TestDenyInheritSecretsPolicy_ApplyJob(t *testing.T) {
       foo: ${{secrets.API_KEY}}`,
 		},
 	}
-	p := &DenyInheritSecretsPolicy{}
+	p := &policy.DenyInheritSecretsPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
 		d := d

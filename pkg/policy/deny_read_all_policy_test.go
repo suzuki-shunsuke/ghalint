@@ -1,27 +1,23 @@
-package policy //nolint:dupl
+package policy_test //nolint:dupl
 
 import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
-func TestDenyReadAllPermissionPolicy_ApplyJob(t *testing.T) { //nolint:funlen
+func TestDenyReadAllPermissionPolicy_ApplyJob(t *testing.T) {
 	t.Parallel()
 	data := []struct {
 		name   string
-		jobCtx *JobContext
+		jobCtx *policy.JobContext
 		job    *workflow.Job
 		isErr  bool
 	}{
 		{
 			name: "don't use read-all",
-			jobCtx: &JobContext{
-				Workflow: &WorkflowContext{
-					Workflow: &workflow.Workflow{},
-				},
-			},
 			job: &workflow.Job{
 				Permissions: workflow.NewPermissions(true, false, nil),
 			},
@@ -29,8 +25,8 @@ func TestDenyReadAllPermissionPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "job permissions is null and workflow permissions is read-all",
-			jobCtx: &JobContext{
-				Workflow: &WorkflowContext{
+			jobCtx: &policy.JobContext{
+				Workflow: &policy.WorkflowContext{
 					Workflow: &workflow.Workflow{
 						Permissions: workflow.NewPermissions(true, false, nil),
 					},
@@ -41,11 +37,6 @@ func TestDenyReadAllPermissionPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 		},
 		{
 			name: "pass",
-			jobCtx: &JobContext{
-				Workflow: &WorkflowContext{
-					Workflow: &workflow.Workflow{},
-				},
-			},
 			job: &workflow.Job{
 				Permissions: workflow.NewPermissions(false, false, map[string]string{
 					"contents": "read",
@@ -53,13 +44,20 @@ func TestDenyReadAllPermissionPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 			},
 		},
 	}
-	policy := &DenyReadAllPermissionPolicy{}
+	p := &policy.DenyReadAllPermissionPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
 		d := d
+		if d.jobCtx == nil {
+			d.jobCtx = &policy.JobContext{
+				Workflow: &policy.WorkflowContext{
+					Workflow: &workflow.Workflow{},
+				},
+			}
+		}
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := policy.ApplyJob(logE, nil, d.jobCtx, d.job); err != nil {
+			if err := p.ApplyJob(logE, nil, d.jobCtx, d.job); err != nil {
 				if !d.isErr {
 					t.Fatal(err)
 				}
