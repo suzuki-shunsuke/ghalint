@@ -8,6 +8,13 @@ type WorkflowContext struct {
 }
 
 type JobContext struct {
-	Workflow *WorkflowContext
 	Name     string
+	Workflow *WorkflowContext
+	Job      *workflow.Job
+}
+
+type StepContext struct {
+	FilePath string
+	Action   *workflow.Action
+	Job      *JobContext
 }

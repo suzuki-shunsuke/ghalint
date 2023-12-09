@@ -33,5 +33,5 @@ type JobPolicy interface {
 type StepPolicy interface {
 	Name() string
 	ID() string
-	ApplyStep(logE *logrus.Entry, cfg *config.Config, jobCtx *policy.JobContext, step *workflow.Step) error
+	ApplyStep(logE *logrus.Entry, cfg *config.Config, stepCtx *policy.StepContext, step *workflow.Step) error
 }

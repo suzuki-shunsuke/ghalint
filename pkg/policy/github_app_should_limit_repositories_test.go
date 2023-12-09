@@ -12,11 +12,11 @@ import (
 func TestGitHubAppShouldLimitRepositoriesPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
-		name   string
-		cfg    *config.Config
-		jobCtx *policy.JobContext
-		step   *workflow.Step
-		isErr  bool
+		name    string
+		cfg     *config.Config
+		stepCtx *policy.StepContext
+		step    *workflow.Step
+		isErr   bool
 	}{
 		{
 			name:  "tibdex/github-app-token fail",
@@ -96,11 +96,14 @@ func TestGitHubAppShouldLimitRepositoriesPolicy_ApplyStep(t *testing.T) { //noli
 					},
 				},
 			},
-			jobCtx: &policy.JobContext{
-				Workflow: &policy.WorkflowContext{
-					FilePath: ".github/workflows/test.yaml",
+			stepCtx: &policy.StepContext{
+				FilePath: ".github/workflows/test.yaml",
+				Job: &policy.JobContext{
+					Name: "test",
+					Workflow: &policy.WorkflowContext{
+						FilePath: ".github/workflows/test.yaml",
+					},
 				},
-				Name: "test",
 			},
 			step: &workflow.Step{
 				Uses: "tibdex/github-app-token@v2",
@@ -116,17 +119,20 @@ func TestGitHubAppShouldLimitRepositoriesPolicy_ApplyStep(t *testing.T) { //noli
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
 		d := d
-		if d.jobCtx == nil {
-			d.jobCtx = &policy.JobContext{
-				Workflow: &policy.WorkflowContext{
-					FilePath: ".github/workflows/test.yaml",
+		if d.stepCtx == nil {
+			d.stepCtx = &policy.StepContext{
+				FilePath: ".github/workflows/test.yaml",
+				Job: &policy.JobContext{
+					Name: "test",
+					Workflow: &policy.WorkflowContext{
+						FilePath: ".github/workflows/test.yaml",
+					},
 				},
-				Name: "test",
 			}
 		}
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyStep(logE, d.cfg, d.jobCtx, d.step); err != nil {
+			if err := p.ApplyStep(logE, d.cfg, d.stepCtx, d.step); err != nil {
 				if d.isErr {
 					return
 				}

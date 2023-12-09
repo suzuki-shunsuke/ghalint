@@ -1,5 +1,7 @@
 # ghalint
 
+[Install](#how-to-install) | [Policies](#policies) | [How to use](#how-to-use) | [Configuration](#configuration)
+
 GitHub Actions linter for security best practices.
 
 ```console
@@ -9,20 +11,28 @@ ERRO[0000] github.token should not be set to workflow's env  env_name=GITHUB_TOK
 ERRO[0000] secret should not be set to workflow's env    env_name=DATADOG_API_KEY policy_name=workflow_secrets program=ghalint version= workflow_file_path=.github/workflows/test.yaml
 ```
 
-ghalint is a command line tool to check GitHub Actions Workflows for security policy compliance.
+ghalint is a command line tool to check GitHub Actions Workflows anc action.yaml for security policy compliance.
 
 ## Policies
 
-- [job_permissions](docs/policies/001.md): All jobs should have `permissions`
-- [deny_read_all_permission](docs/policies/002.md): `read-all` permission should not be used
-- [deny_write_all_permission](docs/policies/003.md): `write-all` permission should not be used
-- [deny_inherit_secrets](docs/policies/004.md): `secrets: inherit` should not be used
-- [workflow_secrets](docs/policies/005.md): Workflow should not set secrets to environment variables
-- [job_secrets](docs/policies/006.md): Job should not set secrets to environment variables
-- [deny_job_container_latest_image](docs/policies/007.md): Job's container image tag should not be `latest`
-- [action_ref_should_be_full_length_commit_sha](docs/policies/008.md): action's ref should be full length commit SHA
-- [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
-- [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
+### 1. Workflow Policies
+
+1. [job_permissions](docs/policies/001.md): All jobs should have `permissions`
+1. [deny_read_all_permission](docs/policies/002.md): `read-all` permission should not be used
+1. [deny_write_all_permission](docs/policies/003.md): `write-all` permission should not be used
+1. [deny_inherit_secrets](docs/policies/004.md): `secrets: inherit` should not be used
+1. [workflow_secrets](docs/policies/005.md): Workflow should not set secrets to environment variables
+1. [job_secrets](docs/policies/006.md): Job should not set secrets to environment variables
+1. [deny_job_container_latest_image](docs/policies/007.md): Job's container image tag should not be `latest`
+1. [action_ref_should_be_full_length_commit_sha](docs/policies/008.md): action's ref should be full length commit SHA
+1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
+1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
+
+### 2. Action Policies
+
+1. [action_ref_should_be_full_length_commit_sha](docs/policies/008.md): action's ref should be full length commit SHA
+1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
+1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
 
 ## How to install
 
@@ -49,43 +59,35 @@ aqua g -i suzuki-shunsuke/ghalint
 
 ## How to use
 
+### 1. Validate workflows
+
 Run the command `ghalint run` on the repository root directory.
-Then ghalint validates workflow files `^\.github/workflows/.*\.ya?ml$`.
 
-```console
-$ ghalint help
-NAME:
-   ghalint - GitHub Actions linter
-
-USAGE:
-   ghalint [global options] command [command options] [arguments...]
-
-VERSION:
-    ()
-
-COMMANDS:
-   run      lint GitHub Actions Workflows
-   version  Show version
-   help, h  Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --log-color value         log color. auto(default)|always|never [$GHALINT_LOG_COLOR]
-   --log-level value         log level [$GHALINT_LOG_LEVEL]
-   --config value, -c value  configuration file path [$GHALINT_CONFIG]
-   --help, -h                show help
-   --version, -v             print the version
+```sh
+ghalint run
 ```
 
-```console
-$ ghalint help run
-NAME:
-   ghalint run - lint GitHub Actions Workflows
+Then ghalint validates workflow files `^\.github/workflows/.*\.ya?ml$`.
 
-USAGE:
-   ghalint run [command options] [arguments...]
+### 2. Validate action.yaml
 
-OPTIONS:
-   --help, -h  show help
+Run the command `ghalint run-action`.
+
+```sh
+ghalint run-action
+```
+
+The alias `act` is available.
+
+```sh
+ghalint act
+```
+
+Then ghalint validates action files `^action\.ya?ml$` on the current directory.
+You can also specify file paths.
+
+```sh
+ghalint act foo/action.yaml bar/action.yml
 ```
 
 ## Configuration file

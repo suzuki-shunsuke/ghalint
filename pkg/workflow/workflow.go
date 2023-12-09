@@ -22,3 +22,12 @@ type Step struct {
 	Name string
 	With map[string]string
 }
+
+type Action struct {
+	Runs *Runs
+}
+
+type Runs struct {
+	Image string
+	Steps []*Step
+}
