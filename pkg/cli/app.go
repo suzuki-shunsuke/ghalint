@@ -69,7 +69,7 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
 				"act",
 			},
 			Usage:  "lint actions",
-			Action: runner.Run,
+			Action: runner.RunAction,
 			Flags:  []cli.Flag{},
 		},
 		{
