@@ -34,7 +34,7 @@ jobs:
     # Update aqua-checksums.json and push a commit
     needs: path-filter
     if: needs.path-filter.outputs.update-aqua-checksums == 'true'
-    uses: aquaproj/update-checksum-workflow/.github/workflows/update-checksum.yaml@3598c506108a2e0e9e31a0c6ef9c202c77049420 # v0.1.9
+    uses: aquaproj/update-checksum-workflow/.github/workflows/update-checksum.yaml@f367004e7f17e99d30297cd9e89afad30ee1f251 # v1.0.0
     permissions:
       contents: read
     with:
