@@ -51,7 +51,6 @@ func TestActionRefShouldBeSHA1Policy_ApplyJob(t *testing.T) {
 	p := policy.NewActionRefShouldBeSHA1Policy()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := p.ApplyJob(logE, d.cfg, nil, d.job); err != nil {
@@ -114,7 +113,6 @@ func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) {
 	p := policy.NewActionRefShouldBeSHA1Policy()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := p.ApplyStep(logE, d.cfg, nil, d.step); err != nil {

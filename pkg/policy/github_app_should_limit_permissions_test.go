@@ -69,7 +69,6 @@ func TestGitHubAppShouldLimitPermissionsPolicy_ApplyStep(t *testing.T) { //nolin
 	p := &policy.GitHubAppShouldLimitPermissionsPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		if d.stepCtx == nil {
 			d.stepCtx = &policy.StepContext{
 				FilePath: ".github/workflows/test.yaml",
