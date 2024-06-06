@@ -43,7 +43,7 @@ func (p *JobSecretsPolicy) ApplyJob(_ *logrus.Entry, cfg *config.Config, jobCtx 
 	if checkExcludes(p.Name(), jobCtx, cfg) {
 		return nil
 	}
-	if len(job.Steps) < 2 { //nolint:gomnd
+	if len(job.Steps) < 2 { //nolint:mnd
 		return nil
 	}
 	for envName, envValue := range job.Env {

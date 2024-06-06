@@ -11,10 +11,10 @@ linters:
     - structcheck # WARN [runner] The linter 'structcheck' is deprecated (since v1.49.0) due to: The owner seems to have abandoned the linter.  Replaced by unused. 
     - nosnakecase # WARN [runner] The linter 'nosnakecase' is deprecated (since v1.48.1) due to: The repository of the linter has been deprecated by the owner.  Replaced by revive(var-naming). 
     - deadcode # WARN [runner] The linter 'deadcode' is deprecated (since v1.49.0) due to: The owner seems to have abandoned the linter.  Replaced by unused. 
-
+    - gomnd # WARN The linter 'gomnd' is deprecated (since v1.58.0) due to: The linter has been renamed. Replaced by mnd
     - tagliatelle
     - wsl
-    - goerr113
+    - err113
     - nlreturn
     - lll
     - godot
