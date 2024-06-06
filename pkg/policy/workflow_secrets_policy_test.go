@@ -78,7 +78,6 @@ func TestWorkflowSecretsPolicy_ApplyWorkflow(t *testing.T) { //nolint:funlen
 	p := policy.NewWorkflowSecretsPolicy()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := p.ApplyWorkflow(logE, d.cfg, nil, d.wf); err != nil {

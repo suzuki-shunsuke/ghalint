@@ -47,7 +47,6 @@ func TestDenyWriteAllPermissionPolicy_ApplyJob(t *testing.T) {
 	p := &policy.DenyWriteAllPermissionPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		if d.jobCtx == nil {
 			d.jobCtx = &policy.JobContext{
 				Workflow: &policy.WorkflowContext{
