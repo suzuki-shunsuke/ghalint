@@ -33,7 +33,6 @@ func TestActionShellIsRequiredPolicy_ApplyStep(t *testing.T) {
 	p := &policy.ActionShellIsRequiredPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := p.ApplyStep(logE, nil, nil, d.step); err != nil {

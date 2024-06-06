@@ -101,12 +101,22 @@ You can specify the configuration file with the command line option `-config (-c
 ghalint -c foo.yaml run
 ```
 
-You can exclude the policy `job_secrets` and `action_ref_should_be_full_length_commit_sha`.
+### Disable policies
+
+You can disable the following policies.
+
+- [deny_inherit_secrets](docs/policies/004.md)
+- [job_secrets](docs/policies/006.md)
+- [action_ref_should_be_full_length_commit_sha](docs/policies/008.md)
+- [github_app_should_limit_repositories](docs/policies/009.md)
 
 e.g.
 
 ```yaml
 excludes:
+  - policy_name: deny_inherit_secrets
+    workflow_file_path: .github/workflows/actionlint.yaml
+    job_name: actionlint
   - policy_name: job_secrets
     workflow_file_path: .github/workflows/actionlint.yaml
     job_name: actionlint
@@ -117,14 +127,6 @@ excludes:
     job_name: test
     step_id: create_token
 ```
-
-### excludes[].policy_name
-
-Required. You can exclude only the following policies.
-
-- [job_secrets](docs/policies/006.md)
-- [action_ref_should_be_full_length_commit_sha](docs/policies/008.md)
-- [github_app_should_limit_repositories](docs/policies/009.md)
 
 ## Environment variables
 

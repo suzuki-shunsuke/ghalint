@@ -66,7 +66,6 @@ func TestJobPermissionsPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 	p := &policy.JobPermissionsPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := p.ApplyJob(logE, nil, d.jobCtx, d.job); err != nil {

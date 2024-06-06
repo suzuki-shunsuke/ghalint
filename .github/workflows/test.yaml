@@ -34,11 +34,11 @@ jobs:
     # Update aqua-checksums.json and push a commit
     needs: path-filter
     if: needs.path-filter.outputs.update-aqua-checksums == 'true'
-    uses: aquaproj/update-checksum-workflow/.github/workflows/update-checksum.yaml@f367004e7f17e99d30297cd9e89afad30ee1f251 # v1.0.0
+    uses: aquaproj/update-checksum-workflow/.github/workflows/update-checksum.yaml@75c72cdc372a43dd1b1ad0458748f5d6bfeac7b9 # v1.0.1
     permissions:
       contents: read
     with:
-      aqua_version: v2.27.3
+      aqua_version: v2.29.0
       prune: true
     secrets:
       gh_app_id: ${{secrets.APP_ID}}
@@ -80,10 +80,10 @@ jobs:
       - run: exit 1
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@fd6e66427230606a7d71e686d01e3eed92ae5012 # v1.0.0
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@3191fc67e2aa6426e4bccd25be69b9d80b47a007 # v1.0.1
     with:
-      aqua_version: v2.27.3
-      go-version: 1.22.2
+      aqua_version: v2.29.0
+      go-version: 1.22.4
     permissions:
       pull-requests: write
       contents: read
@@ -92,5 +92,5 @@ jobs:
     runs-on: ubuntu-latest
     permissions: {}
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       - run: go run ./cmd/ghalint run

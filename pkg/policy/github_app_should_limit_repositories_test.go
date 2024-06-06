@@ -118,7 +118,6 @@ func TestGitHubAppShouldLimitRepositoriesPolicy_ApplyStep(t *testing.T) { //noli
 	p := &policy.GitHubAppShouldLimitRepositoriesPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		if d.stepCtx == nil {
 			d.stepCtx = &policy.StepContext{
 				FilePath: ".github/workflows/test.yaml",
