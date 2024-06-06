@@ -76,6 +76,13 @@ func validate(exclude *Exclude) error { //nolint:cyclop
 		if exclude.JobName == "" {
 			return errors.New(`job_name is required to exclude job_secrets`)
 		}
+	case "deny_inherit_secrets":
+		if exclude.WorkflowFilePath == "" {
+			return errors.New(`workflow_file_path is required to exclude deny_inherit_secrets`)
+		}
+		if exclude.JobName == "" {
+			return errors.New(`job_name is required to exclude deny_inherit_secrets`)
+		}
 	case "github_app_should_limit_repositories":
 		if exclude.WorkflowFilePath == "" && exclude.ActionFilePath == "" {
 			return errors.New(`workflow_file_path or action_file_path is required to exclude github_app_should_limit_repositories`)
