@@ -52,7 +52,6 @@ func TestDenyJobContainerLatestImagePolicy_ApplyJob(t *testing.T) {
 	p := &policy.DenyJobContainerLatestImagePolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := p.ApplyJob(logE, nil, nil, d.job); err != nil {

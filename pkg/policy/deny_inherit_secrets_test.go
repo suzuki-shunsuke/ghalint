@@ -87,7 +87,6 @@ func TestDenyInheritSecretsPolicy_ApplyJob(t *testing.T) {
 	p := &policy.DenyInheritSecretsPolicy{}
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			job := &workflow.Job{}

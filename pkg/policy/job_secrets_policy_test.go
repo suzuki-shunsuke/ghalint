@@ -106,7 +106,6 @@ func TestJobSecretsPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 	p := policy.NewJobSecretsPolicy()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
-		d := d
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if err := p.ApplyJob(logE, d.cfg, d.jobCtx, d.job); err != nil {
