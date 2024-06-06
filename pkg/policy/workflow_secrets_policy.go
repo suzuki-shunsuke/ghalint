@@ -29,7 +29,7 @@ func (p *WorkflowSecretsPolicy) ID() string {
 }
 
 func (p *WorkflowSecretsPolicy) ApplyWorkflow(logE *logrus.Entry, _ *config.Config, _ *WorkflowContext, wf *workflow.Workflow) error {
-	if len(wf.Jobs) < 2 { //nolint:gomnd
+	if len(wf.Jobs) < 2 { //nolint:mnd
 		return nil
 	}
 	failed := false
