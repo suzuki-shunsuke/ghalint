@@ -94,7 +94,9 @@ func validate(exclude *Exclude) error { //nolint:cyclop
 			return errors.New(`step_id is required to exclude github_app_should_limit_repositories`)
 		}
 	default:
-		return errors.New(`the policy can't be excluded`)
+		return logerr.WithFields(errors.New(`the policy can't be excluded`), logrus.Fields{
+			"policy_name": exclude.PolicyName,
+		})
 	}
 	return nil
 }
