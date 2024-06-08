@@ -72,7 +72,7 @@ func (p *GitHubAppShouldLimitRepositoriesPolicy) excluded(cfg *config.Config, st
 		if exclude.PolicyName != p.Name() {
 			continue
 		}
-		if exclude.WorkflowFilePath != stepCtx.FilePath {
+		if exclude.FilePath() != stepCtx.FilePath {
 			continue
 		}
 		if stepCtx.Job != nil && exclude.JobName != stepCtx.Job.Name {

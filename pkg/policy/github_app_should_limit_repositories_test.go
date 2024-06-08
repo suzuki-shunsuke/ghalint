@@ -114,6 +114,29 @@ func TestGitHubAppShouldLimitRepositoriesPolicy_ApplyStep(t *testing.T) { //noli
 				},
 			},
 		},
+		{
+			name: "exclude action",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName:     "github_app_should_limit_repositories",
+						ActionFilePath: "foo/action.yaml",
+						StepID:         "token",
+					},
+				},
+			},
+			stepCtx: &policy.StepContext{
+				FilePath: "foo/action.yaml",
+			},
+			step: &workflow.Step{
+				Uses: "tibdex/github-app-token@v2",
+				ID:   "token",
+				With: map[string]string{
+					"app_id":      "xxx",
+					"private_key": "xxx",
+				},
+			},
+		},
 	}
 	p := &policy.GitHubAppShouldLimitRepositoriesPolicy{}
 	logE := logrus.NewEntry(logrus.New())

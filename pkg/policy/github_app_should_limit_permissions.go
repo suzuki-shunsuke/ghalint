@@ -66,7 +66,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) excluded(excludes []*config.Excl
 		if exclude.PolicyName != p.Name() {
 			continue
 		}
-		if exclude.WorkflowFilePath != filePath {
+		if exclude.FilePath() != filePath {
 			continue
 		}
 		if jobName != "" {
