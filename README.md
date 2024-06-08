@@ -13,6 +13,14 @@ ERRO[0000] secret should not be set to workflow's env    env_name=DATADOG_API_KE
 
 ghalint is a command line tool to check GitHub Actions Workflows anc action.yaml for security policy compliance.
 
+## :bulb: We've ported ghalint to lintnet module
+
+- https://lintnet.github.io/
+- https://github.com/lintnet-modules/ghalint
+
+lintnet is a general purpose linter powered by Jsonnet.
+We've ported ghalint to [the lintnet module](https://github.com/lintnet-modules/ghalint), so you can migrate ghalint to lintnet!
+
 ## Policies
 
 ### 1. Workflow Policies
