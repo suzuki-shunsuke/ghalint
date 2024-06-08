@@ -24,6 +24,13 @@ type Exclude struct {
 	StepID           string `yaml:"step_id"`
 }
 
+func (e *Exclude) FilePath() string {
+	if e.WorkflowFilePath != "" {
+		return e.WorkflowFilePath
+	}
+	return e.ActionFilePath
+}
+
 func Find(fs afero.Fs) string {
 	for _, filePath := range []string{"ghalint.yaml", ".ghalint.yaml", "ghalint.yml", ".ghalint.yml"} {
 		if _, err := fs.Stat(filePath); err == nil {
