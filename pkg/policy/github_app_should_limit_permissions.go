@@ -19,7 +19,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) ID() string {
 	return "010"
 }
 
-func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(logE *logrus.Entry, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) (ge error) {
+func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(_ *logrus.Entry, _ *config.Config, _ *StepContext, step *workflow.Step) (ge error) {
 	action := p.checkUses(step.Uses)
 	if action == "" {
 		return nil
@@ -31,15 +31,6 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(logE *logrus.Entry, cf
 			})
 		}
 	}()
-
-	var name string
-	if stepCtx.Job != nil {
-		name = stepCtx.Job.Name
-	}
-	if p.excluded(cfg.Excludes, stepCtx.FilePath, name, step.ID) {
-		logE.Debug("this step is ignored")
-		return nil
-	}
 
 	if action == "tibdex/github-app-token" {
 		if step.With == nil {
@@ -59,25 +50,4 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) checkUses(uses string) string {
 	}
 	action, _, _ := strings.Cut(uses, "@")
 	return action
-}
-
-func (p *GitHubAppShouldLimitPermissionsPolicy) excluded(excludes []*config.Exclude, filePath, jobName, stepID string) bool {
-	for _, exclude := range excludes {
-		if exclude.PolicyName != p.Name() {
-			continue
-		}
-		if exclude.FilePath() != filePath {
-			continue
-		}
-		if jobName != "" {
-			if exclude.JobName != jobName {
-				continue
-			}
-		}
-		if exclude.StepID != stepID {
-			continue
-		}
-		return true
-	}
-	return false
 }

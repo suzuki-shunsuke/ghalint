@@ -44,27 +44,6 @@ func TestGitHubAppShouldLimitPermissionsPolicy_ApplyStep(t *testing.T) { //nolin
 				},
 			},
 		},
-		{
-			name: "exclude",
-			cfg: &config.Config{
-				Excludes: []*config.Exclude{
-					{
-						PolicyName:       "github_app_should_limit_permissions",
-						WorkflowFilePath: ".github/workflows/test.yaml",
-						JobName:          "test",
-						StepID:           "token",
-					},
-				},
-			},
-			step: &workflow.Step{
-				Uses: "tibdex/github-app-token@v2",
-				ID:   "token",
-				With: map[string]string{
-					"app_id":      "xxx",
-					"private_key": "xxx",
-				},
-			},
-		},
 	}
 	p := &policy.GitHubAppShouldLimitPermissionsPolicy{}
 	logE := logrus.NewEntry(logrus.New())
