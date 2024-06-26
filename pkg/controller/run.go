@@ -27,6 +27,7 @@ func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath stri
 	}
 	jobPolicies := []JobPolicy{
 		&policy.JobPermissionsPolicy{},
+		&policy.JobTimeoutMinutesIsRequiredPolicy{},
 		policy.NewJobSecretsPolicy(),
 		&policy.DenyInheritSecretsPolicy{},
 		&policy.DenyJobContainerLatestImagePolicy{},

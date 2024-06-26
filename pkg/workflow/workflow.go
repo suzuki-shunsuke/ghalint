@@ -8,21 +8,23 @@ type Workflow struct {
 }
 
 type Job struct {
-	Permissions *Permissions
-	Env         map[string]string
-	Steps       []*Step
-	Secrets     *JobSecrets
-	Container   *Container
-	Uses        string
+	Permissions    *Permissions
+	Env            map[string]string
+	Steps          []*Step
+	Secrets        *JobSecrets
+	Container      *Container
+	Uses           string
+	TimeoutMinutes int `yaml:"timeout-minutes"`
 }
 
 type Step struct {
-	Uses  string
-	ID    string
-	Name  string
-	Run   string
-	Shell string
-	With  map[string]string
+	Uses           string
+	ID             string
+	Name           string
+	Run            string
+	Shell          string
+	With           map[string]string
+	TimeoutMinutes int `yaml:"timeout-minutes"`
 }
 
 type Action struct {
