@@ -17,6 +17,7 @@ jobs:
       renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
     runs-on: ubuntu-latest
     permissions: {}
+    timeout-minutes: 10
     steps:
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: changes
@@ -69,6 +70,7 @@ jobs:
     # This job is used for main branch's branch protection rule's status check.
     # If all dependent jobs succeed or are skipped this job succeeds.
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs:
       - update-aqua-checksums
       - test
@@ -91,6 +93,7 @@ jobs:
   ghalint:
     runs-on: ubuntu-latest
     permissions: {}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - run: go run ./cmd/ghalint run
