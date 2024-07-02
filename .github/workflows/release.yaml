@@ -9,7 +9,7 @@ jobs:
     with:
       homebrew: true
       aqua_version: v2.29.0
-      go-version: 1.22.4
+      go-version: 1.22.5
       app_token_repositories: >-
         [
           "${{github.event.repository.name}}",
