@@ -39,7 +39,7 @@ jobs:
     permissions:
       contents: read
     with:
-      aqua_version: v2.29.0
+      aqua_version: v2.29.1
       prune: true
     secrets:
       gh_app_id: ${{secrets.APP_ID}}
@@ -84,7 +84,7 @@ jobs:
   test:
     uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@3191fc67e2aa6426e4bccd25be69b9d80b47a007 # v1.0.1
     with:
-      aqua_version: v2.29.0
+      aqua_version: v2.29.1
       go-version: 1.22.5
     permissions:
       pull-requests: write
