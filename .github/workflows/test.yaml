@@ -82,7 +82,7 @@ jobs:
       - run: exit 1
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@main
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@fix-error-command
     with:
       aqua_version: v2.30.0
     permissions:
