@@ -1,6 +1,11 @@
 version: 2
 project_name: ghalint
 
+archives:
+  - format_overrides:
+      - goos: windows
+        format: zip
+
 env:
   - GO111MODULE=on
 
