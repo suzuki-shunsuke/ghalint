@@ -1,6 +1,6 @@
 module github.com/suzuki-shunsuke/ghalint
 
-go 1.22.5
+go 1.23.2
 
 require (
 	github.com/mattn/go-colorable v0.1.13
