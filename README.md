@@ -67,6 +67,108 @@ aqua g -i suzuki-shunsuke/ghalint
 
 4. [Download a pre-built binary from GitHub Releases](https://github.com/suzuki-shunsuke/ghalint/releases) and locate an executable binary `ghalint` in `PATH`
 
+<details>
+<summary>Verify downloaded assets from GitHub Releases</summary>
+
+You can verify downloaded assets using some tools.
+
+1. [GitHub CLI](https://cli.github.com/)
+1. [slsa-verifier](https://github.com/slsa-framework/slsa-verifier)
+1. [Cosign](https://github.com/sigstore/cosign)
+
+### 1. GitHub CLI
+
+ghalint >= v1.0.0
+
+You can install GitHub CLI by aqua.
+
+```sh
+aqua g -i cli/cli
+```
+
+```sh
+gh release download -R suzuki-shunsuke/ghalint v1.0.0 -p ghalint_1.0.0_darwin_arm64.tar.gz
+gh attestation verify ghalint_1.0.0_darwin_arm64.tar.gz \
+  -R suzuki-shunsuke/ghalint \
+  --signer-workflow suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml
+```
+
+Output:
+
+```
+Loaded digest sha256:3e3fda71ffae83cf713295df2bef09fc268811deab11dea58d8caa287642c9dc for file://ghalint_1.0.0_darwin_arm64.tar.gz
+Loaded 1 attestation from GitHub API
+✓ Verification succeeded!
+
+sha256:3e3fda71ffae83cf713295df2bef09fc268811deab11dea58d8caa287642c9dc was attested by:
+REPO                                 PREDICATE_TYPE                  WORKFLOW
+suzuki-shunsuke/go-release-workflow  https://slsa.dev/provenance/v1  .github/workflows/release.yaml@7f97a226912ee2978126019b1e95311d7d15c97a
+```
+
+### 2. slsa-verifier
+
+You can install slsa-verifier by aqua.
+
+```sh
+aqua g -i slsa-framework/slsa-verifier
+```
+
+```sh
+gh release download -R suzuki-shunsuke/ghalint v1.0.0
+slsa-verifier verify-artifact ghalint_1.0.0_darwin_arm64.tar.gz \
+  --provenance-path multiple.intoto.jsonl \
+  --source-uri github.com/suzuki-shunsuke/ghalint \
+  --source-tag v1.0.0
+```
+
+Output:
+
+```
+Verified signature against tlog entry index 137012838 at URL: https://rekor.sigstore.dev/api/v1/log/entries/108e9186e8c5677a89619c7db02cfb94d2609666f60a8a48d41ee49b2e6553195f36fce510626ca7
+Verified build using builder "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@refs/tags/v2.0.0" at commit 292bc11372c8b0dc8dc23476bde9bab19c8d663b
+Verifying artifact ghalint_1.0.0_darwin_arm64.tar.gz: PASSED
+
+PASSED: SLSA verification passed
+```
+
+### 3. Cosign
+
+You can install Cosign by aqua.
+
+```sh
+aqua g -i sigstore/cosign
+```
+
+```sh
+gh release download -R suzuki-shunsuke/ghalint v1.0.0
+cosign verify-blob \
+  --signature ghalint_1.0.0_checksums.txt.sig \
+  --certificate ghalint_1.0.0_checksums.txt.pem \
+  --certificate-identity-regexp 'https://github\.com/suzuki-shunsuke/go-release-workflow/\.github/workflows/release\.yaml@.*' \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghalint_1.0.0_checksums.txt
+```
+
+Output:
+
+```
+Verified OK
+```
+
+After verifying the checksum, verify the artifact.
+
+```sh
+cat ghalint_1.0.0_checksums.txt | sha256sum -c --ignore-missing
+```
+
+</details>
+
+5. go install
+
+```sh
+go install github.com/suzuki-shunsuke/ghalint/cmd/ghalint@latest
+```
+
 ## How to use
 
 ### 1. Validate workflows
