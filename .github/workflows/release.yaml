@@ -8,7 +8,7 @@ jobs:
     uses: suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@7f97a226912ee2978126019b1e95311d7d15c97a # v2.0.0
     with:
       homebrew: true
-      aqua_version: v2.38.2
+      aqua_version: v2.38.3
       go-version-file: go.mod
       app_token_repositories: >-
         [
