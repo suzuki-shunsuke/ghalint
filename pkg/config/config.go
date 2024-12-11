@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
@@ -75,6 +76,11 @@ func validate(exclude *Exclude) error { //nolint:cyclop
 	case "action_ref_should_be_full_length_commit_sha":
 		if exclude.ActionName == "" {
 			return errors.New(`action_name is required to exclude action_ref_should_be_full_length_commit_sha`)
+		}
+		if _, err := path.Match(exclude.ActionName, ""); err != nil {
+			return fmt.Errorf("action_name must be a glob pattern: %w", logerr.WithFields(err, logrus.Fields{
+				"pattern_reference": "https://pkg.go.dev/path#Match",
+			}))
 		}
 	case "job_secrets":
 		if exclude.WorkflowFilePath == "" {

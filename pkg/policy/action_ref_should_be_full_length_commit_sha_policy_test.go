@@ -93,6 +93,20 @@ func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) {
 			},
 		},
 		{
+			name: "exclude with glob pattern",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "slsa-framework/*",
+					},
+				},
+			},
+			step: &workflow.Step{
+				Uses: "slsa-framework/slsa-github-generator@v1.5.0",
+			},
+		},
+		{
 			name:  "step error",
 			isErr: true,
 			cfg: &config.Config{
