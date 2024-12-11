@@ -66,7 +66,7 @@ func TestActionRefShouldBeSHA1Policy_ApplyJob(t *testing.T) {
 	}
 }
 
-func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) {
+func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
