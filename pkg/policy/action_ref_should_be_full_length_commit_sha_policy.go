@@ -2,6 +2,7 @@ package policy
 
 import (
 	"errors"
+	"path"
 	"regexp"
 	"strings"
 
@@ -34,7 +35,7 @@ func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config
 		if exclude.PolicyName != p.Name() {
 			continue
 		}
-		if action == exclude.ActionName {
+		if f, _ := path.Match(exclude.ActionName, action); f {
 			return true
 		}
 	}

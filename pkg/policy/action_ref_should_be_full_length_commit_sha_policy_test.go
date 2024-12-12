@@ -66,7 +66,7 @@ func TestActionRefShouldBeSHA1Policy_ApplyJob(t *testing.T) {
 	}
 }
 
-func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) {
+func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
@@ -85,6 +85,20 @@ func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) {
 					{
 						PolicyName: "action_ref_should_be_full_length_commit_sha",
 						ActionName: "suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml",
+					},
+				},
+			},
+			step: &workflow.Step{
+				Uses: "slsa-framework/slsa-github-generator@v1.5.0",
+			},
+		},
+		{
+			name: "exclude with glob pattern",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "slsa-framework/*",
 					},
 				},
 			},
