@@ -8,6 +8,9 @@ inputs:
 runs:
   using: composite
   steps:
+    # checkout_persist_credentials_should_be_false
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
     # action_ref_should_be_full_length_commit_sha
     - uses: tibdex/github-app-token@v2.1.0
       id: token1

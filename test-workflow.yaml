@@ -22,6 +22,8 @@ jobs:
       GITHUB_TOKEN: ${{github.token}}
       API_KEY: ${{secrets.API_KEY}}
     steps:
+      # checkout_persist_credentials_should_be_false
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - run: echo hello
       - run: echo hello
 
