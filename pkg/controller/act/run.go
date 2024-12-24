@@ -29,6 +29,7 @@ func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath stri
 		&policy.GitHubAppShouldLimitPermissionsPolicy{},
 		&policy.ActionShellIsRequiredPolicy{},
 		policy.NewActionRefShouldBeSHA1Policy(),
+		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
 	failed := false
 	for _, filePath := range filePaths {

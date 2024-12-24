@@ -36,6 +36,7 @@ We've ported ghalint to [the lintnet module](https://github.com/lintnet-modules/
 1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
 1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
 1. [job_timeout_minutes_is_required](docs/policies/012.md): All jobs should set [timeout-minutes](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idtimeout-minutes)
+1. [checkout_persist_credentials_should_be_false](docs/policies/013.md): [actions/checkout](https://github.com/actions/checkout)'s input `persist-credentials` should be `false`
 
 ### 2. Action Policies
 
@@ -43,6 +44,7 @@ We've ported ghalint to [the lintnet module](https://github.com/lintnet-modules/
 1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
 1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
 1. [action_shell_is_required](docs/policies/011.md): `shell` is required if `run` is set
+1. [checkout_persist_credentials_should_be_false](docs/policies/013.md): [actions/checkout](https://github.com/actions/checkout)'s input `persist-credentials` should be `false`
 
 ## How to install
 
