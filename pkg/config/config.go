@@ -106,6 +106,13 @@ func validate(exclude *Exclude) error { //nolint:cyclop
 		if exclude.StepID == "" {
 			return errors.New(`step_id is required to exclude github_app_should_limit_repositories`)
 		}
+	case "checkout_persist_credentials_should_be_false":
+		if exclude.WorkflowFilePath == "" && exclude.ActionFilePath == "" {
+			return errors.New(`workflow_file_path or action_file_path is required to exclude checkout_persist_credentials_should_be_false`)
+		}
+		if exclude.WorkflowFilePath != "" && exclude.JobName == "" {
+			return errors.New(`job_name is required to exclude checkout_persist_credentials_should_be_false`)
+		}
 	default:
 		return logerr.WithFields(errors.New(`the policy can't be excluded`), logrus.Fields{ //nolint:wrapcheck
 			"policy_name": exclude.PolicyName,
