@@ -20,7 +20,7 @@ func (p *CheckoutPersistCredentialShouldBeFalsePolicy) ID() string {
 }
 
 func (p *CheckoutPersistCredentialShouldBeFalsePolicy) ApplyStep(_ *logrus.Entry, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) error {
-	if p.excluded(stepCtx.Job, cfg.Excludes) {
+	if p.excluded(stepCtx, cfg.Excludes) {
 		return nil
 	}
 	if !strings.HasPrefix(step.Uses, "actions/checkout@") {
@@ -36,15 +36,21 @@ func (p *CheckoutPersistCredentialShouldBeFalsePolicy) ApplyStep(_ *logrus.Entry
 	return nil
 }
 
-func (p *CheckoutPersistCredentialShouldBeFalsePolicy) excluded(jobCtx *JobContext, excludes []*config.Exclude) bool {
+func (p *CheckoutPersistCredentialShouldBeFalsePolicy) excluded(stepCtx *StepContext, excludes []*config.Exclude) bool {
 	for _, exclude := range excludes {
 		if exclude.PolicyName != p.Name() {
 			continue
 		}
-		if exclude.JobName != jobCtx.Name {
+		if stepCtx.Action != nil {
+			if exclude.ActionFilePath != stepCtx.FilePath {
+				continue
+			}
+			return true
+		}
+		if exclude.JobName != stepCtx.Job.Name {
 			continue
 		}
-		if exclude.WorkflowFilePath != jobCtx.Workflow.FilePath {
+		if exclude.WorkflowFilePath != stepCtx.Job.Workflow.FilePath {
 			continue
 		}
 		return true
