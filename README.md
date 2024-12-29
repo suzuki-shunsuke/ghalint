@@ -1,6 +1,6 @@
 # ghalint
 
-[Install](#docs/install.md) | [Policies](#policies) | [How to use](#how-to-use) | [Configuration](#configuration)
+[Install](docs/install.md) | [Policies](#policies) | [How to use](#how-to-use) | [Configuration](#configuration)
 
 GitHub Actions linter for security best practices.
 
