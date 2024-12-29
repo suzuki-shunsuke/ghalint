@@ -13,16 +13,16 @@ import (
 )
 
 type Config struct {
-	Excludes []*Exclude
+	Excludes []*Exclude `json:"excludes,omitempty"`
 }
 
 type Exclude struct {
-	PolicyName       string `yaml:"policy_name"`
-	WorkflowFilePath string `yaml:"workflow_file_path"`
-	ActionFilePath   string `yaml:"action_file_path"`
-	JobName          string `yaml:"job_name"`
-	ActionName       string `yaml:"action_name"`
-	StepID           string `yaml:"step_id"`
+	PolicyName       string `json:"policy_name" yaml:"policy_name"`
+	WorkflowFilePath string `json:"workflow_file_path,omitempty" yaml:"workflow_file_path"`
+	ActionFilePath   string `json:"action_file_path,omitempty" yaml:"action_file_path"`
+	JobName          string `json:"job_name,omitempty" yaml:"job_name"`
+	ActionName       string `json:"action_name,omitempty" yaml:"action_name"`
+	StepID           string `json:"step_id,omitempty" yaml:"step_id"`
 }
 
 func (e *Exclude) FilePath() string {
