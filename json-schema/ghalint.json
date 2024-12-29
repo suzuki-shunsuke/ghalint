@@ -5,7 +5,7 @@
   "$defs": {
     "Config": {
       "properties": {
-        "Excludes": {
+        "excludes": {
           "items": {
             "$ref": "#/$defs/Exclude"
           },
@@ -13,41 +13,33 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "Excludes"
-      ]
+      "type": "object"
     },
     "Exclude": {
       "properties": {
-        "PolicyName": {
+        "policy_name": {
           "type": "string"
         },
-        "WorkflowFilePath": {
+        "workflow_file_path": {
           "type": "string"
         },
-        "ActionFilePath": {
+        "action_file_path": {
           "type": "string"
         },
-        "JobName": {
+        "job_name": {
           "type": "string"
         },
-        "ActionName": {
+        "action_name": {
           "type": "string"
         },
-        "StepID": {
+        "step_id": {
           "type": "string"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "PolicyName",
-        "WorkflowFilePath",
-        "ActionFilePath",
-        "JobName",
-        "ActionName",
-        "StepID"
+        "policy_name"
       ]
     }
   }
