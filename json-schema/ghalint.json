@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/suzuki-shunsuke/ghalint/pkg/config/config",
+  "$ref": "#/$defs/Config",
+  "$defs": {
+    "Config": {
+      "properties": {
+        "Excludes": {
+          "items": {
+            "$ref": "#/$defs/Exclude"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Excludes"
+      ]
+    },
+    "Exclude": {
+      "properties": {
+        "PolicyName": {
+          "type": "string"
+        },
+        "WorkflowFilePath": {
+          "type": "string"
+        },
+        "ActionFilePath": {
+          "type": "string"
+        },
+        "JobName": {
+          "type": "string"
+        },
+        "ActionName": {
+          "type": "string"
+        },
+        "StepID": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "PolicyName",
+        "WorkflowFilePath",
+        "ActionFilePath",
+        "JobName",
+        "ActionName",
+        "StepID"
+      ]
+    }
+  }
+}
