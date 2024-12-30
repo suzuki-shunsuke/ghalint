@@ -107,13 +107,13 @@ ajv --spec=draft2020 -s json-schema/ghalint.json -d ghalint.yaml
 Version: `main`
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghalint/refs/heads/main/json-schema/ghalint.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghalint/main/json-schema/ghalint.json
 ```
 
 Or pinning version:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghalint/refs/heads/v1.2.1/json-schema/ghalint.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghalint/v1.2.1/json-schema/ghalint.json
 ```
 
 ### Disable policies
