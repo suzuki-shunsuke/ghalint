@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"io"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
@@ -9,13 +11,19 @@ import (
 )
 
 type Controller struct {
-	fs afero.Fs
+	fs     afero.Fs
+	stderr io.Writer
 }
 
-func New(fs afero.Fs) *Controller {
+func New(fs afero.Fs, input *InputNew) *Controller {
 	return &Controller{
-		fs: fs,
+		fs:     fs,
+		stderr: input.Stderr,
 	}
+}
+
+type InputNew struct {
+	Stderr io.Writer
 }
 
 type WorkflowPolicy interface {
