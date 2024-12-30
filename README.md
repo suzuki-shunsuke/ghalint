@@ -113,7 +113,7 @@ Version: `main`
 Or pinning version:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghalint/refs/heads/v1.2.1/json-schema/ghalint.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghalint/refs/tags/v1.2.1/json-schema/ghalint.json
 ```
 
 ### Disable policies
