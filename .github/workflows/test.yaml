@@ -23,27 +23,8 @@ jobs:
         id: changes
         with:
           filters: |
-            update-aqua-checksums:
-              - aqua.yaml
-              - aqua/*.yaml
-              - aqua-checksums.json
-              - .github/workflows/test.yaml
             renovate-config-validator:
               - renovate.json5
-
-  update-aqua-checksums:
-    # Update aqua-checksums.json and push a commit
-    needs: path-filter
-    if: needs.path-filter.outputs.update-aqua-checksums == 'true'
-    uses: aquaproj/update-checksum-workflow/.github/workflows/update-checksum.yaml@8bce60cc4475128360bc32f00707abb874ca4a91 # v1.0.3
-    permissions:
-      contents: read
-    with:
-      aqua_version: v2.43.0
-      prune: true
-    secrets:
-      gh_app_id: ${{secrets.APP_ID}}
-      gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
 
   renovate-config-validator:
     # Validate Renovate Configuration by renovate-config-validator.
@@ -59,7 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs:
-      - update-aqua-checksums
       - test
       - renovate-config-validator
       - ghalint
