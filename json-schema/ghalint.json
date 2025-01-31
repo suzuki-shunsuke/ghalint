@@ -4,6 +4,14 @@
   "$ref": "#/$defs/Config",
   "$defs": {
     "Config": {
+      "properties": {
+        "excludes": {
+          "items": {
+            "$ref": "#/$defs/Exclude"
+          },
+          "type": "array"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     },

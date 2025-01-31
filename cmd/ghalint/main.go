@@ -41,5 +41,4 @@ func core(logE *logrus.Entry) error {
 		Date:    date,
 	}, afero.NewOsFs(), logE)
 	return app.RunContext(ctx, os.Args) //nolint:wrapcheck
-
 }
