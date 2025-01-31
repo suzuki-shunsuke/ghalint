@@ -173,3 +173,4 @@ If there is no violation ghalint succeeds.
 ## LICENSE
 
 [MIT](LICENSE)
+
