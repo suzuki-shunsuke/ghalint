@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/urfave-cli-help-all/helpall"
 	"github.com/urfave/cli/v2"
 )
 
@@ -80,6 +81,7 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
 				return nil
 			},
 		},
+		helpall.New(nil),
 	}
 	return app
 }
