@@ -191,6 +191,7 @@ func (c *Controller) readConfig(cfg *config.Config, cfgFilePath string) error {
 				"config_file": cfgFilePath,
 			}))
 		}
+		config.ConvertPath(cfg)
 	}
 	return nil
 }
