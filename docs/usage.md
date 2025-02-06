@@ -11,7 +11,7 @@ USAGE:
    ghalint [global options] command [command options]
 
 VERSION:
-   1.2.2 (13f3872374edb879741c337f6b73db28113d5e05)
+   1.2.3 (2e5e757c1e8b958315fb2d24e0434ede0eaed598)
 
 COMMANDS:
    run              lint GitHub Actions Workflows
