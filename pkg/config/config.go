@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"path/filepath"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
@@ -66,6 +67,17 @@ func Validate(cfg *Config) error {
 		}
 	}
 	return nil
+}
+
+func ConvertPath(cfg *Config) {
+	for _, exclude := range cfg.Excludes {
+		convertPath(exclude)
+	}
+}
+
+func convertPath(exclude *Exclude) {
+	exclude.WorkflowFilePath = filepath.FromSlash(exclude.WorkflowFilePath)
+	exclude.ActionFilePath = filepath.FromSlash(exclude.ActionFilePath)
 }
 
 func validate(exclude *Exclude) error { //nolint:cyclop
