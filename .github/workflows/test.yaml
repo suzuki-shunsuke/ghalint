@@ -1,68 +1,19 @@
 ---
 name: test
-
 on: pull_request
-
-env:
-  AQUA_LOG_COLOR: always
-  GHALINT_LOG_COLOR: always
-
 permissions: {}
-
 jobs:
-  path-filter:
-    # Get changed files to filter jobs
-    outputs:
-      update-aqua-checksums: ${{steps.changes.outputs.update-aqua-checksums}}
-      renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
-    runs-on: ubuntu-latest
-    permissions: {}
-    timeout-minutes: 10
-    steps:
-      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: changes
-        with:
-          filters: |
-            renovate-config-validator:
-              - renovate.json5
-
-  renovate-config-validator:
-    # Validate Renovate Configuration by renovate-config-validator.
-    uses: suzuki-shunsuke/renovate-config-validator-workflow/.github/workflows/validate.yaml@e8effbd185cbe3874cddef63f48b8bdcfc9ada55 # v0.2.4
-    needs: path-filter
-    if: needs.path-filter.outputs.renovate-config-validator == 'true'
-    permissions:
-      contents: read
-
-  status-check:
-    # This job is used for main branch's branch protection rule's status check.
-    # If all dependent jobs succeed or are skipped this job succeeds.
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs:
-      - test
-      - renovate-config-validator
-      - ghalint
-    permissions: {}
-    if: failure()
-    steps:
-      - run: exit 1
-
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@6861ea245ad10752afcba66cb71f28cf5c46ce49 # v1.1.0
-    with:
-      aqua_version: v2.45.0
-      go-version-file: go.mod
+    uses: ./.github/workflows/workflow_call_test.yaml
     permissions:
       pull-requests: write
       contents: read
-
-  ghalint:
-    runs-on: ubuntu-latest
+  status-check:
+    runs-on: ubuntu-24.04
+    if: failure()
+    timeout-minutes: 10
     permissions: {}
-    timeout-minutes: 20
+    needs:
+      - test
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - run: go run ./cmd/ghalint run
+      - run: exit 1
