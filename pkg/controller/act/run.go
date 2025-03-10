@@ -2,6 +2,7 @@ package act
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -31,14 +32,26 @@ func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath stri
 		policy.NewActionRefShouldBeSHA1Policy(),
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
-	failed := false
+	var errs []*policy.ErrorInfo
 	for _, filePath := range filePaths {
 		logE := logE.WithField("action_file_path", filePath)
-		if c.validateAction(logE, cfg, stepPolicies, filePath) {
-			failed = true
+		for _, err := range c.validateAction(logE, cfg, stepPolicies, filePath) {
+			err.FilePath = filePath
+			errs = append(errs, err)
 		}
 	}
-	if failed {
+	for _, err := range errs {
+		if err.Policy != nil {
+			err.Policy.URL = policy.GetURL(err.Policy.ID)
+		}
+	}
+	if len(errs) > 0 {
+		logE.Error("some workflow files are invalid")
+		encoder := json.NewEncoder(c.stderr)
+		encoder.SetIndent("", "  ")
+		if err := encoder.Encode(errs); err != nil {
+			logerr.WithError(logE, err).Error("encode the error info")
+		}
 		return debugError(errors.New("some action files are invalid"))
 	}
 	return nil
@@ -60,25 +73,20 @@ func (c *Controller) listFiles(args ...string) ([]string, error) {
 	return nil, nil
 }
 
-func (c *Controller) validateAction(logE *logrus.Entry, cfg *config.Config, stepPolicies []controller.StepPolicy, filePath string) bool {
+func (c *Controller) validateAction(logE *logrus.Entry, cfg *config.Config, stepPolicies []controller.StepPolicy, filePath string) []*policy.ErrorInfo {
 	action := &workflow.Action{}
 	if err := workflow.ReadAction(c.fs, filePath, action); err != nil {
-		logerr.WithError(logE, err).Error("read an action file")
-		return true
+		return []*policy.ErrorInfo{
+			{
+				Message: "read an action file: " + err.Error(),
+			},
+		}
 	}
-
 	stepCtx := &policy.StepContext{
 		FilePath: filePath,
 		Action:   action,
 	}
-
-	failed := false
-
-	if c.applyStepPolicies(logE, cfg, stepCtx, action, stepPolicies) {
-		failed = true
-	}
-
-	return failed
+	return c.applyStepPolicies(logE, cfg, stepCtx, action, stepPolicies)
 }
 
 type Policy interface {
@@ -93,20 +101,24 @@ func withPolicyReference(logE *logrus.Entry, p Policy) *logrus.Entry {
 	})
 }
 
-func (c *Controller) applyStepPolicies(logE *logrus.Entry, cfg *config.Config, stepCtx *policy.StepContext, action *workflow.Action, stepPolicies []controller.StepPolicy) bool {
-	failed := false
+func (c *Controller) applyStepPolicies(logE *logrus.Entry, cfg *config.Config, stepCtx *policy.StepContext, action *workflow.Action, stepPolicies []controller.StepPolicy) []*policy.ErrorInfo {
+	var errs []*policy.ErrorInfo
 	for _, stepPolicy := range stepPolicies {
 		logE := withPolicyReference(logE, stepPolicy)
-		if c.applyStepPolicy(logE, cfg, stepCtx, action, stepPolicy) {
-			failed = true
+		for _, err := range c.applyStepPolicy(logE, cfg, stepCtx, action, stepPolicy) {
+			err.Policy = &policy.Info{
+				Name: stepPolicy.Name(),
+				ID:   stepPolicy.ID(),
+			}
+			errs = append(errs, err)
 		}
 	}
-	return failed
+	return errs
 }
 
-func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, stepCtx *policy.StepContext, action *workflow.Action, stepPolicy controller.StepPolicy) bool {
-	failed := false
-	for _, step := range action.Runs.Steps {
+func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, stepCtx *policy.StepContext, action *workflow.Action, stepPolicy controller.StepPolicy) []*policy.ErrorInfo {
+	var errs []*policy.ErrorInfo
+	for idx, step := range action.Runs.Steps {
 		logE := logE
 		if step.ID != "" {
 			logE = logE.WithField("step_id", step.ID)
@@ -115,13 +127,15 @@ func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, ste
 			logE = logE.WithField("step_name", step.Name)
 		}
 		if err := stepPolicy.ApplyStep(logE, cfg, stepCtx, step); err != nil {
-			if err.Error() != "" {
-				logerr.WithError(logE, err).Error("the step violates policies")
-			}
-			failed = true
+			errs = append(errs, &policy.ErrorInfo{
+				StepName:  step.Name,
+				StepID:    step.ID,
+				StepIndex: idx,
+				Message:   err.Error(),
+			})
 		}
 	}
-	return failed
+	return errs
 }
 
 func (c *Controller) readConfig(cfg *config.Config, cfgFilePath string) error {

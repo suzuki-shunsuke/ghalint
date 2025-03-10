@@ -17,7 +17,9 @@ func (r *Runner) RunAction(ctx *cli.Context) error {
 		log.SetLevel(logLevel, logE)
 	}
 
-	ctrl := act.New(r.fs)
+	ctrl := act.New(r.fs, &act.InputNew{
+		Stderr: r.stderr,
+	})
 
 	return ctrl.Run(ctx.Context, logE, ctx.String("config"), ctx.Args().Slice()...) //nolint:wrapcheck
 }

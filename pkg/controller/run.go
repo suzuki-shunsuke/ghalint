@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -41,26 +42,55 @@ func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath stri
 		policy.NewActionRefShouldBeSHA1Policy(),
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
-	failed := false
+	var errs []*policy.ErrorInfo
 	for _, filePath := range filePaths {
 		logE := logE.WithField("workflow_file_path", filePath)
-		if c.validateWorkflow(logE, cfg, wfPolicies, jobPolicies, stepPolicies, filePath) {
-			failed = true
+		for _, err := range c.validateWorkflow(logE, cfg, wfPolicies, jobPolicies, stepPolicies, filePath) {
+			err.FilePath = filePath
+			errs = append(errs, err)
 		}
 	}
-	if failed {
+	for _, err := range errs {
+		if err.Policy != nil {
+			err.Policy.URL = policy.GetURL(err.Policy.ID)
+		}
+	}
+	if len(errs) > 0 {
+		logE.Error("some workflow files are invalid")
+		encoder := json.NewEncoder(c.stderr)
+		encoder.SetIndent("", "  ")
+		if err := encoder.Encode(errs); err != nil {
+			logerr.WithError(logE, err).Error("encode the error info")
+		}
 		return debugError(errors.New("some workflow files are invalid"))
 	}
 	return nil
 }
 
-func (c *Controller) validateWorkflow(logE *logrus.Entry, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string) bool {
+/*
+policy name
+file path
+job name
+step name, id, index, action name, version
+
+file
+location
+policy name
+policy description
+policy url
+error message
+*/
+
+func (c *Controller) validateWorkflow(logE *logrus.Entry, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string) []*policy.ErrorInfo {
 	wf := &workflow.Workflow{
 		FilePath: filePath,
 	}
 	if err := workflow.Read(c.fs, filePath, wf); err != nil {
-		logerr.WithError(logE, err).Error("read a workflow file")
-		return true
+		return []*policy.ErrorInfo{
+			{
+				Message: "read a workflow file: " + err.Error(),
+			},
+		}
 	}
 
 	wfCtx := &policy.WorkflowContext{
@@ -68,27 +98,24 @@ func (c *Controller) validateWorkflow(logE *logrus.Entry, cfg *config.Config, wf
 		Workflow: wf,
 	}
 
-	failed := false
+	var errs []*policy.ErrorInfo
 	for _, wfPolicy := range wfPolicies {
 		logE := withPolicyReference(logE, wfPolicy)
 		if err := wfPolicy.ApplyWorkflow(logE, cfg, wfCtx, wf); err != nil {
-			if err.Error() != "" {
-				logerr.WithError(logE, err).Error("the workflow violates policies")
-			}
-			failed = true
-			continue
+			errs = append(errs, &policy.ErrorInfo{
+				Policy: &policy.Info{
+					Name:    wfPolicy.Name(),
+					ID:      wfPolicy.ID(),
+					Message: err.Error(),
+				},
+			})
 		}
 	}
 
-	if c.applyJobPolicies(logE, cfg, wfCtx, jobPolicies) {
-		failed = true
-	}
+	errs = append(errs, c.applyJobPolicies(logE, cfg, wfCtx, jobPolicies)...)
+	errs = append(errs, c.applyStepPolicies(logE, cfg, wfCtx, wf.Jobs, stepPolicies)...)
 
-	if c.applyStepPolicies(logE, cfg, wfCtx, wf.Jobs, stepPolicies) {
-		failed = true
-	}
-
-	return failed
+	return errs
 }
 
 type Policy interface {
@@ -99,23 +126,27 @@ type Policy interface {
 func withPolicyReference(logE *logrus.Entry, p Policy) *logrus.Entry {
 	return logE.WithFields(logrus.Fields{
 		"policy_name": p.Name(),
-		"reference":   fmt.Sprintf("https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/policies/%s.md", p.ID()),
+		"reference":   policy.GetURL(p.ID()),
 	})
 }
 
-func (c *Controller) applyJobPolicies(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobPolicies []JobPolicy) bool {
-	failed := false
+func (c *Controller) applyJobPolicies(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobPolicies []JobPolicy) []*policy.ErrorInfo {
+	var errs []*policy.ErrorInfo
 	for _, jobPolicy := range jobPolicies {
 		logE := withPolicyReference(logE, jobPolicy)
-		if c.applyJobPolicy(logE, cfg, wfCtx, jobPolicy) {
-			failed = true
+		for _, err := range c.applyJobPolicy(logE, cfg, wfCtx, jobPolicy) {
+			err.Policy = &policy.Info{
+				Name: jobPolicy.Name(),
+				ID:   jobPolicy.ID(),
+			}
+			errs = append(errs, err)
 		}
 	}
-	return failed
+	return errs
 }
 
-func (c *Controller) applyJobPolicy(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobPolicy JobPolicy) bool {
-	failed := false
+func (c *Controller) applyJobPolicy(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobPolicy JobPolicy) []*policy.ErrorInfo {
+	var errs []*policy.ErrorInfo
 	for jobName, job := range wfCtx.Workflow.Jobs {
 		jobCtx := &policy.JobContext{
 			Workflow: wfCtx,
@@ -123,28 +154,32 @@ func (c *Controller) applyJobPolicy(logE *logrus.Entry, cfg *config.Config, wfCt
 		}
 		logE := logE.WithField("job_name", jobName)
 		if err := jobPolicy.ApplyJob(logE, cfg, jobCtx, job); err != nil {
-			failed = true
-			if err.Error() != "" {
-				logerr.WithError(logE, err).Error("the job violates policies")
-			}
+			errs = append(errs, &policy.ErrorInfo{
+				Message: err.Error(),
+				JobName: jobName,
+			})
 		}
 	}
-	return failed
+	return errs
 }
 
-func (c *Controller) applyStepPolicies(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobs map[string]*workflow.Job, stepPolicies []StepPolicy) bool {
-	failed := false
+func (c *Controller) applyStepPolicies(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobs map[string]*workflow.Job, stepPolicies []StepPolicy) []*policy.ErrorInfo {
+	var errs []*policy.ErrorInfo
 	for _, stepPolicy := range stepPolicies {
 		logE := withPolicyReference(logE, stepPolicy)
-		if c.applyStepPolicy(logE, cfg, wfCtx, jobs, stepPolicy) {
-			failed = true
+		for _, err := range c.applyStepPolicy(logE, cfg, wfCtx, jobs, stepPolicy) {
+			err.Policy = &policy.Info{
+				Name: stepPolicy.Name(),
+				ID:   stepPolicy.ID(),
+			}
+			errs = append(errs, err)
 		}
 	}
-	return failed
+	return errs
 }
 
-func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobs map[string]*workflow.Job, stepPolicy StepPolicy) bool {
-	failed := false
+func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, jobs map[string]*workflow.Job, stepPolicy StepPolicy) []*policy.ErrorInfo {
+	var errs []*policy.ErrorInfo
 	for jobName, job := range jobs {
 		stepCtx := &policy.StepContext{
 			FilePath: wfCtx.FilePath,
@@ -155,7 +190,7 @@ func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, wfC
 			},
 		}
 		logE := logE.WithField("job_name", jobName)
-		for _, step := range job.Steps {
+		for idx, step := range job.Steps {
 			logE := logE
 			if step.ID != "" {
 				logE = logE.WithField("step_id", step.ID)
@@ -164,14 +199,17 @@ func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, wfC
 				logE = logE.WithField("step_name", step.Name)
 			}
 			if err := stepPolicy.ApplyStep(logE, cfg, stepCtx, step); err != nil {
-				if err.Error() != "" {
-					logerr.WithError(logE, err).Error("the step violates policies")
-				}
-				failed = true
+				errs = append(errs, &policy.ErrorInfo{
+					StepName:  step.Name,
+					StepID:    step.ID,
+					StepIndex: idx,
+					JobName:   jobName,
+					Message:   err.Error(),
+				})
 			}
 		}
 	}
-	return failed
+	return errs
 }
 
 func (c *Controller) readConfig(cfg *config.Config, cfgFilePath string) error {
