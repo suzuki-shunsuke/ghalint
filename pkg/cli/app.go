@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"io"
+	"os"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/urfave-cli-help-all/helpall"
@@ -18,9 +21,10 @@ func (f *LDFlags) AppVersion() string {
 }
 
 type Runner struct {
-	flags *LDFlags
-	fs    afero.Fs
-	logE  *logrus.Entry
+	flags  *LDFlags
+	fs     afero.Fs
+	logE   *logrus.Entry
+	stderr io.Writer
 }
 
 func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
@@ -53,9 +57,10 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
 		},
 	}
 	runner := &Runner{
-		flags: flags,
-		fs:    fs,
-		logE:  logE,
+		flags:  flags,
+		fs:     fs,
+		logE:   logE,
+		stderr: os.Stderr,
 	}
 	app.Commands = []*cli.Command{
 		{
