@@ -30,7 +30,7 @@ jobs:
       contents: read
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@6861ea245ad10752afcba66cb71f28cf5c46ce49 # v1.1.0
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@287a75bd5ffae8d64db887708d9262381a7f6655 # v1.1.1
     with:
       aqua_version: v2.46.0
       go-version-file: go.mod
