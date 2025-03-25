@@ -72,13 +72,7 @@ func (c *Controller) validateAction(logE *logrus.Entry, cfg *config.Config, step
 		Action:   action,
 	}
 
-	failed := false
-
-	if c.applyStepPolicies(logE, cfg, stepCtx, action, stepPolicies) {
-		failed = true
-	}
-
-	return failed
+	return c.applyStepPolicies(logE, cfg, stepCtx, action, stepPolicies)
 }
 
 type Policy interface {
