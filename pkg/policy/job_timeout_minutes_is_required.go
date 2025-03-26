@@ -19,7 +19,7 @@ func (p *JobTimeoutMinutesIsRequiredPolicy) ID() string {
 }
 
 func (p *JobTimeoutMinutesIsRequiredPolicy) ApplyJob(_ *logrus.Entry, _ *config.Config, _ *JobContext, job *workflow.Job) error {
-	if job.TimeoutMinutes != 0 {
+	if job.TimeoutMinutes != nil {
 		return nil
 	}
 	if job.Uses != "" {
@@ -27,7 +27,7 @@ func (p *JobTimeoutMinutesIsRequiredPolicy) ApplyJob(_ *logrus.Entry, _ *config.
 		return nil
 	}
 	for _, step := range job.Steps {
-		if step.TimeoutMinutes == 0 {
+		if step.TimeoutMinutes == nil {
 			return errors.New("job's timeout-minutes is required")
 		}
 	}
