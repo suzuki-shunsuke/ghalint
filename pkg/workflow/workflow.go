@@ -21,7 +21,7 @@ type Job struct {
 	Secrets        *JobSecrets
 	Container      *Container
 	Uses           string
-	TimeoutMinutes int `yaml:"timeout-minutes"`
+	TimeoutMinutes any `yaml:"timeout-minutes"`
 }
 
 type Step struct {
@@ -31,7 +31,7 @@ type Step struct {
 	Run            string
 	Shell          string
 	With           With
-	TimeoutMinutes int `yaml:"timeout-minutes"`
+	TimeoutMinutes any `yaml:"timeout-minutes"`
 }
 
 type With map[string]string
