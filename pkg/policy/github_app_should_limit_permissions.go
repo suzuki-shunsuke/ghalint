@@ -44,7 +44,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(_ *logrus.Entry, _ *co
 		if step.With == nil {
 			return errPermissionsIsRequired
 		}
-		err := errPermissionsIsRequired
+		err := errPermissionHyphenIsRequired
 		for k := range step.With {
 			if strings.HasPrefix(k, "permission-") {
 				err = nil
