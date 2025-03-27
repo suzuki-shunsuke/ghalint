@@ -11,7 +11,7 @@ ERRO[0000] github.token should not be set to workflow's env  env_name=GITHUB_TOK
 ERRO[0000] secret should not be set to workflow's env    env_name=DATADOG_API_KEY policy_name=workflow_secrets program=ghalint version= workflow_file_path=.github/workflows/test.yaml
 ```
 
-ghalint is a command line tool to check GitHub Actions Workflows anc action.yaml for security policy compliance.
+ghalint is a command line tool to check GitHub Actions Workflows and action.yaml for security policy compliance.
 
 ## :bulb: We've ported ghalint to lintnet module
 
@@ -33,16 +33,16 @@ We've ported ghalint to [the lintnet module](https://github.com/lintnet-modules/
 1. [job_secrets](docs/policies/006.md): Job should not set secrets to environment variables
 1. [deny_job_container_latest_image](docs/policies/007.md): Job's container image tag should not be `latest`
 1. [action_ref_should_be_full_length_commit_sha](docs/policies/008.md): action's ref should be full length commit SHA
-1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
-1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
+1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issuing GitHub Access tokens from GitHub Apps should limit repositories
+1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issuing GitHub Access tokens from GitHub Apps should limit permissions
 1. [job_timeout_minutes_is_required](docs/policies/012.md): All jobs should set [timeout-minutes](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idtimeout-minutes)
 1. [checkout_persist_credentials_should_be_false](docs/policies/013.md): [actions/checkout](https://github.com/actions/checkout)'s input `persist-credentials` should be `false`
 
 ### 2. Action Policies
 
 1. [action_ref_should_be_full_length_commit_sha](docs/policies/008.md): action's ref should be full length commit SHA
-1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit repositories
-1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issueing GitHub Access tokens from GitHub Apps should limit permissions
+1. [github_app_should_limit_repositories](docs/policies/009.md): GitHub Actions issuing GitHub Access tokens from GitHub Apps should limit repositories
+1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issuing GitHub Access tokens from GitHub Apps should limit permissions
 1. [action_shell_is_required](docs/policies/011.md): `shell` is required if `run` is set
 1. [checkout_persist_credentials_should_be_false](docs/policies/013.md): [actions/checkout](https://github.com/actions/checkout)'s input `persist-credentials` should be `false`
 
