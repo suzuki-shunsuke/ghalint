@@ -19,7 +19,7 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) ID() string {
 	return "010"
 }
 
-func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(_ *logrus.Entry, _ *config.Config, _ *StepContext, step *workflow.Step) (ge error) {
+func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(_ *logrus.Entry, _ *config.Config, _ *StepContext, step *workflow.Step) (ge error) { //nolint:cyclop
 	action := p.checkUses(step.Uses)
 	if action == "" {
 		return nil
@@ -32,14 +32,28 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(_ *logrus.Entry, _ *co
 		}
 	}()
 
-	if action == "tibdex/github-app-token" {
+	switch action {
+	case "tibdex/github-app-token":
 		if step.With == nil {
 			return errPermissionsIsRequired
 		}
 		if _, ok := step.With["permissions"]; !ok {
 			return errPermissionsIsRequired
 		}
-		return nil
+	case "actions/create-github-app-token":
+		if step.With == nil {
+			return errPermissionsIsRequired
+		}
+		err := errPermissionsIsRequired
+		for k := range step.With {
+			if strings.HasPrefix(k, "permission-") {
+				err = nil
+				break
+			}
+		}
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

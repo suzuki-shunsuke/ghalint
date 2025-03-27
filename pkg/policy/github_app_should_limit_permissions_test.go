@@ -44,6 +44,32 @@ func TestGitHubAppShouldLimitPermissionsPolicy_ApplyStep(t *testing.T) { //nolin
 				},
 			},
 		},
+		{
+			name:  "actions/create-github-app-token fail",
+			isErr: true,
+			cfg:   &config.Config{},
+			step: &workflow.Step{
+				Uses: "actions/create-github-app-token@v1.12.0",
+				ID:   "token",
+				With: map[string]string{
+					"app-id":      "xxx",
+					"private-key": "xxx",
+				},
+			},
+		},
+		{
+			name: "actions/create-github-app-token succeed",
+			cfg:  &config.Config{},
+			step: &workflow.Step{
+				Uses: "actions/create-github-app-token@v1.12.0",
+				ID:   "token",
+				With: map[string]string{
+					"app-id":            "xxx",
+					"private-key":       "xxx",
+					"permission-issues": "write",
+				},
+			},
+		},
 	}
 	p := &policy.GitHubAppShouldLimitPermissionsPolicy{}
 	logE := logrus.NewEntry(logrus.New())
