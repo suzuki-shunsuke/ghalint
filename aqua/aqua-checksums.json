@@ -1,6 +1,31 @@
 {
   "checksums": [
     {
+      "id": "github_release/github.com/crate-ci/typos/v1.30.3/typos-v1.30.3-aarch64-apple-darwin.tar.gz",
+      "checksum": "4A62E43C3474AB82818D19982F624B2201595DE04737046091E1CDE71AD74370",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/crate-ci/typos/v1.30.3/typos-v1.30.3-aarch64-unknown-linux-musl.tar.gz",
+      "checksum": "B75AD91DB7CC89F845BAE5F640DDE7480599D3F39A2922708191709D2C6B9319",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/crate-ci/typos/v1.30.3/typos-v1.30.3-x86_64-apple-darwin.tar.gz",
+      "checksum": "9B00CA78D373EABAF0F9D06A9E9719AFF6D336DCF5AB39BDC52C16EAC978241E",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/crate-ci/typos/v1.30.3/typos-v1.30.3-x86_64-pc-windows-msvc.zip",
+      "checksum": "008BBFE96AB4FBEC343CC0A761367C90DE42D6049F471F8C0FEB1666BD319D02",
+      "algorithm": "sha256"
+    },
+    {
+      "id": "github_release/github.com/crate-ci/typos/v1.30.3/typos-v1.30.3-x86_64-unknown-linux-musl.tar.gz",
+      "checksum": "6EC16CEB87A612C8706437D665783A6194BF98119B245ABE40E122C6A04FEB94",
+      "algorithm": "sha256"
+    },
+    {
       "id": "github_release/github.com/golangci/golangci-lint/v2.0.2/golangci-lint-2.0.2-darwin-amd64.tar.gz",
       "checksum": "A88CBDC86B483FE44E90BF2DCC3FEC2AF8C754116E6EDF0AA6592CAC5BAA7A0E",
       "algorithm": "sha256"
