@@ -4,7 +4,7 @@ project_name: ghalint
 archives:
   - format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
 
 env:
   - GO111MODULE=on
