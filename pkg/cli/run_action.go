@@ -3,7 +3,7 @@ package cli
 import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/act"
 	"github.com/suzuki-shunsuke/ghalint/pkg/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func (r *Runner) RunAction(ctx *cli.Context) error {
