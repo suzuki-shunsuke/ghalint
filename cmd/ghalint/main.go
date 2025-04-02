@@ -40,5 +40,5 @@ func core(logE *logrus.Entry) error {
 		Commit:  commit,
 		Date:    date,
 	}, afero.NewOsFs(), logE)
-	return app.RunContext(ctx, os.Args) //nolint:wrapcheck
+	return app.Run(ctx, os.Args) //nolint:wrapcheck
 }

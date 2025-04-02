@@ -1,10 +1,12 @@
 package cli
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
-	"github.com/suzuki-shunsuke/urfave-cli-help-all/helpall"
-	"github.com/urfave/cli/v2"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-help-all/helpall"
+	"github.com/urfave/cli/v3"
 )
 
 type LDFlags struct {
@@ -23,8 +25,8 @@ type Runner struct {
 	logE  *logrus.Entry
 }
 
-func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
-	app := cli.NewApp()
+func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
+	app := &cli.Command{}
 	app.Name = "ghalint"
 	app.Usage = "GitHub Actions linter"
 	app.Version = flags.AppVersion()
@@ -32,24 +34,24 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
 		&cli.StringFlag{
 			Name:  "log-color",
 			Usage: "log color. auto(default)|always|never",
-			EnvVars: []string{
+			Sources: cli.EnvVars(
 				"GHALINT_LOG_COLOR",
-			},
+			),
 		},
 		&cli.StringFlag{
 			Name:  "log-level",
 			Usage: "log level",
-			EnvVars: []string{
+			Sources: cli.EnvVars(
 				"GHALINT_LOG_LEVEL",
-			},
+			),
 		},
 		&cli.StringFlag{
 			Name:    "config",
 			Aliases: []string{"c"},
 			Usage:   "configuration file path",
-			EnvVars: []string{
+			Sources: cli.EnvVars(
 				"GHALINT_CONFIG",
-			},
+			),
 		},
 	}
 	runner := &Runner{
@@ -76,12 +78,11 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.App {
 		{
 			Name:  "version",
 			Usage: "Show version",
-			Action: func(ctx *cli.Context) error {
-				cli.ShowVersion(ctx)
+			Action: func(_ context.Context, cmd *cli.Command) error {
+				cli.ShowVersion(cmd)
 				return nil
 			},
 		},
-		helpall.New(nil),
 	}
-	return app
+	return helpall.With(app, nil)
 }
