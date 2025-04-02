@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-help-all/helpall"
@@ -76,12 +78,11 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 		{
 			Name:  "version",
 			Usage: "Show version",
-			Action: func(ctx context.Context, ctx *cli.Command) error {
-				cli.ShowVersion(ctx)
+			Action: func(_ context.Context, cmd *cli.Command) error {
+				cli.ShowVersion(cmd)
 				return nil
 			},
 		},
-		helpall.New(nil),
 	}
-	return app
+	return helpall.With(app, nil)
 }
