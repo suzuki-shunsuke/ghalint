@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func (r *Runner) RunAction(ctx *cli.Context) error {
+func (r *Runner) RunAction(ctx context.Context, ctx *cli.Command) error {
 	logE := r.logE
 
 	if color := ctx.String("log-color"); color != "" {
