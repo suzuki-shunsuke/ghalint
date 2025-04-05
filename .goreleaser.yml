@@ -57,7 +57,6 @@ brews:
     repository:
       owner: suzuki-shunsuke
       name: homebrew-ghalint
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     # The project name and current git tag are used in the format string.
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     # Your app's homepage.
@@ -75,7 +74,7 @@ brews:
     # If set to auto, the release will not be uploaded to the homebrew tap
     # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
     # Default is false.
-    skip_upload: auto
+    skip_upload: true
 
     # So you can `brew test` your formula.
     # Default is empty.
@@ -85,8 +84,7 @@ brews:
 scoops:
   - description: GitHub Actions linter for security best practices.
     license: MIT
-    skip_upload: auto
+    skip_upload: true
     repository:
       owner: suzuki-shunsuke
       name: scoop-bucket
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
