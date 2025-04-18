@@ -30,18 +30,6 @@ func (p *ActionRefShouldBeSHA1Policy) ID() string {
 	return "008"
 }
 
-func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config.Exclude) bool {
-	for _, exclude := range excludes {
-		if exclude.PolicyName != p.Name() {
-			continue
-		}
-		if f, _ := path.Match(exclude.ActionName, action); f {
-			return true
-		}
-	}
-	return false
-}
-
 func (p *ActionRefShouldBeSHA1Policy) ApplyJob(_ *logrus.Entry, cfg *config.Config, _ *JobContext, job *workflow.Job) error {
 	return p.apply(cfg, job.Uses)
 }
@@ -72,4 +60,16 @@ func (p *ActionRefShouldBeSHA1Policy) checkUses(uses string) string {
 		return ""
 	}
 	return action
+}
+
+func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config.Exclude) bool {
+	for _, exclude := range excludes {
+		if exclude.PolicyName != p.Name() {
+			continue
+		}
+		if f, _ := path.Match(exclude.ActionName, action); f {
+			return true
+		}
+	}
+	return false
 }
