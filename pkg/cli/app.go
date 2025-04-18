@@ -14,10 +14,6 @@ type LDFlags struct {
 	Date    string
 }
 
-func (f *LDFlags) AppVersion() string {
-	return f.Version + " (" + f.Commit + ")"
-}
-
 type Runner struct {
 	flags *LDFlags
 	fs    afero.Fs
@@ -30,10 +26,11 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 		fs:    fs,
 		logE:  logE,
 	}
-	return helpall.With(&cli.Command{
-		Name:    "ghalint",
-		Usage:   "GitHub Actions linter",
-		Version: flags.AppVersion(),
+	return helpall.With(vcmd.With(&cli.Command{
+		Name:                  "ghalint",
+		Usage:                 "GitHub Actions linter",
+		Version:               flags.Version,
+		EnableShellCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "log-color",
@@ -74,11 +71,6 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 				Action: runner.RunAction,
 				Flags:  []cli.Flag{},
 			},
-			vcmd.New(&vcmd.Command{
-				Name:    "ghalint",
-				Version: flags.AppVersion(),
-				SHA:     flags.Commit,
-			}),
 		},
-	}, nil)
+	}, flags.Commit), nil)
 }
