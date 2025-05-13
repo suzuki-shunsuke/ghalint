@@ -3,34 +3,25 @@ package cli
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
-	"github.com/suzuki-shunsuke/urfave-cli-v3-util/helpall"
-	"github.com/suzuki-shunsuke/urfave-cli-v3-util/vcmd"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"github.com/urfave/cli/v3"
 )
 
-type LDFlags struct {
-	Version string
-	Commit  string
-	Date    string
-}
-
 type Runner struct {
-	flags *LDFlags
+	flags *urfave.LDFlags
 	fs    afero.Fs
 	logE  *logrus.Entry
 }
 
-func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
+func New(flags *urfave.LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 	runner := &Runner{
 		flags: flags,
 		fs:    fs,
 		logE:  logE,
 	}
-	return helpall.With(vcmd.With(&cli.Command{
-		Name:                  "ghalint",
-		Usage:                 "GitHub Actions linter",
-		Version:               flags.Version,
-		EnableShellCompletion: true,
+	return urfave.Command(logE, flags, &cli.Command{
+		Name:  "ghalint",
+		Usage: "GitHub Actions linter",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "log-color",
@@ -72,5 +63,5 @@ func New(flags *LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 				Flags:  []cli.Flag{},
 			},
 		},
-	}, flags.Commit), nil)
+	})
 }
