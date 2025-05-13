@@ -48,16 +48,27 @@ func (c *Controller) listFiles(args ...string) ([]string, error) {
 	if len(args) != 0 {
 		return args, nil
 	}
-	for _, file := range []string{"action.yaml", "action.yml"} {
-		f, err := afero.Exists(c.fs, file)
+
+	patterns := []string{
+		"action.yaml",
+		"action.yml",
+		"*/action.yaml",
+		"*/action.yml",
+		"*/*/action.yaml",
+		"*/*/action.yml",
+		"*/*/*/action.yaml",
+		"*/*/*/action.yml",
+	}
+
+	files := []string{}
+	for _, pattern := range patterns {
+		matches, err := afero.Glob(c.fs, pattern)
 		if err != nil {
 			return nil, fmt.Errorf("check if the action file exists: %w", err)
 		}
-		if f {
-			return []string{file}, nil
-		}
+		files = append(files, matches...)
 	}
-	return nil, nil
+	return files, nil
 }
 
 func (c *Controller) validateAction(logE *logrus.Entry, cfg *config.Config, stepPolicies []controller.StepPolicy, filePath string) bool {
