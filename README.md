@@ -81,7 +81,7 @@ ghalint act foo/action.yaml bar/action.yml
 
 ## Configuration file
 
-Configuration file path: `^\.?ghalint\.ya?ml$`
+Configuration file path: `^(\.|\.github/)?ghalint\.ya?ml$`
 
 You can specify the configuration file with the command line option `-config (-c)` or the environment variable `GHALINT_CONFIG`.
 

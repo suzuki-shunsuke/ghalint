@@ -34,7 +34,16 @@ func (e *Exclude) FilePath() string {
 }
 
 func Find(fs afero.Fs) string {
-	for _, filePath := range []string{"ghalint.yaml", ".ghalint.yaml", "ghalint.yml", ".ghalint.yml"} {
+	filePaths := []string{
+		"ghalint.yaml",
+		".ghalint.yaml",
+		".github/ghalint.yaml",
+		"ghalint.yml",
+		".ghalint.yml",
+		".github/ghalint.yml",
+	}
+
+	for _, filePath := range filePaths {
 		if _, err := fs.Stat(filePath); err == nil {
 			return filePath
 		}
