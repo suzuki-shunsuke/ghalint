@@ -72,7 +72,7 @@ The alias `act` is available.
 ghalint act
 ```
 
-Then ghalint validates action files `^action\.ya?ml$` on the current directory.
+Then ghalint validates action files `^([^/]+/){0,3}action\.ya?ml$` on the current directory.
 You can also specify file paths.
 
 ```sh
