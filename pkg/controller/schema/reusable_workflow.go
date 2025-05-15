@@ -46,7 +46,7 @@ type On struct {
 	WorkflowCall *WorkflowCall `yaml:"workflow_call"`
 }
 
-func (o *On) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *On) UnmarshalYAML(unmarshal func(any) error) error { //nolint:cyclop
 	var onAny any
 	if err := unmarshal(&onAny); err != nil {
 		return fmt.Errorf("unmarshal a workflow to any: %w", err)
