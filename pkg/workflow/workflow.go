@@ -22,6 +22,7 @@ type Job struct {
 	Container      *Container
 	Uses           string
 	TimeoutMinutes any `yaml:"timeout-minutes"`
+	With           map[string]any
 }
 
 type Step struct {
@@ -59,10 +60,16 @@ func (w With) UnmarshalYAML(b []byte) error {
 }
 
 type Action struct {
-	Runs *Runs
+	Runs   *Runs
+	Inputs map[string]*Input
 }
 
 type Runs struct {
 	Image string
 	Steps []*Step
+}
+
+type Input struct {
+	Required bool
+	Type     string
 }

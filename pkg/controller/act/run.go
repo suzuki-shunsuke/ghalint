@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/ghalint/pkg/action"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
@@ -49,26 +49,7 @@ func (c *Controller) listFiles(args ...string) ([]string, error) {
 		return args, nil
 	}
 
-	patterns := []string{
-		"action.yaml",
-		"action.yml",
-		"*/action.yaml",
-		"*/action.yml",
-		"*/*/action.yaml",
-		"*/*/action.yml",
-		"*/*/*/action.yaml",
-		"*/*/*/action.yml",
-	}
-
-	files := []string{}
-	for _, pattern := range patterns {
-		matches, err := afero.Glob(c.fs, pattern)
-		if err != nil {
-			return nil, fmt.Errorf("check if the action file exists: %w", err)
-		}
-		files = append(files, matches...)
-	}
-	return files, nil
+	return action.Find(c.fs) //nolint:wrapcheck
 }
 
 func (c *Controller) validateAction(logE *logrus.Entry, cfg *config.Config, stepPolicies []controller.StepPolicy, filePath string) bool {

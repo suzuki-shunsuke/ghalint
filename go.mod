@@ -3,6 +3,9 @@ module github.com/suzuki-shunsuke/ghalint
 go 1.24.2
 
 require (
+	github.com/adrg/xdg v0.5.3
+	github.com/google/go-github/v72 v72.0.0
+	github.com/k0kubun/pp/v3 v3.4.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.14.0
@@ -10,12 +13,18 @@ require (
 	github.com/suzuki-shunsuke/logrus-error v0.1.4
 	github.com/suzuki-shunsuke/urfave-cli-v3-util v0.0.5
 	github.com/urfave/cli/v3 v3.3.2
+	github.com/zalando/go-keyring v0.2.6
+	golang.org/x/oauth2 v0.30.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
+	al.essio.dev/pkg/shellescape v1.5.1 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/danieljoos/wincred v1.2.2 // indirect
+	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/invopop/jsonschema v0.12.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

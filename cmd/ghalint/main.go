@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
+	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
 	"github.com/suzuki-shunsuke/ghalint/pkg/log"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
@@ -27,6 +28,9 @@ func main() {
 		hasLogLevel := &controller.HasLogLevelError{}
 		if errors.As(err, &hasLogLevel) {
 			logerr.WithError(logE, hasLogLevel.Err).Log(hasLogLevel.LogLevel, "ghalint failed")
+			os.Exit(1)
+		}
+		if errors.Is(err, schema.SilentError) {
 			os.Exit(1)
 		}
 		logerr.WithError(logE, err).Fatal("ghalint failed")
