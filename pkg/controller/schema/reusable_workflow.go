@@ -149,7 +149,7 @@ func (v *validateJob) validateWorkflow(wf *ReusableWorkflow) error {
 		}
 	}
 	if failed {
-		return SilentError
+		return ErrSilent
 	}
 	return nil
 }

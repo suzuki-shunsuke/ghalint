@@ -30,7 +30,7 @@ func main() {
 			logerr.WithError(logE, hasLogLevel.Err).Log(hasLogLevel.LogLevel, "ghalint failed")
 			os.Exit(1)
 		}
-		if errors.Is(err, schema.SilentError) {
+		if errors.Is(err, schema.ErrSilent) {
 			os.Exit(1)
 		}
 		logerr.WithError(logE, err).Fatal("ghalint failed")

@@ -28,13 +28,13 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 		}
 		if err := vw.validate(ctx); err != nil {
 			failed = true
-			if !errors.Is(err, SilentError) {
+			if !errors.Is(err, ErrSilent) {
 				logE.WithError(err).Error("validate workflow")
 			}
 		}
 	}
 	if failed {
-		return SilentError
+		return ErrSilent
 	}
 	return nil
 }
@@ -65,13 +65,13 @@ func (v *validateWorkflow) validate(ctx context.Context) error {
 		}
 		if err := vj.validate(ctx); err != nil {
 			failed = true
-			if !errors.Is(err, SilentError) {
+			if !errors.Is(err, ErrSilent) {
 				logerr.WithError(v.logE, err).Error("validate job")
 			}
 		}
 	}
 	if failed {
-		return SilentError
+		return ErrSilent
 	}
 	return nil
 }

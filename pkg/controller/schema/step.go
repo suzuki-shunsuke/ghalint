@@ -160,7 +160,7 @@ func (v *validateStep) validate(ctx context.Context) error {
 		}
 	}
 	if failed {
-		return SilentError
+		return ErrSilent
 	}
 	return nil
 }

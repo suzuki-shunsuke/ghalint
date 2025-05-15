@@ -39,13 +39,13 @@ func (v *validateJob) validate(ctx context.Context) error {
 		}
 		if err := vs.validate(ctx); err != nil {
 			failed = true
-			if !errors.Is(err, SilentError) {
+			if !errors.Is(err, ErrSilent) {
 				logerr.WithError(v.logE, err).Error("validate a step")
 			}
 		}
 	}
 	if failed {
-		return SilentError
+		return ErrSilent
 	}
 	return nil
 }

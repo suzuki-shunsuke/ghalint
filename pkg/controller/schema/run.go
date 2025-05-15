@@ -13,18 +13,18 @@ func (c *Controller) Run(ctx context.Context) error {
 	failed := false
 	if err := c.runWorkflow(ctx); err != nil {
 		failed = true
-		if !errors.Is(err, SilentError) {
+		if !errors.Is(err, ErrSilent) {
 			logerr.WithError(c.logE, err).Error("validate workflows")
 		}
 	}
 	if err := c.runActions(ctx); err != nil {
-		if !errors.Is(err, SilentError) {
+		if !errors.Is(err, ErrSilent) {
 			return fmt.Errorf("validate actions: %w", err)
 		}
-		return SilentError
+		return ErrSilent
 	}
 	if failed {
-		return SilentError
+		return ErrSilent
 	}
 	return nil
 }
