@@ -1,4 +1,4 @@
-package validate
+package validateinput
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func New(logE *logrus.Entry, fs afero.Fs) *cli.Command {
 		fs:   fs,
 	}
 	return &cli.Command{
-		Name:        "validate",
+		Name:        "validate-input",
 		Usage:       "validate action inputs",
 		Description: "validate action inputs",
 		Action:      runner.Action,
