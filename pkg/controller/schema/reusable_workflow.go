@@ -112,7 +112,7 @@ func (v *validateJob) validateWorkflow(wf *ReusableWorkflow) error {
 		return errors.New("the reusable workflow is invalid. on is not set")
 	}
 	if wf.On.WorkflowCall == nil {
-		return errors.New("the reusable worfklow is invalid. workflow_call is not set")
+		return errors.New("the reusable workflow is invalid. workflow_call is not set")
 	}
 	inputs := wf.On.WorkflowCall.Inputs
 	validKeys := map[string]struct{}{}
