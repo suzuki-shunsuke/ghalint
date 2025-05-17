@@ -12,45 +12,55 @@ import (
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 )
 
-type ActionRefShouldBeSHA1Policy struct {
-	sha1Pattern *regexp.Regexp
+type ActionRefShouldBeSHAPolicy struct {
+	sha1Pattern   *regexp.Regexp
+	sha256Pattern *regexp.Regexp
 }
 
-func NewActionRefShouldBeSHA1Policy() *ActionRefShouldBeSHA1Policy {
-	return &ActionRefShouldBeSHA1Policy{
-		sha1Pattern: regexp.MustCompile(`\b[0-9a-f]{40}\b`),
+func NewActionRefShouldBeSHAPolicy() *ActionRefShouldBeSHAPolicy {
+	return &ActionRefShouldBeSHAPolicy{
+		sha1Pattern:   regexp.MustCompile(`\b[0-9a-f]{40}\b`),
+		sha256Pattern: regexp.MustCompile(`\b[0-9a-f]{64}\b`),
 	}
 }
 
-func (p *ActionRefShouldBeSHA1Policy) Name() string {
+func (p *ActionRefShouldBeSHAPolicy) Name() string {
 	return "action_ref_should_be_full_length_commit_sha"
 }
 
-func (p *ActionRefShouldBeSHA1Policy) ID() string {
+func (p *ActionRefShouldBeSHAPolicy) ID() string {
 	return "008"
 }
 
-func (p *ActionRefShouldBeSHA1Policy) ApplyJob(_ *logrus.Entry, cfg *config.Config, _ *JobContext, job *workflow.Job) error {
+func (p *ActionRefShouldBeSHAPolicy) ApplyJob(_ *logrus.Entry, cfg *config.Config, _ *JobContext, job *workflow.Job) error {
 	return p.apply(cfg, job.Uses)
 }
 
-func (p *ActionRefShouldBeSHA1Policy) ApplyStep(_ *logrus.Entry, cfg *config.Config, _ *StepContext, step *workflow.Step) error {
+func (p *ActionRefShouldBeSHAPolicy) ApplyStep(_ *logrus.Entry, cfg *config.Config, _ *StepContext, step *workflow.Step) error {
 	return p.apply(cfg, step.Uses)
 }
 
-func (p *ActionRefShouldBeSHA1Policy) apply(cfg *config.Config, uses string) error {
+func (p *ActionRefShouldBeSHAPolicy) apply(cfg *config.Config, uses string) error {
 	action := p.checkUses(uses)
 	if action == "" || p.excluded(action, cfg.Excludes) {
 		return nil
 	}
-	return logerr.WithFields(errors.New("action ref should be full length SHA1"), logrus.Fields{ //nolint:wrapcheck
+	return logerr.WithFields(errors.New("action ref should be full length SHA"), logrus.Fields{ //nolint:wrapcheck
 		"action": action,
 	})
 }
 
-func (p *ActionRefShouldBeSHA1Policy) checkUses(uses string) string {
+func (p *ActionRefShouldBeSHAPolicy) checkUses(uses string) string {
 	if uses == "" {
 		return ""
+	}
+	if reference, ok := strings.CutPrefix(uses, "docker://"); ok {
+		rest, digest, ok := strings.Cut(reference, "@")
+		if ok && p.sha256Pattern.MatchString(digest) {
+			return ""
+		}
+		repository, _, _ := strings.Cut(rest, ":")
+		return "docker://" + repository
 	}
 	action, tag, ok := strings.Cut(uses, "@")
 	if !ok {
@@ -62,7 +72,7 @@ func (p *ActionRefShouldBeSHA1Policy) checkUses(uses string) string {
 	return action
 }
 
-func (p *ActionRefShouldBeSHA1Policy) excluded(action string, excludes []*config.Exclude) bool {
+func (p *ActionRefShouldBeSHAPolicy) excluded(action string, excludes []*config.Exclude) bool {
 	for _, exclude := range excludes {
 		if exclude.PolicyName != p.Name() {
 			continue
