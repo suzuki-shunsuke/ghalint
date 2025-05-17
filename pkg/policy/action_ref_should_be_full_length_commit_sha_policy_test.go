@@ -9,7 +9,7 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
-func TestActionRefShouldBeSHA1Policy_ApplyJob(t *testing.T) {
+func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) {
 	t.Parallel()
 	data := []struct {
 		name  string
@@ -48,7 +48,7 @@ func TestActionRefShouldBeSHA1Policy_ApplyJob(t *testing.T) {
 			},
 		},
 	}
-	p := policy.NewActionRefShouldBeSHA1Policy()
+	p := policy.NewActionRefShouldBeSHAPolicy()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
@@ -66,7 +66,7 @@ func TestActionRefShouldBeSHA1Policy_ApplyJob(t *testing.T) {
 	}
 }
 
-func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) { //nolint:funlen
+func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
@@ -124,7 +124,7 @@ func TestActionRefShouldBeSHA1Policy_ApplyStep(t *testing.T) { //nolint:funlen
 			},
 		},
 	}
-	p := policy.NewActionRefShouldBeSHA1Policy()
+	p := policy.NewActionRefShouldBeSHAPolicy()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {

@@ -31,14 +31,14 @@ func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath stri
 		policy.NewJobSecretsPolicy(),
 		&policy.DenyInheritSecretsPolicy{},
 		&policy.DenyJobContainerLatestImagePolicy{},
-		policy.NewActionRefShouldBeSHA1Policy(),
+		policy.NewActionRefShouldBeSHAPolicy(),
 		&policy.DenyReadAllPermissionPolicy{},
 		&policy.DenyWriteAllPermissionPolicy{},
 	}
 	stepPolicies := []StepPolicy{
 		&policy.GitHubAppShouldLimitRepositoriesPolicy{},
 		&policy.GitHubAppShouldLimitPermissionsPolicy{},
-		policy.NewActionRefShouldBeSHA1Policy(),
+		policy.NewActionRefShouldBeSHAPolicy(),
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
 	failed := false
