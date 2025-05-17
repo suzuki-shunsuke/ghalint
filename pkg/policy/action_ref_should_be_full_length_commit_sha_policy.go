@@ -13,12 +13,14 @@ import (
 )
 
 type ActionRefShouldBeSHAPolicy struct {
-	sha1Pattern *regexp.Regexp
+	sha1Pattern   *regexp.Regexp
+	sha256Pattern *regexp.Regexp
 }
 
 func NewActionRefShouldBeSHAPolicy() *ActionRefShouldBeSHAPolicy {
 	return &ActionRefShouldBeSHAPolicy{
-		sha1Pattern: regexp.MustCompile(`\b[0-9a-f]{40}\b`),
+		sha1Pattern:   regexp.MustCompile(`\b[0-9a-f]{40}\b`),
+		sha256Pattern: regexp.MustCompile(`\b[0-9a-f]{64}\b`),
 	}
 }
 
@@ -43,7 +45,7 @@ func (p *ActionRefShouldBeSHAPolicy) apply(cfg *config.Config, uses string) erro
 	if action == "" || p.excluded(action, cfg.Excludes) {
 		return nil
 	}
-	return logerr.WithFields(errors.New("action ref should be full length SHA1"), logrus.Fields{ //nolint:wrapcheck
+	return logerr.WithFields(errors.New("action ref should be full length SHA"), logrus.Fields{ //nolint:wrapcheck
 		"action": action,
 	})
 }
@@ -51,6 +53,14 @@ func (p *ActionRefShouldBeSHAPolicy) apply(cfg *config.Config, uses string) erro
 func (p *ActionRefShouldBeSHAPolicy) checkUses(uses string) string {
 	if uses == "" {
 		return ""
+	}
+	if reference, ok := strings.CutPrefix(uses, "docker://"); ok {
+		rest, digest, ok := strings.Cut(reference, "@")
+		if ok && p.sha256Pattern.MatchString(digest) {
+			return ""
+		}
+		repository, _, _ := strings.Cut(rest, ":")
+		return "docker://" + repository
 	}
 	action, tag, ok := strings.Cut(uses, "@")
 	if !ok {
