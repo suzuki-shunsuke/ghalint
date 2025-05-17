@@ -47,6 +47,71 @@ func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) {
 				Uses: "suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v0.4.4",
 			},
 		},
+		{
+			name: "docker image with digest",
+			cfg:  &config.Config{},
+			job: &workflow.Job{
+				Uses: "docker://rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9",
+			},
+		},
+		{
+			name: "docker image with digest (no tag)",
+			cfg:  &config.Config{},
+			job: &workflow.Job{
+				Uses: "docker://rhysd/actionlint@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9",
+			},
+		},
+		{
+			name: "docker image with port and digest",
+			cfg:  &config.Config{},
+			job: &workflow.Job{
+				Uses: "docker://registry.example.com:5000/myimage:1.0.0@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9",
+			},
+		},
+		{
+			name:  "docker image with tag",
+			isErr: true,
+			cfg:   &config.Config{},
+			job: &workflow.Job{
+				Uses: "docker://rhysd/actionlint:latest",
+			},
+		},
+		{
+			name:  "docker image with port and tag",
+			isErr: true,
+			cfg:   &config.Config{},
+			job: &workflow.Job{
+				Uses: "docker://registry.example.com:5000/myimage:latest",
+			},
+		},
+		{
+			name: "exclude docker image with tag",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "docker://rhysd/actionlint",
+					},
+				},
+			},
+			job: &workflow.Job{
+				Uses: "docker://rhysd/actionlint:latest",
+			},
+		},
+		{
+			name: "exclude docker image with port and tag",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "docker://registry.example.com:5000/myimage",
+					},
+				},
+			},
+			job: &workflow.Job{
+				Uses: "docker://registry.example.com:5000/myimage:latest",
+			},
+		},
 	}
 	p := policy.NewActionRefShouldBeSHAPolicy()
 	logE := logrus.NewEntry(logrus.New())
@@ -121,6 +186,71 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 				Uses: "slsa-framework/slsa-github-generator@v1.5.0",
 				ID:   "generate",
 				Name: "Generate SLSA Provenance",
+			},
+		},
+		{
+			name: "docker image with digest",
+			cfg:  &config.Config{},
+			step: &workflow.Step{
+				Uses: "docker://rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9",
+			},
+		},
+		{
+			name: "docker image with digest (no tag)",
+			cfg:  &config.Config{},
+			step: &workflow.Step{
+				Uses: "docker://rhysd/actionlint@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9",
+			},
+		},
+		{
+			name: "docker image with port and digest",
+			cfg:  &config.Config{},
+			step: &workflow.Step{
+				Uses: "docker://registry.example.com:5000/myimage:1.0.0@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9",
+			},
+		},
+		{
+			name:  "docker image with tag",
+			isErr: true,
+			cfg:   &config.Config{},
+			step: &workflow.Step{
+				Uses: "docker://rhysd/actionlint:latest",
+			},
+		},
+		{
+			name:  "docker image with port and tag",
+			isErr: true,
+			cfg:   &config.Config{},
+			step: &workflow.Step{
+				Uses: "docker://registry.example.com:5000/myimage:latest",
+			},
+		},
+		{
+			name: "exclude docker image with tag",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "docker://rhysd/actionlint",
+					},
+				},
+			},
+			step: &workflow.Step{
+				Uses: "docker://rhysd/actionlint:latest",
+			},
+		},
+		{
+			name: "exclude docker image with port and tag",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "docker://registry.example.com:5000/myimage",
+					},
+				},
+			},
+			step: &workflow.Step{
+				Uses: "docker://registry.example.com:5000/myimage:latest",
 			},
 		},
 	}

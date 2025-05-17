@@ -13,12 +13,14 @@ import (
 )
 
 type ActionRefShouldBeSHAPolicy struct {
-	sha1Pattern *regexp.Regexp
+	sha1Pattern   *regexp.Regexp
+	sha256Pattern *regexp.Regexp
 }
 
 func NewActionRefShouldBeSHAPolicy() *ActionRefShouldBeSHAPolicy {
 	return &ActionRefShouldBeSHAPolicy{
-		sha1Pattern: regexp.MustCompile(`\b[0-9a-f]{40}\b`),
+		sha1Pattern:   regexp.MustCompile(`\b[0-9a-f]{40}\b`),
+		sha256Pattern: regexp.MustCompile(`\b[0-9a-f]{64}\b`),
 	}
 }
 
@@ -43,7 +45,7 @@ func (p *ActionRefShouldBeSHAPolicy) apply(cfg *config.Config, uses string) erro
 	if action == "" || p.excluded(action, cfg.Excludes) {
 		return nil
 	}
-	return logerr.WithFields(errors.New("action ref should be full length SHA1"), logrus.Fields{ //nolint:wrapcheck
+	return logerr.WithFields(errors.New("action ref should be full length SHA"), logrus.Fields{ //nolint:wrapcheck
 		"action": action,
 	})
 }
@@ -51,6 +53,19 @@ func (p *ActionRefShouldBeSHAPolicy) apply(cfg *config.Config, uses string) erro
 func (p *ActionRefShouldBeSHAPolicy) checkUses(uses string) string {
 	if uses == "" {
 		return ""
+	}
+	if ref, ok := strings.CutPrefix(uses, "docker://"); ok {
+		repoAndTag, digest, hasDigest := strings.Cut(ref, "@sha256:")
+		if hasDigest && p.sha256Pattern.MatchString(digest) {
+			return ""
+		}
+		repo := repoAndTag
+		lastColon := strings.LastIndex(repoAndTag, ":")
+		lastSlash := strings.LastIndex(repoAndTag, "/")
+		if lastColon != -1 && lastColon > lastSlash {
+			repo = repoAndTag[:lastColon]
+		}
+		return "docker://" + repo
 	}
 	action, tag, ok := strings.Cut(uses, "@")
 	if !ok {
