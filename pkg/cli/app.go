@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/ghalint/pkg/cli/experiment"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"github.com/urfave/cli/v3"
 )
@@ -62,6 +63,7 @@ func New(flags *urfave.LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 				Action: runner.RunAction,
 				Flags:  []cli.Flag{},
 			},
+			experiment.New(logE, fs),
 		},
 	})
 }
