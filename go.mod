@@ -5,7 +5,6 @@ go 1.24.2
 require (
 	github.com/adrg/xdg v0.5.3
 	github.com/google/go-github/v72 v72.0.0
-	github.com/k0kubun/pp/v3 v3.4.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.14.0
