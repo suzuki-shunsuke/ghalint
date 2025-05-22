@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/k0kubun/pp/v3"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
@@ -60,13 +59,13 @@ func (o *On) UnmarshalYAML(unmarshal func(any) error) error { //nolint:cyclop
 	}
 	onMap, ok := onAny.(map[string]any)
 	if !ok {
-		pp.Println(onAny)
 		return errors.New("failed to convert workflow on into map")
 	}
 	workflowCallAny, ok := onMap["workflow_call"]
 	if !ok {
 		return nil
 	}
+	o.WorkflowCall = &WorkflowCall{}
 	workflowCallMap, ok := workflowCallAny.(map[string]any)
 	if !ok {
 		return nil
@@ -79,9 +78,7 @@ func (o *On) UnmarshalYAML(unmarshal func(any) error) error { //nolint:cyclop
 	if !ok {
 		return nil
 	}
-	o.WorkflowCall = &WorkflowCall{
-		Inputs: map[string]*workflow.Input{},
-	}
+	o.WorkflowCall.Inputs = map[string]*workflow.Input{}
 	for inputKey, v := range inputsMap {
 		o.WorkflowCall.Inputs[inputKey] = &workflow.Input{}
 		inputValueMap, ok := v.(map[any]any)

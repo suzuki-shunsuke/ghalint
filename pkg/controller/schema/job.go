@@ -24,7 +24,7 @@ func (v *validateJob) validate(ctx context.Context) error {
 	if v.job.Uses != "" {
 		v.logE = v.logE.WithField("reusable_workflow", v.job.Uses)
 		if err := v.validateReusableWorkflow(ctx); err != nil {
-			return fmt.Errorf("validate a reusable workflow: %w", err)
+			return fmt.Errorf("validate a reusable workflow: %w", logerr.WithFields(err, v.logE.Data))
 		}
 		return nil
 	}
