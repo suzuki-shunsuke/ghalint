@@ -9,7 +9,7 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
-func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) {
+func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
