@@ -170,6 +170,57 @@ ghalint reads GitHub Actions Workflows `^\.github/workflows/.*\.ya?ml$` and vali
 If there are violatation ghalint outputs error logs and fails.
 If there is no violation ghalint succeeds.
 
+## Experimental Features
+
+> [!WARNING]
+> These features are experimental, meaning they may be changed or removed at minor pr patch versions.
+
+### Validate inputs of actions and resuable workflows
+
+[#904](https://github.com/suzuki-shunsuke/ghalint/pull/904)
+
+```console
+$ ghalint exp validate-input
+ERRO[0000] invalid input key                             action=suzuki-shunsuke/actionlint-action@c8d3c0dcc9152f1d1c7d4a38cbf4953c3a55953d input_key=actionlint_option job_key=actionlint program=ghalint required_inputs= valid_inputs="sparse-checkout, actionlint_options" version=v1.0.0-local workflow_file_path=.github/workflows/actionlint.yaml
+```
+
+`ghalint exp validate-input` command validates inputs of actions and reusable workflows.
+It fails if required inputs aren't given or unknown inputs are passed.
+
+> [!WARNING]
+> [Actions using `required: true` will not automatically return an error if the input is not specified.](https://docs.github.com/en/actions/sharing-automations/creating-actions/metadata-syntax-for-github-actions#inputs)
+> This means if `ghalint exp validate-input` fails as rquired inputs aren't given, the action may work without any problem.
+> Now `ghalint exp validate-input` can't ignore those errors.
+> Ideally, actions should be fixed.
+
+By default, the following files are validated.
+
+```
+.github/workflows/*.yaml
+.github/workflows/*.yml
+action.yaml
+action.yml
+*/action.yaml
+*/action.yml
+*/*/action.yaml
+*/*/action.yml
+*/*/*/action.yaml
+*/*/*/action.yml
+```
+
+This command uses a GitHub access token with `contents:read` permission to download actions and reusable workflows.
+It downloads them into `XDG_DATA_HOME/ghalint`.
+You can pass a GitHub access token by environment variables `GITHUB_TOKEN` or `GHALINT_GITHUB_TOKEN`.
+You can also manage it by secret stores such as GNOME Keyring, Windows Credential Manager, and macOS Keychain.
+
+```sh
+ghalint exp token set [-stdin]
+```
+
+```sh
+ghalint exp token rm # Remove a token from secret store
+```
+
 ## LICENSE
 
 [MIT](LICENSE)
