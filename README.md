@@ -173,7 +173,7 @@ If there is no violation ghalint succeeds.
 ## Experimental Features
 
 > [!WARNING]
-> These features are experimental, meaning they may be changed or removed at minor pr patch versions.
+> These features are experimental, meaning they are unstable and may be changed or removed at minor or patch versions.
 
 ### Validate inputs of actions and reusable workflows
 
