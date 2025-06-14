@@ -175,7 +175,7 @@ If there is no violation ghalint succeeds.
 > [!WARNING]
 > These features are experimental, meaning they may be changed or removed at minor pr patch versions.
 
-### Validate inputs of actions and resuable workflows
+### Validate inputs of actions and reusable workflows
 
 [#904](https://github.com/suzuki-shunsuke/ghalint/pull/904)
 
@@ -189,7 +189,7 @@ It fails if required inputs aren't given or unknown inputs are passed.
 
 > [!WARNING]
 > [Actions using `required: true` will not automatically return an error if the input is not specified.](https://docs.github.com/en/actions/sharing-automations/creating-actions/metadata-syntax-for-github-actions#inputs)
-> This means if `ghalint exp validate-input` fails as rquired inputs aren't given, the action may work without any problem.
+> This means if `ghalint exp validate-input` fails as required inputs aren't given, the action may work without any problem.
 > Now `ghalint exp validate-input` can't ignore those errors.
 > Ideally, actions should be fixed.
 
