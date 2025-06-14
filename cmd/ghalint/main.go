@@ -11,8 +11,8 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
-	"github.com/suzuki-shunsuke/ghalint/pkg/log"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/log"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 )
 
@@ -23,7 +23,7 @@ var (
 )
 
 func main() {
-	logE := log.New(version)
+	logE := log.New("ghalint", version)
 	if err := core(logE); err != nil {
 		hasLogLevel := &controller.HasLogLevelError{}
 		if errors.As(err, &hasLogLevel) {
