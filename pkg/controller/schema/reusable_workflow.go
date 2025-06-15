@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -81,7 +83,7 @@ func (o *On) UnmarshalYAML(unmarshal func(any) error) error { //nolint:cyclop
 	o.WorkflowCall.Inputs = map[string]*workflow.Input{}
 	for inputKey, v := range inputsMap {
 		o.WorkflowCall.Inputs[inputKey] = &workflow.Input{}
-		inputValueMap, ok := v.(map[any]any)
+		inputValueMap, ok := v.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -112,23 +114,15 @@ func (v *validateJob) validateWorkflow(wf *ReusableWorkflow) error {
 		return errors.New("the reusable workflow is invalid. workflow_call is not set")
 	}
 	inputs := wf.On.WorkflowCall.Inputs
-	validKeys := map[string]struct{}{}
 	requiredKeys := map[string]struct{}{}
-	validKeysArray := make([]string, 0, len(inputs))
-	requiredKeysArray := []string{}
 	for key, input := range inputs {
-		validKeysArray = append(validKeysArray, key)
-		validKeys[key] = struct{}{}
 		if input.Required {
 			requiredKeys[key] = struct{}{}
-			requiredKeysArray = append(requiredKeysArray, key)
 		}
 	}
-	validKeysS := strings.Join(validKeysArray, ", ")
-	requiredKeysS := strings.Join(requiredKeysArray, ", ")
 	v.logE = v.logE.WithFields(logrus.Fields{
-		"valid_inputs":    validKeysS,
-		"required_inputs": requiredKeysS,
+		"valid_inputs":    strings.Join(slices.Collect(maps.Keys(inputs)), ", "),
+		"required_inputs": strings.Join(slices.Collect(maps.Keys(requiredKeys)), ", "),
 	})
 	failed := false
 	// Check if the input is valid
