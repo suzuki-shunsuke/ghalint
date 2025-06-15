@@ -15,6 +15,12 @@ There are some ways to install ghalint.
 You can install ghalint using [Homebrew](https://brew.sh/).
 
 ```sh
+brew install ghalint
+```
+
+Or
+
+```sh
 brew install suzuki-shunsuke/ghalint/ghalint
 ```
 
