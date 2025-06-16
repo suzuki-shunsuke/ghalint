@@ -4,12 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"gopkg.in/yaml.v3"
 )
 
 func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath string) error {
@@ -58,14 +61,25 @@ func (c *Controller) validateWorkflow(logE *logrus.Entry, cfg *config.Config, wf
 	wf := &workflow.Workflow{
 		FilePath: filePath,
 	}
-	if err := workflow.Read(c.fs, filePath, wf); err != nil {
+	b, err := afero.ReadFile(c.fs, filePath)
+	if err != nil {
 		logerr.WithError(logE, err).Error("read a workflow file")
-		return true
+		return false
+	}
+	if err := yaml.Unmarshal(b, wf); err != nil {
+		err := fmt.Errorf("parse a workflow file as YAML: %w", err)
+		fields := logrus.Fields{}
+		if errors.Is(err, io.EOF) {
+			fields["reference"] = "https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/codes/001.md"
+		}
+		logerr.WithError(logE, err).WithFields(fields).Error("read a workflow file")
+		return false
 	}
 
 	wfCtx := &policy.WorkflowContext{
 		FilePath: filePath,
 		Workflow: wf,
+		Content:  b,
 	}
 
 	failed := false
