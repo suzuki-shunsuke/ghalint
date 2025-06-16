@@ -5,6 +5,7 @@ import "github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 type WorkflowContext struct {
 	FilePath string
 	Workflow *workflow.Workflow
+	Content  []byte
 }
 
 type JobContext struct {

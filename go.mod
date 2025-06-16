@@ -4,6 +4,7 @@ go 1.24.4
 
 require (
 	github.com/adrg/xdg v0.5.3
+	github.com/goccy/go-yaml v1.18.0
 	github.com/google/go-github/v72 v72.0.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.14.0
