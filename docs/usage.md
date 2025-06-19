@@ -11,11 +11,12 @@ USAGE:
    ghalint [global options] [command [command options]]
 
 VERSION:
-   1.4.1
+   1.5.1
 
 COMMANDS:
    run              lint GitHub Actions Workflows
    run-action, act  lint actions
+   experiment, exp  experimental commands
    version          Show version
    help, h          Shows a list of commands or help for one command
    completion       Output shell completion script for bash, zsh, fish, or Powershell
@@ -51,6 +52,43 @@ NAME:
 
 USAGE:
    ghalint run-action
+
+OPTIONS:
+   --help, -h  show help
+```
+
+## ghalint experiment
+
+```console
+$ ghalint experiment --help
+NAME:
+   ghalint experiment - experimental commands
+
+USAGE:
+   ghalint experiment [command [command options]]
+
+DESCRIPTION:
+   experimental commands. These commands are not stable and may change in the future without major updates.
+
+COMMANDS:
+   validate-input  validate action inputs
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### experiment validate-input
+
+```console
+$ experiment validate-input --help
+NAME:
+   ghalint experiment validate-input - validate action inputs
+
+USAGE:
+   ghalint experiment validate-input
+
+DESCRIPTION:
+   validate action inputs
 
 OPTIONS:
    --help, -h  show help
