@@ -17,6 +17,10 @@ before:
   hooks:
     - go mod tidy
 
+sboms:
+  - id: default
+    disable: false
+
 builds:
   - main: ./cmd/ghalint
     binary: ghalint
