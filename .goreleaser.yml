@@ -84,6 +84,13 @@ homebrew_casks:
     # Default is false.
     skip_upload: true
 
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/ghalint"]
+          end
+
 scoops:
   - description: GitHub Actions linter for security best practices.
     license: MIT
