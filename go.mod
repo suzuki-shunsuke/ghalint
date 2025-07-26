@@ -4,7 +4,7 @@ go 1.24.5
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/google/go-github/v73 v73.0.0
+	github.com/google/go-github/v74 v74.0.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.14.0
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
