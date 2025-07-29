@@ -34,23 +34,6 @@ builds:
       - amd64
       - arm64
 
-signs:
-  - cmd: cosign
-    artifacts: checksum
-    signature: ${artifact}.sig
-    certificate: ${artifact}.pem
-    output: true
-    args:
-      - sign-blob
-      - "-y"
-      - --output-signature
-      - ${signature}
-      - --output-certificate
-      - ${certificate}
-      - --oidc-provider
-      - github
-      - ${artifact}
-
 release:
   prerelease: "true" # we update release note manually before releasing
   header: |
@@ -61,29 +44,16 @@ homebrew_casks:
     # NOTE: make sure the url_template, the token and given repo (github or gitlab) owner and name are from the
     # same kind. We will probably unify this in the next major version like it is done with scoop.
 
-    # GitHub/GitLab repository to push the formula to
     repository:
       owner: suzuki-shunsuke
       name: homebrew-ghalint
     # The project name and current git tag are used in the format string.
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
-    # Your app's homepage.
-    # Default is empty.
     homepage: https://github.com/suzuki-shunsuke/ghalint
 
-    # Template of your app's description.
-    # Default is empty.
     description: GitHub Actions linter
     license: MIT
-
-    # Setting this will prevent goreleaser to actually try to commit the updated
-    # formula - instead, the formula file will be stored on the dist folder only,
-    # leaving the responsibility of publishing it to the user.
-    # If set to auto, the release will not be uploaded to the homebrew tap
-    # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
-    # Default is false.
     skip_upload: true
-
     hooks:
       post:
         install: |
