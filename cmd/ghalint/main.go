@@ -11,9 +11,9 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
+	"github.com/suzuki-shunsuke/go-stdutil"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
-	"github.com/suzuki-shunsuke/urfave-cli-v3-util/log"
-	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
+	"github.com/suzuki-shunsuke/logrus-util/log"
 )
 
 var (
@@ -40,7 +40,7 @@ func main() {
 func core(logE *logrus.Entry) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
-	app := cli.New(&urfave.LDFlags{
+	app := cli.New(&stdutil.LDFlags{
 		Version: version,
 		Commit:  commit,
 		Date:    date,

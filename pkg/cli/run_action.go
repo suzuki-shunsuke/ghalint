@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/act"
-	"github.com/suzuki-shunsuke/urfave-cli-v3-util/log"
+	"github.com/suzuki-shunsuke/logrus-util/log"
 	"github.com/urfave/cli/v3"
 )
 
