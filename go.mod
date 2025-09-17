@@ -8,6 +8,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.15.0
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
+	github.com/suzuki-shunsuke/go-stdutil v0.0.1
 	github.com/suzuki-shunsuke/logrus-error v0.1.4
 	github.com/suzuki-shunsuke/logrus-util v0.0.1
 	github.com/suzuki-shunsuke/slog-logrus v0.1.0
@@ -32,7 +33,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/samber/slog-logrus v1.0.0 // indirect
-	github.com/suzuki-shunsuke/go-stdutil v0.0.1 // indirect
 	github.com/suzuki-shunsuke/slog-error v0.2.0 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/zalando/go-keyring v0.2.6 // indirect
