@@ -4,23 +4,24 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli/experiment"
+	"github.com/suzuki-shunsuke/go-stdutil"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"github.com/urfave/cli/v3"
 )
 
 type Runner struct {
-	flags *urfave.LDFlags
+	flags *stdutil.LDFlags
 	fs    afero.Fs
 	logE  *logrus.Entry
 }
 
-func New(flags *urfave.LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
+func New(flags *stdutil.LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 	runner := &Runner{
 		flags: flags,
 		fs:    fs,
 		logE:  logE,
 	}
-	return urfave.Command(logE, flags, &cli.Command{
+	return urfave.Command(flags, &cli.Command{
 		Name:  "ghalint",
 		Usage: "GitHub Actions linter",
 		Flags: []cli.Flag{

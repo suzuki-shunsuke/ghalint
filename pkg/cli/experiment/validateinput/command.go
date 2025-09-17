@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
-	"github.com/suzuki-shunsuke/urfave-cli-v3-util/log"
+	"github.com/suzuki-shunsuke/logrus-util/log"
 	"github.com/urfave/cli/v3"
 )
 
