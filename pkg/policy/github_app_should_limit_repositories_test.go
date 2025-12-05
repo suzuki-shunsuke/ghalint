@@ -1,9 +1,9 @@
 package policy_test
 
 import (
+	"log/slog"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
@@ -139,7 +139,7 @@ func TestGitHubAppShouldLimitRepositoriesPolicy_ApplyStep(t *testing.T) { //noli
 		},
 	}
 	p := &policy.GitHubAppShouldLimitRepositoriesPolicy{}
-	logE := logrus.NewEntry(logrus.New())
+	logger := slog.New(slog.DiscardHandler)
 	for _, d := range data {
 		if d.stepCtx == nil {
 			d.stepCtx = &policy.StepContext{
@@ -154,7 +154,7 @@ func TestGitHubAppShouldLimitRepositoriesPolicy_ApplyStep(t *testing.T) { //noli
 		}
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyStep(logE, d.cfg, d.stepCtx, d.step); err != nil {
+			if err := p.ApplyStep(logger, d.cfg, d.stepCtx, d.step); err != nil {
 				if d.isErr {
 					return
 				}

@@ -2,23 +2,23 @@ package schema
 
 import (
 	"context"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 )
 
 type Controller struct {
 	fs      afero.Fs
-	logE    *logrus.Entry
+	logger  *slog.Logger
 	gh      GitHub
 	rootDir string
 }
 
-func New(fs afero.Fs, logE *logrus.Entry, gh GitHub, rootDir string) *Controller {
+func New(fs afero.Fs, logger *slog.Logger, gh GitHub, rootDir string) *Controller {
 	return &Controller{
 		fs:      fs,
-		logE:    logE,
+		logger:  logger,
 		gh:      gh,
 		rootDir: rootDir,
 	}

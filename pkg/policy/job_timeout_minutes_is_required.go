@@ -2,8 +2,8 @@ package policy
 
 import (
 	"errors"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -18,7 +18,7 @@ func (p *JobTimeoutMinutesIsRequiredPolicy) ID() string {
 	return "012"
 }
 
-func (p *JobTimeoutMinutesIsRequiredPolicy) ApplyJob(_ *logrus.Entry, _ *config.Config, _ *JobContext, job *workflow.Job) error {
+func (p *JobTimeoutMinutesIsRequiredPolicy) ApplyJob(_ *slog.Logger, _ *config.Config, _ *JobContext, job *workflow.Job) error {
 	if job.TimeoutMinutes != nil {
 		return nil
 	}

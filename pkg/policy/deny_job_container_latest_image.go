@@ -2,9 +2,9 @@ package policy
 
 import (
 	"errors"
+	"log/slog"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -19,7 +19,7 @@ func (p *DenyJobContainerLatestImagePolicy) ID() string {
 	return "007"
 }
 
-func (p *DenyJobContainerLatestImagePolicy) ApplyJob(_ *logrus.Entry, _ *config.Config, _ *JobContext, job *workflow.Job) error {
+func (p *DenyJobContainerLatestImagePolicy) ApplyJob(_ *slog.Logger, _ *config.Config, _ *JobContext, job *workflow.Job) error {
 	if job.Container == nil {
 		return nil
 	}

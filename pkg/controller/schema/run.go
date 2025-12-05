@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 func (c *Controller) Run(ctx context.Context) error {
@@ -14,7 +14,7 @@ func (c *Controller) Run(ctx context.Context) error {
 	if err := c.runWorkflow(ctx); err != nil {
 		failed = true
 		if !errors.Is(err, ErrSilent) {
-			logerr.WithError(c.logE, err).Error("validate workflows")
+			slogerr.WithError(c.logger, err).Error("validate workflows")
 		}
 	}
 	if err := c.runActions(ctx); err != nil {

@@ -2,9 +2,9 @@ package policy
 
 import (
 	"errors"
+	"log/slog"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -19,7 +19,7 @@ func (p *CheckoutPersistCredentialShouldBeFalsePolicy) ID() string {
 	return "013"
 }
 
-func (p *CheckoutPersistCredentialShouldBeFalsePolicy) ApplyStep(_ *logrus.Entry, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) error {
+func (p *CheckoutPersistCredentialShouldBeFalsePolicy) ApplyStep(_ *slog.Logger, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) error {
 	if p.excluded(stepCtx, cfg.Excludes) {
 		return nil
 	}

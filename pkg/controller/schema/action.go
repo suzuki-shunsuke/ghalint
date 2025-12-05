@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/action"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 func (c *Controller) runActions(ctx context.Context) error {
@@ -19,16 +19,16 @@ func (c *Controller) runActions(ctx context.Context) error {
 	}
 	failed := false
 	for _, filePath := range filePaths {
-		logE := c.logE.WithField("action_file_path", filePath)
+		logger := c.logger.With("action_file_path", filePath)
 		vw := &validateAction{
 			action:  filePath,
-			logE:    logE,
+			logger:  logger,
 			fs:      c.fs,
 			gh:      c.gh,
 			rootDir: c.rootDir,
 		}
 		if err := vw.validate(ctx); err != nil {
-			logE.WithError(err).Error("validate action")
+			slogerr.WithError(logger, err).Error("validate action")
 			failed = true
 		}
 	}
@@ -40,7 +40,7 @@ func (c *Controller) runActions(ctx context.Context) error {
 
 type validateAction struct {
 	action  string
-	logE    *logrus.Entry
+	logger  *slog.Logger
 	fs      afero.Fs
 	gh      GitHub
 	rootDir string
@@ -55,13 +55,13 @@ func (v *validateAction) validate(ctx context.Context) error {
 	for _, step := range act.Runs.Steps {
 		vs := &validateStep{
 			step:    step,
-			logE:    v.logE,
+			logger:  v.logger,
 			fs:      v.fs,
 			gh:      v.gh,
 			rootDir: v.rootDir,
 		}
 		if err := vs.validate(ctx); err != nil {
-			logerr.WithError(v.logE, err).Error("validate a step")
+			slogerr.WithError(v.logger, err).Error("validate a step")
 			failed = true
 		}
 	}

@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"os"
 	"os/signal"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
 	"github.com/suzuki-shunsuke/go-stdutil"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
-	"github.com/suzuki-shunsuke/logrus-util/log"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/slog-util/slogutil"
 )
 
 var (
@@ -23,27 +23,37 @@ var (
 )
 
 func main() {
-	logE := log.New("ghalint", version)
-	if err := core(logE); err != nil {
-		hasLogLevel := &controller.HasLogLevelError{}
-		if errors.As(err, &hasLogLevel) {
-			logerr.WithError(logE, hasLogLevel.Err).Log(hasLogLevel.LogLevel, "ghalint failed")
-			os.Exit(1)
-		}
-		if errors.Is(err, schema.ErrSilent) {
-			os.Exit(1)
-		}
-		logerr.WithError(logE, err).Fatal("ghalint failed")
+	if code := core(); code != 0 {
+		os.Exit(code)
 	}
 }
 
-func core(logE *logrus.Entry) error {
+func core() int {
+	logLevelVar := &slog.LevelVar{}
+	logger := slogutil.New(&slogutil.InputNew{
+		Name:    "ghalint",
+		Version: version,
+		Out:     os.Stderr,
+		Level:   logLevelVar,
+	})
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	app := cli.New(&stdutil.LDFlags{
 		Version: version,
 		Commit:  commit,
 		Date:    date,
-	}, afero.NewOsFs(), logE)
-	return app.Run(ctx, os.Args) //nolint:wrapcheck
+	}, afero.NewOsFs(), logger, logLevelVar)
+	if err := app.Run(ctx, os.Args); err != nil {
+		hasLogLevel := &controller.HasLogLevelError{}
+		if errors.As(err, &hasLogLevel) {
+			slogerr.WithError(logger, hasLogLevel.Err).Log(ctx, hasLogLevel.LogLevel, "ghalint failed")
+			return 1
+		}
+		if errors.Is(err, schema.ErrSilent) {
+			return 1
+		}
+		slogerr.WithError(logger, err).Error("ghalint failed")
+		return 1
+	}
+	return 0
 }

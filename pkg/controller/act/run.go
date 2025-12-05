@@ -4,17 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/action"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
-func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath string, args ...string) error {
+func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath string, args ...string) error {
 	cfg := &config.Config{}
 	if err := c.readConfig(cfg, cfgFilePath); err != nil {
 		return err
@@ -33,8 +33,8 @@ func (c *Controller) Run(_ context.Context, logE *logrus.Entry, cfgFilePath stri
 	}
 	failed := false
 	for _, filePath := range filePaths {
-		logE := logE.WithField("action_file_path", filePath)
-		if c.validateAction(logE, cfg, stepPolicies, filePath) {
+		logger := logger.With("action_file_path", filePath)
+		if c.validateAction(logger, cfg, stepPolicies, filePath) {
 			failed = true
 		}
 	}
@@ -52,10 +52,10 @@ func (c *Controller) listFiles(args ...string) ([]string, error) {
 	return action.Find(c.fs) //nolint:wrapcheck
 }
 
-func (c *Controller) validateAction(logE *logrus.Entry, cfg *config.Config, stepPolicies []controller.StepPolicy, filePath string) bool {
+func (c *Controller) validateAction(logger *slog.Logger, cfg *config.Config, stepPolicies []controller.StepPolicy, filePath string) bool {
 	action := &workflow.Action{}
 	if err := workflow.ReadAction(c.fs, filePath, action); err != nil {
-		logerr.WithError(logE, err).Error("read an action file")
+		slogerr.WithError(logger, err).Error("read an action file")
 		return true
 	}
 
@@ -64,7 +64,7 @@ func (c *Controller) validateAction(logE *logrus.Entry, cfg *config.Config, step
 		Action:   action,
 	}
 
-	return c.applyStepPolicies(logE, cfg, stepCtx, action, stepPolicies)
+	return c.applyStepPolicies(logger, cfg, stepCtx, action, stepPolicies)
 }
 
 type Policy interface {
@@ -72,37 +72,37 @@ type Policy interface {
 	ID() string
 }
 
-func withPolicyReference(logE *logrus.Entry, p Policy) *logrus.Entry {
-	return logE.WithFields(logrus.Fields{
-		"policy_name": p.Name(),
-		"reference":   fmt.Sprintf("https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/policies/%s.md", p.ID()),
-	})
+func withPolicyReference(logger *slog.Logger, p Policy) *slog.Logger {
+	return logger.With(
+		"policy_name", p.Name(),
+		"reference", fmt.Sprintf("https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/policies/%s.md", p.ID()),
+	)
 }
 
-func (c *Controller) applyStepPolicies(logE *logrus.Entry, cfg *config.Config, stepCtx *policy.StepContext, action *workflow.Action, stepPolicies []controller.StepPolicy) bool {
+func (c *Controller) applyStepPolicies(logger *slog.Logger, cfg *config.Config, stepCtx *policy.StepContext, action *workflow.Action, stepPolicies []controller.StepPolicy) bool {
 	failed := false
 	for _, stepPolicy := range stepPolicies {
-		logE := withPolicyReference(logE, stepPolicy)
-		if c.applyStepPolicy(logE, cfg, stepCtx, action, stepPolicy) {
+		logger := withPolicyReference(logger, stepPolicy)
+		if c.applyStepPolicy(logger, cfg, stepCtx, action, stepPolicy) {
 			failed = true
 		}
 	}
 	return failed
 }
 
-func (c *Controller) applyStepPolicy(logE *logrus.Entry, cfg *config.Config, stepCtx *policy.StepContext, action *workflow.Action, stepPolicy controller.StepPolicy) bool {
+func (c *Controller) applyStepPolicy(logger *slog.Logger, cfg *config.Config, stepCtx *policy.StepContext, action *workflow.Action, stepPolicy controller.StepPolicy) bool {
 	failed := false
 	for _, step := range action.Runs.Steps {
-		logE := logE
+		logger := logger
 		if step.ID != "" {
-			logE = logE.WithField("step_id", step.ID)
+			logger = logger.With("step_id", step.ID)
 		}
 		if step.Name != "" {
-			logE = logE.WithField("step_name", step.Name)
+			logger = logger.With("step_name", step.Name)
 		}
-		if err := stepPolicy.ApplyStep(logE, cfg, stepCtx, step); err != nil {
+		if err := stepPolicy.ApplyStep(logger, cfg, stepCtx, step); err != nil {
 			if err.Error() != "" {
-				logerr.WithError(logE, err).Error("the step violates policies")
+				slogerr.WithError(logger, err).Error("the step violates policies")
 			}
 			failed = true
 		}
@@ -118,14 +118,14 @@ func (c *Controller) readConfig(cfg *config.Config, cfgFilePath string) error {
 	}
 	if cfgFilePath != "" {
 		if err := config.Read(c.fs, cfg, cfgFilePath); err != nil {
-			return fmt.Errorf("read a configuration file: %w", logerr.WithFields(err, logrus.Fields{
-				"config_file": cfgFilePath,
-			}))
+			return fmt.Errorf("read a configuration file: %w", slogerr.With(err,
+				"config_file", cfgFilePath,
+			))
 		}
 		if err := config.Validate(cfg); err != nil {
-			return fmt.Errorf("validate a configuration file: %w", logerr.WithFields(err, logrus.Fields{
-				"config_file": cfgFilePath,
-			}))
+			return fmt.Errorf("validate a configuration file: %w", slogerr.With(err,
+				"config_file", cfgFilePath,
+			))
 		}
 		config.ConvertPath(cfg)
 	}

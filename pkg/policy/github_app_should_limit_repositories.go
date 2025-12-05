@@ -1,12 +1,12 @@
 package policy
 
 import (
+	"log/slog"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type GitHubAppShouldLimitRepositoriesPolicy struct{}
@@ -19,20 +19,20 @@ func (p *GitHubAppShouldLimitRepositoriesPolicy) ID() string {
 	return "009"
 }
 
-func (p *GitHubAppShouldLimitRepositoriesPolicy) ApplyStep(logE *logrus.Entry, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) (ge error) { //nolint:cyclop
+func (p *GitHubAppShouldLimitRepositoriesPolicy) ApplyStep(logger *slog.Logger, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) (ge error) { //nolint:cyclop
 	action := p.checkUses(step.Uses)
 	if action == "" {
 		return nil
 	}
 	defer func() {
 		if ge != nil {
-			ge = logerr.WithFields(ge, logrus.Fields{
-				"action": action,
-			})
+			ge = slogerr.With(ge,
+				"action", action,
+			)
 		}
 	}()
 	if p.excluded(cfg, stepCtx, step) {
-		logE.Debug("this step is ignored")
+		logger.Debug("this step is ignored")
 		return nil
 	}
 	if action == "tibdex/github-app-token" {

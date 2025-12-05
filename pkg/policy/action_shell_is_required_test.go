@@ -1,9 +1,9 @@
 package policy_test
 
 import (
+	"log/slog"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -31,11 +31,11 @@ func TestActionShellIsRequiredPolicy_ApplyStep(t *testing.T) {
 		},
 	}
 	p := &policy.ActionShellIsRequiredPolicy{}
-	logE := logrus.NewEntry(logrus.New())
+	logger := slog.New(slog.DiscardHandler)
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyStep(logE, nil, nil, d.step); err != nil {
+			if err := p.ApplyStep(logger, nil, nil, d.step); err != nil {
 				if d.isErr {
 					return
 				}

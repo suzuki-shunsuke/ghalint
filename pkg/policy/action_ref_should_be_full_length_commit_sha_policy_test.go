@@ -1,9 +1,9 @@
 package policy_test
 
 import (
+	"log/slog"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
@@ -114,11 +114,11 @@ func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 		},
 	}
 	p := policy.NewActionRefShouldBeSHAPolicy()
-	logE := logrus.NewEntry(logrus.New())
+	logger := slog.New(slog.DiscardHandler)
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyJob(logE, d.cfg, nil, d.job); err != nil {
+			if err := p.ApplyJob(logger, d.cfg, nil, d.job); err != nil {
 				if d.isErr {
 					return
 				}
@@ -255,11 +255,11 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 		},
 	}
 	p := policy.NewActionRefShouldBeSHAPolicy()
-	logE := logrus.NewEntry(logrus.New())
+	logger := slog.New(slog.DiscardHandler)
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyStep(logE, d.cfg, nil, d.step); err != nil {
+			if err := p.ApplyStep(logger, d.cfg, nil, d.step); err != nil {
 				if d.isErr {
 					return
 				}

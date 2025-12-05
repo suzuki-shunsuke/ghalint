@@ -4,21 +4,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"gopkg.in/yaml.v3"
 )
 
 type validateStep struct {
 	step    *workflow.Step
-	logE    *logrus.Entry
+	logger  *slog.Logger
 	fs      afero.Fs
 	gh      GitHub
 	rootDir string
@@ -104,7 +104,7 @@ func (v *validateStep) download(ctx context.Context, input *downloadInput) (stri
 			Ref: input.Ref,
 		})
 		if err != nil {
-			logerr.WithError(v.logE, err).Debug("get action file")
+			slogerr.WithError(v.logger, err).Debug("get action file")
 			continue
 		}
 		s, err := content.GetContent()
@@ -121,7 +121,7 @@ func (v *validateStep) validate(ctx context.Context) error {
 	if v.step.Uses == "" {
 		return nil
 	}
-	v.logE = v.logE.WithField("action", v.step.Uses)
+	v.logger = v.logger.With("action", v.step.Uses)
 	action := &workflow.Action{}
 	if err := v.readAction(ctx, action); err != nil {
 		return fmt.Errorf("read action: %w", err)
@@ -140,22 +140,22 @@ func (v *validateStep) validate(ctx context.Context) error {
 	}
 	validKeysS := strings.Join(validKeysArray, ", ")
 	requiredKeysS := strings.Join(requiredKeysArray, ", ")
-	v.logE = v.logE.WithFields(logrus.Fields{
-		"valid_inputs":    validKeysS,
-		"required_inputs": requiredKeysS,
-	})
+	v.logger = v.logger.With(
+		"valid_inputs", validKeysS,
+		"required_inputs", requiredKeysS,
+	)
 	failed := false
 	// Check if the input is valid
 	for key := range v.step.With {
 		if _, ok := action.Inputs[key]; !ok {
-			v.logE.WithField("input_key", key).Errorf("invalid input key")
+			v.logger.Error("invalid input key", "input_key", key)
 			failed = true
 		}
 	}
 	// Check if required keys are set
 	for key := range requiredKeys {
 		if _, ok := v.step.With[key]; !ok {
-			v.logE.WithField("input_key", key).Errorf("required key is not set")
+			v.logger.Error("required key is not set", "input_key", key)
 			failed = true
 		}
 	}

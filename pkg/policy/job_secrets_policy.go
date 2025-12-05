@@ -2,12 +2,12 @@ package policy
 
 import (
 	"errors"
+	"log/slog"
 	"regexp"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type JobSecretsPolicy struct {
@@ -39,7 +39,7 @@ func checkExcludes(policyName string, jobCtx *JobContext, cfg *config.Config) bo
 	return false
 }
 
-func (p *JobSecretsPolicy) ApplyJob(_ *logrus.Entry, cfg *config.Config, jobCtx *JobContext, job *workflow.Job) error {
+func (p *JobSecretsPolicy) ApplyJob(_ *slog.Logger, cfg *config.Config, jobCtx *JobContext, job *workflow.Job) error {
 	if checkExcludes(p.Name(), jobCtx, cfg) {
 		return nil
 	}
@@ -48,14 +48,14 @@ func (p *JobSecretsPolicy) ApplyJob(_ *logrus.Entry, cfg *config.Config, jobCtx 
 	}
 	for envName, envValue := range job.Env {
 		if p.secretPattern.MatchString(envValue) {
-			return logerr.WithFields(errors.New("secret should not be set to job's env"), logrus.Fields{ //nolint:wrapcheck
-				"env_name": envName,
-			})
+			return slogerr.With(errors.New("secret should not be set to job's env"), //nolint:wrapcheck
+				"env_name", envName,
+			)
 		}
 		if p.githubTokenPattern.MatchString(envValue) {
-			return logerr.WithFields(errors.New("github.token should not be set to job's env"), logrus.Fields{ //nolint:wrapcheck
-				"env_name": envName,
-			})
+			return slogerr.With(errors.New("github.token should not be set to job's env"), //nolint:wrapcheck
+				"env_name", envName,
+			)
 		}
 	}
 	return nil

@@ -5,18 +5,19 @@ import (
 	"fmt"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
-	"github.com/suzuki-shunsuke/logrus-util/log"
+	"github.com/suzuki-shunsuke/slog-util/slogutil"
 	"github.com/urfave/cli/v3"
 )
 
 func (r *Runner) Run(ctx context.Context, cmd *cli.Command) error {
-	logE := r.logE
-
-	if err := log.Set(logE, cmd.String("log-level"), cmd.String("log-color")); err != nil {
-		return fmt.Errorf("configure logger: %w", err)
+	if cmd.String("log-color") != "" {
+		r.logger.Warn("log color option is deprecated and doesn't work anymore. This is kept for backward compatibility.")
+	}
+	if err := slogutil.SetLevel(r.logLevelVar, cmd.String("log-level")); err != nil {
+		return fmt.Errorf("set log level: %w", err)
 	}
 
 	ctrl := controller.New(r.fs)
 
-	return ctrl.Run(ctx, logE, cmd.String("config")) //nolint:wrapcheck
+	return ctrl.Run(ctx, r.logger, cmd.String("config")) //nolint:wrapcheck
 }

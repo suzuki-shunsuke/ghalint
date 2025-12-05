@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 func (c *Controller) runWorkflow(ctx context.Context) error {
@@ -18,10 +18,10 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 	}
 	failed := false
 	for _, filePath := range filePaths {
-		logE := c.logE.WithField("workflow_file_path", filePath)
+		logger := c.logger.With("workflow_file_path", filePath)
 		vw := &validateWorkflow{
 			workflow: filePath,
-			logE:     logE,
+			logger:   logger,
 			fs:       c.fs,
 			gh:       c.gh,
 			rootDir:  c.rootDir,
@@ -29,7 +29,7 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 		if err := vw.validate(ctx); err != nil {
 			failed = true
 			if !errors.Is(err, ErrSilent) {
-				logE.WithError(err).Error("validate workflow")
+				slogerr.WithError(logger, err).Error("validate workflow")
 			}
 		}
 	}
@@ -41,7 +41,7 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 
 type validateWorkflow struct {
 	workflow string
-	logE     *logrus.Entry
+	logger   *slog.Logger
 	fs       afero.Fs
 	gh       GitHub
 	rootDir  string
@@ -58,7 +58,7 @@ func (v *validateWorkflow) validate(ctx context.Context) error {
 	for name, job := range wf.Jobs {
 		vj := &validateJob{
 			job:     job,
-			logE:    v.logE.WithField("job_key", name),
+			logger:  v.logger.With("job_key", name),
 			fs:      v.fs,
 			gh:      v.gh,
 			rootDir: v.rootDir,
@@ -66,7 +66,7 @@ func (v *validateWorkflow) validate(ctx context.Context) error {
 		if err := vj.validate(ctx); err != nil {
 			failed = true
 			if !errors.Is(err, ErrSilent) {
-				logerr.WithError(v.logE, err).Error("validate job")
+				slogerr.WithError(v.logger, err).Error("validate job")
 			}
 		}
 	}

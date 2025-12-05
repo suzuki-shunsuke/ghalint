@@ -10,11 +10,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"gopkg.in/yaml.v3"
 )
 
@@ -120,22 +119,22 @@ func (v *validateJob) validateWorkflow(wf *ReusableWorkflow) error {
 			requiredKeys[key] = struct{}{}
 		}
 	}
-	v.logE = v.logE.WithFields(logrus.Fields{
-		"valid_inputs":    strings.Join(slices.Collect(maps.Keys(inputs)), ", "),
-		"required_inputs": strings.Join(slices.Collect(maps.Keys(requiredKeys)), ", "),
-	})
+	v.logger = v.logger.With(
+		"valid_inputs", strings.Join(slices.Collect(maps.Keys(inputs)), ", "),
+		"required_inputs", strings.Join(slices.Collect(maps.Keys(requiredKeys)), ", "),
+	)
 	failed := false
 	// Check if the input is valid
 	for key := range v.job.With {
 		if _, ok := inputs[key]; !ok {
-			v.logE.WithField("input_key", key).Errorf("invalid input key")
+			v.logger.Error("invalid input key", "input_key", key)
 			failed = true
 		}
 	}
 	// Check if required keys are set
 	for key := range requiredKeys {
 		if _, ok := v.job.With[key]; !ok {
-			v.logE.WithField("input_key", key).Errorf("required key is not set")
+			v.logger.Error("required key is not set", "input_key", key)
 			failed = true
 		}
 	}
@@ -154,9 +153,9 @@ func readReusableWorkflow(fs afero.Fs, p string, wf *ReusableWorkflow) error {
 	if err := yaml.NewDecoder(f).Decode(wf); err != nil {
 		err := fmt.Errorf("parse a workflow file as YAML: %w", err)
 		if errors.Is(err, io.EOF) {
-			return logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
-				"reference": "https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/codes/001.md",
-			})
+			return slogerr.With(err, //nolint:wrapcheck
+				"reference", "https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/codes/001.md",
+			)
 		}
 		return err
 	}
