@@ -3,22 +3,23 @@ package validateinput
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
 	"github.com/adrg/xdg"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
-	"github.com/suzuki-shunsuke/logrus-util/log"
+	"github.com/suzuki-shunsuke/slog-util/slogutil"
 	"github.com/urfave/cli/v3"
 )
 
-func New(logE *logrus.Entry, fs afero.Fs) *cli.Command {
+func New(logger *slog.Logger, logLevelVar *slog.LevelVar, fs afero.Fs) *cli.Command {
 	runner := &Runner{
-		logE: logE,
-		fs:   fs,
+		logger:      logger,
+		logLevelVar: logLevelVar,
+		fs:          fs,
 	}
 	return &cli.Command{
 		Name:        "validate-input",
@@ -29,15 +30,17 @@ func New(logE *logrus.Entry, fs afero.Fs) *cli.Command {
 }
 
 type Runner struct {
-	logE *logrus.Entry
-	fs   afero.Fs
+	logger      *slog.Logger
+	logLevelVar *slog.LevelVar
+	fs          afero.Fs
 }
 
 func (r *Runner) Action(ctx context.Context, cmd *cli.Command) error {
-	logE := r.logE
-
-	if err := log.Set(logE, cmd.String("log-level"), cmd.String("log-color")); err != nil {
-		return fmt.Errorf("configure log options: %w", err)
+	if cmd.String("log-color") != "" {
+		r.logger.Warn("log color option is deprecated and doesn't work anymore. This is kept for backward compatibility.")
+	}
+	if err := slogutil.SetLevel(r.logLevelVar, cmd.String("log-level")); err != nil {
+		return fmt.Errorf("set log level: %w", err)
 	}
 
 	rootDir, err := GetRootDir()
@@ -45,9 +48,9 @@ func (r *Runner) Action(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("get the root directory: %w", err)
 	}
 
-	gh := github.New(ctx, logE)
+	gh := github.New(ctx, r.logger)
 
-	ctrl := schema.New(r.fs, logE, gh.Repositories, rootDir)
+	ctrl := schema.New(r.fs, r.logger, gh.Repositories, rootDir)
 
 	return ctrl.Run(ctx) //nolint:wrapcheck
 }

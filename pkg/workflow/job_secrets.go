@@ -3,8 +3,7 @@ package workflow
 import (
 	"errors"
 
-	"github.com/sirupsen/logrus"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type JobSecrets struct {
@@ -36,9 +35,7 @@ func convJobSecrets(src interface{}, dest *JobSecrets) error { //nolint:cyclop
 			dest.inherit = true
 			return nil
 		default:
-			return logerr.WithFields(errors.New("job secrets must be a map or `inherit`"), logrus.Fields{ //nolint:wrapcheck
-				"secrets": p,
-			})
+			return slogerr.With(errors.New("job secrets must be a map or `inherit`"), "secrets", p) //nolint:wrapcheck
 		}
 	case map[interface{}]interface{}:
 		m := make(map[string]string, len(p))

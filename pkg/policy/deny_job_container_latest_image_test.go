@@ -1,9 +1,9 @@
 package policy_test
 
 import (
+	"log/slog"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -50,11 +50,11 @@ func TestDenyJobContainerLatestImagePolicy_ApplyJob(t *testing.T) {
 		},
 	}
 	p := &policy.DenyJobContainerLatestImagePolicy{}
-	logE := logrus.NewEntry(logrus.New())
+	logger := slog.New(slog.DiscardHandler)
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyJob(logE, nil, nil, d.job); err != nil {
+			if err := p.ApplyJob(logger, nil, nil, d.job); err != nil {
 				if !d.isErr {
 					t.Fatal(err)
 				}

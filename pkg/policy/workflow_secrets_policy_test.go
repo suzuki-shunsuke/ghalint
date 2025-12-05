@@ -1,9 +1,9 @@
 package policy_test
 
 import (
+	"log/slog"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
@@ -76,11 +76,11 @@ func TestWorkflowSecretsPolicy_ApplyWorkflow(t *testing.T) { //nolint:funlen
 		},
 	}
 	p := policy.NewWorkflowSecretsPolicy()
-	logE := logrus.NewEntry(logrus.New())
+	logger := slog.New(slog.DiscardHandler)
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyWorkflow(logE, d.cfg, nil, d.wf); err != nil {
+			if err := p.ApplyWorkflow(logger, d.cfg, nil, d.wf); err != nil {
 				if !d.isErr {
 					t.Fatal(err)
 				}

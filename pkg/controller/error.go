@@ -1,9 +1,9 @@
 package controller
 
-import "github.com/sirupsen/logrus"
+import "log/slog"
 
 type HasLogLevelError struct {
-	LogLevel logrus.Level
+	LogLevel slog.Level
 	Err      error
 }
 
@@ -17,7 +17,7 @@ func (e *HasLogLevelError) Unwrap() error {
 
 func debugError(err error) *HasLogLevelError {
 	return &HasLogLevelError{
-		LogLevel: logrus.DebugLevel,
+		LogLevel: slog.LevelDebug,
 		Err:      err,
 	}
 }

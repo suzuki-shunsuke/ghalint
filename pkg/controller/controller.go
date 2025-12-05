@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"github.com/sirupsen/logrus"
+	"log/slog"
+
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
@@ -21,17 +22,17 @@ func New(fs afero.Fs) *Controller {
 type WorkflowPolicy interface {
 	Name() string
 	ID() string
-	ApplyWorkflow(logE *logrus.Entry, cfg *config.Config, wfCtx *policy.WorkflowContext, wf *workflow.Workflow) error
+	ApplyWorkflow(logger *slog.Logger, cfg *config.Config, wfCtx *policy.WorkflowContext, wf *workflow.Workflow) error
 }
 
 type JobPolicy interface {
 	Name() string
 	ID() string
-	ApplyJob(logE *logrus.Entry, cfg *config.Config, jobCtx *policy.JobContext, job *workflow.Job) error
+	ApplyJob(logger *slog.Logger, cfg *config.Config, jobCtx *policy.JobContext, job *workflow.Job) error
 }
 
 type StepPolicy interface {
 	Name() string
 	ID() string
-	ApplyStep(logE *logrus.Entry, cfg *config.Config, stepCtx *policy.StepContext, step *workflow.Step) error
+	ApplyStep(logger *slog.Logger, cfg *config.Config, stepCtx *policy.StepContext, step *workflow.Step) error
 }

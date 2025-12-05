@@ -1,12 +1,12 @@
 package policy
 
 import (
+	"log/slog"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type GitHubAppShouldLimitPermissionsPolicy struct{}
@@ -19,16 +19,16 @@ func (p *GitHubAppShouldLimitPermissionsPolicy) ID() string {
 	return "010"
 }
 
-func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(_ *logrus.Entry, _ *config.Config, _ *StepContext, step *workflow.Step) (ge error) { //nolint:cyclop
+func (p *GitHubAppShouldLimitPermissionsPolicy) ApplyStep(_ *slog.Logger, _ *config.Config, _ *StepContext, step *workflow.Step) (ge error) { //nolint:cyclop
 	action := p.checkUses(step.Uses)
 	if action == "" {
 		return nil
 	}
 	defer func() {
 		if ge != nil {
-			ge = logerr.WithFields(ge, logrus.Fields{
-				"action": action,
-			})
+			ge = slogerr.With(ge,
+				"action", action,
+			)
 		}
 	}()
 

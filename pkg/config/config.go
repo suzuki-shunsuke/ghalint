@@ -7,9 +7,8 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"gopkg.in/yaml.v3"
 )
 
@@ -60,9 +59,7 @@ func Read(fs afero.Fs, cfg *Config, filePath string) error {
 	if err := yaml.NewDecoder(f).Decode(cfg); err != nil {
 		err := fmt.Errorf("parse configuration file as YAML: %w", err)
 		if errors.Is(err, io.EOF) {
-			return logerr.WithFields(err, logrus.Fields{ //nolint:wrapcheck
-				"reference": "https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/codes/002.md",
-			})
+			return slogerr.With(err, "reference", "https://github.com/suzuki-shunsuke/ghalint/blob/main/docs/codes/002.md") //nolint:wrapcheck
 		}
 		return err
 	}
@@ -99,9 +96,7 @@ func validate(exclude *Exclude) error { //nolint:cyclop
 			return errors.New(`action_name is required to exclude action_ref_should_be_full_length_commit_sha`)
 		}
 		if _, err := path.Match(exclude.ActionName, ""); err != nil {
-			return fmt.Errorf("action_name must be a glob pattern: %w", logerr.WithFields(err, logrus.Fields{
-				"pattern_reference": "https://pkg.go.dev/path#Match",
-			}))
+			return fmt.Errorf("action_name must be a glob pattern: %w", slogerr.With(err, "pattern_reference", "https://pkg.go.dev/path#Match"))
 		}
 	case "job_secrets":
 		if exclude.WorkflowFilePath == "" {
@@ -135,9 +130,7 @@ func validate(exclude *Exclude) error { //nolint:cyclop
 			return errors.New(`job_name is required to exclude checkout_persist_credentials_should_be_false`)
 		}
 	default:
-		return logerr.WithFields(errors.New(`the policy can't be excluded`), logrus.Fields{ //nolint:wrapcheck
-			"policy_name": exclude.PolicyName,
-		})
+		return slogerr.With(errors.New(`the policy can't be excluded`), "policy_name", exclude.PolicyName) //nolint:wrapcheck
 	}
 	return nil
 }

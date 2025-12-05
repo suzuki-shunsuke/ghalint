@@ -1,7 +1,8 @@
 package cli
 
 import (
-	"github.com/sirupsen/logrus"
+	"log/slog"
+
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli/experiment"
 	"github.com/suzuki-shunsuke/go-stdutil"
@@ -10,16 +11,18 @@ import (
 )
 
 type Runner struct {
-	flags *stdutil.LDFlags
-	fs    afero.Fs
-	logE  *logrus.Entry
+	flags       *stdutil.LDFlags
+	fs          afero.Fs
+	logger      *slog.Logger
+	logLevelVar *slog.LevelVar
 }
 
-func New(flags *stdutil.LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
+func New(flags *stdutil.LDFlags, fs afero.Fs, logger *slog.Logger, logLevelVar *slog.LevelVar) *cli.Command {
 	runner := &Runner{
-		flags: flags,
-		fs:    fs,
-		logE:  logE,
+		flags:       flags,
+		fs:          fs,
+		logger:      logger,
+		logLevelVar: logLevelVar,
 	}
 	return urfave.Command(flags, &cli.Command{
 		Name:  "ghalint",
@@ -27,7 +30,7 @@ func New(flags *stdutil.LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "log-color",
-				Usage: "log color. auto(default)|always|never",
+				Usage: "Deprecated: This option doesn't work anymore. This is kept for backward compatibility.",
 				Sources: cli.EnvVars(
 					"GHALINT_LOG_COLOR",
 				),
@@ -64,7 +67,7 @@ func New(flags *stdutil.LDFlags, fs afero.Fs, logE *logrus.Entry) *cli.Command {
 				Action: runner.RunAction,
 				Flags:  []cli.Flag{},
 			},
-			experiment.New(logE, fs),
+			experiment.New(logger, logLevelVar, fs),
 		},
 	})
 }

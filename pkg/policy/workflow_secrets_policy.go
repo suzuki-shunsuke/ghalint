@@ -1,9 +1,9 @@
 package policy
 
 import (
+	"log/slog"
 	"regexp"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -28,7 +28,7 @@ func (p *WorkflowSecretsPolicy) ID() string {
 	return "005"
 }
 
-func (p *WorkflowSecretsPolicy) ApplyWorkflow(logE *logrus.Entry, _ *config.Config, _ *WorkflowContext, wf *workflow.Workflow) error {
+func (p *WorkflowSecretsPolicy) ApplyWorkflow(logger *slog.Logger, _ *config.Config, _ *WorkflowContext, wf *workflow.Workflow) error {
 	if len(wf.Jobs) < 2 { //nolint:mnd
 		return nil
 	}
@@ -36,11 +36,11 @@ func (p *WorkflowSecretsPolicy) ApplyWorkflow(logE *logrus.Entry, _ *config.Conf
 	for envName, envValue := range wf.Env {
 		if p.secretPattern.MatchString(envValue) {
 			failed = true
-			logE.WithField("env_name", envName).Error("secret should not be set to workflow's env")
+			logger.Error("secret should not be set to workflow's env", "env_name", envName)
 		}
 		if p.githubTokenPattern.MatchString(envValue) {
 			failed = true
-			logE.WithField("env_name", envName).Error("github.token should not be set to workflow's env")
+			logger.Error("github.token should not be set to workflow's env", "env_name", envName)
 		}
 	}
 	if failed {

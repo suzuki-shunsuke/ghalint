@@ -2,9 +2,9 @@
 package policy_test
 
 import (
+	"log/slog"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
@@ -85,7 +85,7 @@ func TestDenyInheritSecretsPolicy_ApplyJob(t *testing.T) {
 		},
 	}
 	p := &policy.DenyInheritSecretsPolicy{}
-	logE := logrus.NewEntry(logrus.New())
+	logger := slog.New(slog.DiscardHandler)
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
@@ -93,7 +93,7 @@ func TestDenyInheritSecretsPolicy_ApplyJob(t *testing.T) {
 			if err := yaml.Unmarshal([]byte(d.job), job); err != nil {
 				t.Fatal(err)
 			}
-			if err := p.ApplyJob(logE, d.cfg, d.jobCtx, job); err != nil {
+			if err := p.ApplyJob(logger, d.cfg, d.jobCtx, job); err != nil {
 				if d.isErr {
 					return
 				}

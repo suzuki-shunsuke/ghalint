@@ -2,8 +2,8 @@ package policy
 
 import (
 	"errors"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -18,7 +18,7 @@ func (p *JobPermissionsPolicy) ID() string {
 	return "001"
 }
 
-func (p *JobPermissionsPolicy) ApplyJob(_ *logrus.Entry, _ *config.Config, jobCtx *JobContext, job *workflow.Job) error {
+func (p *JobPermissionsPolicy) ApplyJob(_ *slog.Logger, _ *config.Config, jobCtx *JobContext, job *workflow.Job) error {
 	wf := jobCtx.Workflow.Workflow
 	wfPermissions := wf.Permissions.Permissions()
 	if wfPermissions != nil && len(wfPermissions) == 0 {

@@ -2,8 +2,8 @@ package policy
 
 import (
 	"errors"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -18,7 +18,7 @@ func (p *DenyInheritSecretsPolicy) ID() string {
 	return "004"
 }
 
-func (p *DenyInheritSecretsPolicy) ApplyJob(_ *logrus.Entry, cfg *config.Config, jobCtx *JobContext, job *workflow.Job) error {
+func (p *DenyInheritSecretsPolicy) ApplyJob(_ *slog.Logger, cfg *config.Config, jobCtx *JobContext, job *workflow.Job) error {
 	if checkExcludes(p.Name(), jobCtx, cfg) {
 		return nil
 	}

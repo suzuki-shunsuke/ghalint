@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
-	"github.com/suzuki-shunsuke/logrus-error/logerr"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type validateJob struct {
 	job     *workflow.Job
-	logE    *logrus.Entry
+	logger  *slog.Logger
 	fs      afero.Fs
 	gh      GitHub
 	rootDir string
@@ -22,9 +22,9 @@ type validateJob struct {
 func (v *validateJob) validate(ctx context.Context) error {
 	// Get actions
 	if v.job.Uses != "" {
-		v.logE = v.logE.WithField("reusable_workflow", v.job.Uses)
+		v.logger = v.logger.With("reusable_workflow", v.job.Uses)
 		if err := v.validateReusableWorkflow(ctx); err != nil {
-			return fmt.Errorf("validate a reusable workflow: %w", logerr.WithFields(err, v.logE.Data))
+			return fmt.Errorf("validate a reusable workflow: %w", err)
 		}
 		return nil
 	}
@@ -33,14 +33,14 @@ func (v *validateJob) validate(ctx context.Context) error {
 		vs := &validateStep{
 			step:    step,
 			fs:      v.fs,
-			logE:    v.logE,
+			logger:  v.logger,
 			gh:      v.gh,
 			rootDir: v.rootDir,
 		}
 		if err := vs.validate(ctx); err != nil {
 			failed = true
 			if !errors.Is(err, ErrSilent) {
-				logerr.WithError(v.logE, err).Error("validate a step")
+				slogerr.WithError(v.logger, err).Error("validate a step")
 			}
 		}
 	}
