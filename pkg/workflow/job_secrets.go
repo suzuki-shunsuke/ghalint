@@ -19,15 +19,15 @@ func (js *JobSecrets) Inherit() bool {
 	return js != nil && js.inherit
 }
 
-func (js *JobSecrets) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var val interface{}
+func (js *JobSecrets) UnmarshalYAML(unmarshal func(any) error) error {
+	var val any
 	if err := unmarshal(&val); err != nil {
 		return err
 	}
 	return convJobSecrets(val, js)
 }
 
-func convJobSecrets(src interface{}, dest *JobSecrets) error { //nolint:cyclop
+func convJobSecrets(src any, dest *JobSecrets) error { //nolint:cyclop
 	switch p := src.(type) {
 	case string:
 		switch p {
@@ -37,7 +37,7 @@ func convJobSecrets(src interface{}, dest *JobSecrets) error { //nolint:cyclop
 		default:
 			return slogerr.With(errors.New("job secrets must be a map or `inherit`"), "secrets", p) //nolint:wrapcheck
 		}
-	case map[interface{}]interface{}:
+	case map[any]any:
 		m := make(map[string]string, len(p))
 		for k, v := range p {
 			ks, ok := k.(string)
@@ -52,7 +52,7 @@ func convJobSecrets(src interface{}, dest *JobSecrets) error { //nolint:cyclop
 		}
 		dest.m = m
 		return nil
-	case map[string]interface{}:
+	case map[string]any:
 		m := make(map[string]string, len(p))
 		for k, v := range p {
 			vs, ok := v.(string)
