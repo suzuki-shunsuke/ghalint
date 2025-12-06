@@ -32,9 +32,6 @@ type Runner struct {
 }
 
 func (r *Runner) Action(ctx context.Context, cmd *cli.Command, logger *slogutil.Logger) error {
-	if cmd.String("log-color") != "" {
-		logger.Warn("log color option is deprecated and doesn't work anymore. This is kept for backward compatibility.")
-	}
 	if err := logger.SetLevel(cmd.String("log-level")); err != nil {
 		return fmt.Errorf("set log level: %w", err)
 	}
