@@ -11,7 +11,7 @@ USAGE:
    ghalint [global options] [command [command options]]
 
 VERSION:
-   1.5.3
+   1.5.4
 
 COMMANDS:
    run              lint GitHub Actions Workflows
@@ -22,7 +22,7 @@ COMMANDS:
    completion       Output shell completion script for bash, zsh, fish, or Powershell
 
 GLOBAL OPTIONS:
-   --log-color string          log color. auto(default)|always|never [$GHALINT_LOG_COLOR]
+   --log-color string          log color [$GHALINT_LOG_COLOR]
    --log-level string          log level [$GHALINT_LOG_LEVEL]
    --config string, -c string  configuration file path [$GHALINT_CONFIG]
    --help, -h                  show help
@@ -105,7 +105,7 @@ USAGE:
    ghalint version
 
 OPTIONS:
-   --json, -j  Output version in JSON format (default: false)
+   --json, -j  Output version in JSON format
    --help, -h  show help
 ```
 
