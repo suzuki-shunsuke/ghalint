@@ -1,36 +1,27 @@
 package cli
 
 import (
-	"log/slog"
+	"context"
 
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli/experiment"
-	"github.com/suzuki-shunsuke/go-stdutil"
+	"github.com/suzuki-shunsuke/slog-util/slogutil"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"github.com/urfave/cli/v3"
 )
 
-type Runner struct {
-	flags       *stdutil.LDFlags
-	fs          afero.Fs
-	logger      *slog.Logger
-	logLevelVar *slog.LevelVar
-}
-
-func New(flags *stdutil.LDFlags, fs afero.Fs, logger *slog.Logger, logLevelVar *slog.LevelVar) *cli.Command {
+func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error {
+	fs := afero.NewOsFs()
 	runner := &Runner{
-		flags:       flags,
-		fs:          fs,
-		logger:      logger,
-		logLevelVar: logLevelVar,
+		fs: fs,
 	}
-	return urfave.Command(flags, &cli.Command{
+	return urfave.Command(env, &cli.Command{ //nolint:wrapcheck
 		Name:  "ghalint",
 		Usage: "GitHub Actions linter",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "log-color",
-				Usage: "Deprecated: This option doesn't work anymore. This is kept for backward compatibility.",
+				Usage: "log color",
 				Sources: cli.EnvVars(
 					"GHALINT_LOG_COLOR",
 				),
@@ -55,7 +46,7 @@ func New(flags *stdutil.LDFlags, fs afero.Fs, logger *slog.Logger, logLevelVar *
 			{
 				Name:   "run",
 				Usage:  "lint GitHub Actions Workflows",
-				Action: runner.Run,
+				Action: urfave.Action(runner.Run, logger),
 				Flags:  []cli.Flag{},
 			},
 			{
@@ -64,10 +55,14 @@ func New(flags *stdutil.LDFlags, fs afero.Fs, logger *slog.Logger, logLevelVar *
 					"act",
 				},
 				Usage:  "lint actions",
-				Action: runner.RunAction,
+				Action: urfave.Action(runner.RunAction, logger),
 				Flags:  []cli.Flag{},
 			},
-			experiment.New(logger, logLevelVar, fs),
+			experiment.New(logger, fs),
 		},
-	})
+	}).Run(ctx, env.Args)
+}
+
+type Runner struct {
+	fs afero.Fs
 }

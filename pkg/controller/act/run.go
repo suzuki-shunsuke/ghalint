@@ -2,7 +2,6 @@ package act
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 )
 
 func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath string, args ...string) error {
@@ -39,7 +39,7 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		}
 	}
 	if failed {
-		return debugError(errors.New("some action files are invalid"))
+		return urfave.ErrSilent
 	}
 	return nil
 }

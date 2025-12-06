@@ -146,7 +146,7 @@ excludes:
 ## Environment variables
 
 - `GHALINT_CONFIG`: Configuration file path
-- `GHALINT_LOG_LEVEL`: Log level One of `panic`, `fatal`, `error`, `warn`, `warning`, `info` (default), `debug`, `trace`
+- `GHALINT_LOG_LEVEL`: Log level One of `error`, `warn`, `info` (default), `debug`
 - `GHALINT_LOG_COLOR`: Configure log color. One of `auto` (default), `always`, and `never`.
 
 💡 If you want to enable log color in GitHub Actions, please try `GHALINT_LOG_COLOR=always` 

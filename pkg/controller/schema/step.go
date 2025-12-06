@@ -13,6 +13,7 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"gopkg.in/yaml.v3"
 )
 
@@ -160,7 +161,7 @@ func (v *validateStep) validate(ctx context.Context) error {
 		}
 	}
 	if failed {
-		return ErrSilent
+		return urfave.ErrSilent
 	}
 	return nil
 }
