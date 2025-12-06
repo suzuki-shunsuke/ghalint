@@ -48,15 +48,15 @@ func (ps *Permissions) IsNil() bool {
 	return ps.m == nil && !ps.readAll && !ps.writeAll
 }
 
-func (ps *Permissions) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var val interface{}
+func (ps *Permissions) UnmarshalYAML(unmarshal func(any) error) error {
+	var val any
 	if err := unmarshal(&val); err != nil {
 		return err
 	}
 	return convPermissions(val, ps)
 }
 
-func convPermissions(src interface{}, dest *Permissions) error { //nolint:cyclop
+func convPermissions(src any, dest *Permissions) error { //nolint:cyclop
 	switch p := src.(type) {
 	case string:
 		switch p {
@@ -69,7 +69,7 @@ func convPermissions(src interface{}, dest *Permissions) error { //nolint:cyclop
 		default:
 			return slogerr.With(errors.New("unknown permissions"), "permission", p) //nolint:wrapcheck
 		}
-	case map[interface{}]interface{}:
+	case map[any]any:
 		m := make(map[string]string, len(p))
 		for k, v := range p {
 			ks, ok := k.(string)
@@ -84,7 +84,7 @@ func convPermissions(src interface{}, dest *Permissions) error { //nolint:cyclop
 		}
 		dest.m = m
 		return nil
-	case map[string]interface{}:
+	case map[string]any:
 		m := make(map[string]string, len(p))
 		for k, v := range p {
 			vs, ok := v.(string)
