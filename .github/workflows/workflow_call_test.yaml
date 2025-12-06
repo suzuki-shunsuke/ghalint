@@ -1,9 +1,6 @@
 ---
 name: test (workflow_call)
 on: workflow_call
-env:
-  AQUA_LOG_COLOR: always
-  GHALINT_LOG_COLOR: always
 permissions: {}
 jobs:
   test:
