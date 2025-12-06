@@ -3,7 +3,6 @@ package validateinput
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -12,35 +11,35 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 	"github.com/suzuki-shunsuke/slog-util/slogutil"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"github.com/urfave/cli/v3"
 )
 
-func New(logger *slog.Logger, logLevelVar *slog.LevelVar, fs afero.Fs) *cli.Command {
+func New(logger *slogutil.Logger, fs afero.Fs) *cli.Command {
 	runner := &Runner{
-		logger:      logger,
-		logLevelVar: logLevelVar,
-		fs:          fs,
+		fs: fs,
 	}
 	return &cli.Command{
 		Name:        "validate-input",
 		Usage:       "validate action inputs",
 		Description: "validate action inputs",
-		Action:      runner.Action,
+		Action:      urfave.Action(runner.Action, logger),
 	}
 }
 
 type Runner struct {
-	logger      *slog.Logger
-	logLevelVar *slog.LevelVar
-	fs          afero.Fs
+	fs afero.Fs
 }
 
-func (r *Runner) Action(ctx context.Context, cmd *cli.Command) error {
+func (r *Runner) Action(ctx context.Context, cmd *cli.Command, logger *slogutil.Logger) error {
 	if cmd.String("log-color") != "" {
-		r.logger.Warn("log color option is deprecated and doesn't work anymore. This is kept for backward compatibility.")
+		logger.Warn("log color option is deprecated and doesn't work anymore. This is kept for backward compatibility.")
 	}
-	if err := slogutil.SetLevel(r.logLevelVar, cmd.String("log-level")); err != nil {
+	if err := logger.SetLevel(cmd.String("log-level")); err != nil {
 		return fmt.Errorf("set log level: %w", err)
+	}
+	if err := logger.SetColor(cmd.String("log-color")); err != nil {
+		return fmt.Errorf("set log color: %w", err)
 	}
 
 	rootDir, err := GetRootDir()
@@ -48,9 +47,9 @@ func (r *Runner) Action(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("get the root directory: %w", err)
 	}
 
-	gh := github.New(ctx, r.logger)
+	gh := github.New(ctx, logger.Logger)
 
-	ctrl := schema.New(r.fs, r.logger, gh.Repositories, rootDir)
+	ctrl := schema.New(r.fs, logger.Logger, gh.Repositories, rootDir)
 
 	return ctrl.Run(ctx) //nolint:wrapcheck
 }

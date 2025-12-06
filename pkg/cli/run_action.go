@@ -9,15 +9,15 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func (r *Runner) RunAction(ctx context.Context, cmd *cli.Command) error {
-	if cmd.String("log-color") != "" {
-		r.logger.Warn("log color option is deprecated and doesn't work anymore. This is kept for backward compatibility.")
+func (r *Runner) RunAction(ctx context.Context, cmd *cli.Command, logger *slogutil.Logger) error {
+	if err := logger.SetColor(cmd.String("log-color")); err != nil {
+		return fmt.Errorf("set log color: %w", err)
 	}
-	if err := slogutil.SetLevel(r.logLevelVar, cmd.String("log-level")); err != nil {
+	if err := logger.SetLevel(cmd.String("log-level")); err != nil {
 		return fmt.Errorf("set log level: %w", err)
 	}
 
 	ctrl := act.New(r.fs)
 
-	return ctrl.Run(ctx, r.logger, cmd.String("config"), cmd.Args().Slice()...) //nolint:wrapcheck
+	return ctrl.Run(ctx, logger.Logger, cmd.String("config"), cmd.Args().Slice()...) //nolint:wrapcheck
 }

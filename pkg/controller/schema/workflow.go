@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 )
 
 func (c *Controller) runWorkflow(ctx context.Context) error {
@@ -28,13 +29,13 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 		}
 		if err := vw.validate(ctx); err != nil {
 			failed = true
-			if !errors.Is(err, ErrSilent) {
+			if !errors.Is(err, urfave.ErrSilent) {
 				slogerr.WithError(logger, err).Error("validate workflow")
 			}
 		}
 	}
 	if failed {
-		return ErrSilent
+		return urfave.ErrSilent
 	}
 	return nil
 }
@@ -65,13 +66,13 @@ func (v *validateWorkflow) validate(ctx context.Context) error {
 		}
 		if err := vj.validate(ctx); err != nil {
 			failed = true
-			if !errors.Is(err, ErrSilent) {
+			if !errors.Is(err, urfave.ErrSilent) {
 				slogerr.WithError(v.logger, err).Error("validate job")
 			}
 		}
 	}
 	if failed {
-		return ErrSilent
+		return urfave.ErrSilent
 	}
 	return nil
 }

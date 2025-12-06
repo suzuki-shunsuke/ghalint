@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 )
 
 type validateJob struct {
@@ -39,13 +40,13 @@ func (v *validateJob) validate(ctx context.Context) error {
 		}
 		if err := vs.validate(ctx); err != nil {
 			failed = true
-			if !errors.Is(err, ErrSilent) {
+			if !errors.Is(err, urfave.ErrSilent) {
 				slogerr.WithError(v.logger, err).Error("validate a step")
 			}
 		}
 	}
 	if failed {
-		return ErrSilent
+		return urfave.ErrSilent
 	}
 	return nil
 }

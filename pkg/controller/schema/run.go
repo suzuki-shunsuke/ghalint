@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 )
 
 func (c *Controller) Run(ctx context.Context) error {
@@ -13,18 +14,18 @@ func (c *Controller) Run(ctx context.Context) error {
 	failed := false
 	if err := c.runWorkflow(ctx); err != nil {
 		failed = true
-		if !errors.Is(err, ErrSilent) {
+		if !errors.Is(err, urfave.ErrSilent) {
 			slogerr.WithError(c.logger, err).Error("validate workflows")
 		}
 	}
 	if err := c.runActions(ctx); err != nil {
-		if !errors.Is(err, ErrSilent) {
+		if !errors.Is(err, urfave.ErrSilent) {
 			return fmt.Errorf("validate actions: %w", err)
 		}
-		return ErrSilent
+		return urfave.ErrSilent
 	}
 	if failed {
-		return ErrSilent
+		return urfave.ErrSilent
 	}
 	return nil
 }
