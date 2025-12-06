@@ -7,7 +7,6 @@ require (
 	github.com/google/go-github/v79 v79.0.0
 	github.com/spf13/afero v1.15.0
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
-	github.com/suzuki-shunsuke/go-stdutil v0.0.1
 	github.com/suzuki-shunsuke/slog-error v0.2.1
 	github.com/suzuki-shunsuke/slog-util v0.3.0
 	github.com/suzuki-shunsuke/urfave-cli-v3-util v0.1.1
