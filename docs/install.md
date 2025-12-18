@@ -5,6 +5,7 @@ ghalint is written in Go. So you only have to install a binary in your `PATH`.
 There are some ways to install ghalint.
 
 1. [Homebrew](#homebrew)
+1. [Mise](#mise)
 1. [Scoop](#scoop)
 1. [aqua](#aqua)
 1. [GitHub Releases](#github-releases)
@@ -22,6 +23,14 @@ Or
 
 ```sh
 brew install suzuki-shunsuke/ghalint/ghalint
+```
+
+## Mise
+
+You can install ghalint using [Mise](https://github.com/jdx/mise), you can install and made available the latest version globally by using a command like:
+
+```sh
+mise use -g ghalint@latest
 ```
 
 ## Scoop
