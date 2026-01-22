@@ -27,7 +27,7 @@ func New(logger *slogutil.Logger, fs afero.Fs, args *Args) *cli.Command {
 		Name:        "validate-input",
 		Usage:       "validate action inputs",
 		Description: "validate action inputs",
-		Action: func(ctx context.Context, cmd *cli.Command) error {
+		Action: func(ctx context.Context, _ *cli.Command) error {
 			return runner.Action(ctx, logger, args)
 		},
 	}

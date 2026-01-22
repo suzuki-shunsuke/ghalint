@@ -22,7 +22,7 @@ type RunActionArgs struct {
 	Files []string
 }
 
-func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error {
+func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error { //nolint:funlen
 	fs := afero.NewOsFs()
 	runner := &Runner{
 		fs: fs,
@@ -71,7 +71,7 @@ func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error {
 			{
 				Name:  "run",
 				Usage: "lint GitHub Actions Workflows",
-				Action: func(ctx context.Context, cmd *cli.Command) error {
+				Action: func(ctx context.Context, _ *cli.Command) error {
 					return runner.Run(ctx, logger, runArgs)
 				},
 				Flags: []cli.Flag{},
@@ -82,7 +82,7 @@ func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error {
 					"act",
 				},
 				Usage: "lint actions",
-				Action: func(ctx context.Context, cmd *cli.Command) error {
+				Action: func(ctx context.Context, _ *cli.Command) error {
 					return runner.RunAction(ctx, logger, runActionArgs)
 				},
 				Arguments: []cli.Argument{
