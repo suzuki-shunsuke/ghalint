@@ -74,7 +74,6 @@ func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error { 
 				Action: func(ctx context.Context, _ *cli.Command) error {
 					return runner.Run(ctx, logger, runArgs)
 				},
-				Flags: []cli.Flag{},
 			},
 			{
 				Name: "run-action",
@@ -92,7 +91,6 @@ func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error { 
 						Max:         -1,
 					},
 				},
-				Flags: []cli.Flag{},
 			},
 			experiment.New(logger, fs, validateInputArgs),
 		},
