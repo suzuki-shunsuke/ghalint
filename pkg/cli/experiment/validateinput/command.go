@@ -8,14 +8,18 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/ghalint/pkg/cli/gflags"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 	"github.com/suzuki-shunsuke/slog-util/slogutil"
-	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 	"github.com/urfave/cli/v3"
 )
 
-func New(logger *slogutil.Logger, fs afero.Fs) *cli.Command {
+type Args struct {
+	*gflags.GlobalFlags
+}
+
+func New(logger *slogutil.Logger, fs afero.Fs, args *Args) *cli.Command {
 	runner := &Runner{
 		fs: fs,
 	}
@@ -23,7 +27,9 @@ func New(logger *slogutil.Logger, fs afero.Fs) *cli.Command {
 		Name:        "validate-input",
 		Usage:       "validate action inputs",
 		Description: "validate action inputs",
-		Action:      urfave.Action(runner.Action, logger),
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			return runner.Action(ctx, logger, args)
+		},
 	}
 }
 
@@ -31,11 +37,11 @@ type Runner struct {
 	fs afero.Fs
 }
 
-func (r *Runner) Action(ctx context.Context, cmd *cli.Command, logger *slogutil.Logger) error {
-	if err := logger.SetLevel(cmd.String("log-level")); err != nil {
+func (r *Runner) Action(ctx context.Context, logger *slogutil.Logger, args *Args) error {
+	if err := logger.SetLevel(args.LogLevel); err != nil {
 		return fmt.Errorf("set log level: %w", err)
 	}
-	if err := logger.SetColor(cmd.String("log-color")); err != nil {
+	if err := logger.SetColor(args.LogColor); err != nil {
 		return fmt.Errorf("set log color: %w", err)
 	}
 

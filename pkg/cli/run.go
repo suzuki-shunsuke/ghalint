@@ -6,18 +6,17 @@ import (
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 	"github.com/suzuki-shunsuke/slog-util/slogutil"
-	"github.com/urfave/cli/v3"
 )
 
-func (r *Runner) Run(ctx context.Context, cmd *cli.Command, logger *slogutil.Logger) error {
-	if err := logger.SetLevel(cmd.String("log-level")); err != nil {
+func (r *Runner) Run(ctx context.Context, logger *slogutil.Logger, args *RunArgs) error {
+	if err := logger.SetLevel(args.LogLevel); err != nil {
 		return fmt.Errorf("set log level: %w", err)
 	}
-	if err := logger.SetColor(cmd.String("log-color")); err != nil {
+	if err := logger.SetColor(args.LogColor); err != nil {
 		return fmt.Errorf("set log color: %w", err)
 	}
 
 	ctrl := controller.New(r.fs)
 
-	return ctrl.Run(ctx, logger.Logger, cmd.String("config")) //nolint:wrapcheck
+	return ctrl.Run(ctx, logger.Logger, args.Config) //nolint:wrapcheck
 }
