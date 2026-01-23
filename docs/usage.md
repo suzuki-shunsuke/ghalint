@@ -11,7 +11,7 @@ USAGE:
    ghalint [global options] [command [command options]]
 
 VERSION:
-   1.5.4
+   1.5.5
 
 COMMANDS:
    run              lint GitHub Actions Workflows
@@ -51,7 +51,7 @@ NAME:
    ghalint run-action - lint actions
 
 USAGE:
-   ghalint run-action
+   ghalint run-action [arguments...]
 
 OPTIONS:
    --help, -h  show help
