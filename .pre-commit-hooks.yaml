@@ -1,0 +1,16 @@
+---
+- id: ghalint
+  name: Validate GitHub Actions workflows
+  description: Check GitHub Actions workflows for security policy compliance
+  entry: ghalint run
+  language: golang
+  types: [yaml]
+  files: ^\.github/workflows/[^/]+\.ya?ml$
+
+- id: ghalint-act
+  name: Validate GitHub Actions
+  description: Check GitHub Actions for security policy compliance
+  entry: ghalint act
+  language: golang
+  types: [yaml]
+  files: ^([^/]+/){0,3}action\.ya?ml$
