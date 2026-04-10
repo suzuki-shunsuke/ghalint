@@ -1,6 +1,6 @@
 module github.com/suzuki-shunsuke/ghalint
 
-go 1.26.1
+go 1.26.2
 
 require (
 	github.com/adrg/xdg v0.5.3
