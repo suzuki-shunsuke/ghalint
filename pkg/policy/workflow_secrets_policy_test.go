@@ -22,7 +22,7 @@ func TestWorkflowSecretsPolicy_ApplyWorkflow(t *testing.T) { //nolint:funlen
 			cfg:  &config.Config{},
 			wf: &workflow.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Env: map[string]string{
+				Env: map[string]string{ //nolint:gosec
 					"GITHUB_TOKEN": "${{github.token}}",
 				},
 				Jobs: map[string]*workflow.Job{
@@ -35,7 +35,7 @@ func TestWorkflowSecretsPolicy_ApplyWorkflow(t *testing.T) { //nolint:funlen
 			cfg:  &config.Config{},
 			wf: &workflow.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Env: map[string]string{
+				Env: map[string]string{ //nolint:gosec
 					"GITHUB_TOKEN": "${{secrets.GITHUB_TOKEN}}",
 				},
 				Jobs: map[string]*workflow.Job{
@@ -50,7 +50,7 @@ func TestWorkflowSecretsPolicy_ApplyWorkflow(t *testing.T) { //nolint:funlen
 			cfg:  &config.Config{},
 			wf: &workflow.Workflow{
 				FilePath: ".github/workflows/test.yaml",
-				Env: map[string]string{
+				Env: map[string]string{ //nolint:gosec
 					"GITHUB_TOKEN": "${{github.token}}",
 				},
 				Jobs: map[string]*workflow.Job{
