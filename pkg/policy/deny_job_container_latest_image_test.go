@@ -8,7 +8,7 @@ import (
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
-func TestDenyJobContainerLatestImagePolicy_ApplyJob(t *testing.T) {
+func TestDenyJobContainerLatestImagePolicy_ApplyJob(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name  string
@@ -47,6 +47,15 @@ func TestDenyJobContainerLatestImagePolicy_ApplyJob(t *testing.T) {
 				},
 			},
 			isErr: true,
+		},
+		{
+			name: "Use variables",
+			job: &workflow.Job{
+				Container: &workflow.Container{
+					Image: "mirror.gcr.io/${{needs.list.outputs.image}}",
+				},
+			},
+			isErr: false,
 		},
 	}
 	p := &policy.DenyJobContainerLatestImagePolicy{}
