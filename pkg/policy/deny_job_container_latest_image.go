@@ -19,12 +19,16 @@ func (p *DenyJobContainerLatestImagePolicy) ID() string {
 	return "007"
 }
 
-func (p *DenyJobContainerLatestImagePolicy) ApplyJob(_ *slog.Logger, _ *config.Config, _ *JobContext, job *workflow.Job) error {
+func (p *DenyJobContainerLatestImagePolicy) ApplyJob(logger *slog.Logger, _ *config.Config, _ *JobContext, job *workflow.Job) error {
 	if job.Container == nil {
 		return nil
 	}
 	if job.Container.Image == "" {
 		return errors.New("job container should have image")
+	}
+	if strings.Contains(job.Container.Image, "${{") {
+		logger.Debug("job container image contains `${{`; skipping latest image check")
+		return nil
 	}
 	_, tag, ok := strings.Cut(job.Container.Image, ":")
 	if !ok {
