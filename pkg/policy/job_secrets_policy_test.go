@@ -36,7 +36,7 @@ func TestJobSecretsPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 				Name: "foo",
 			},
 			job: &workflow.Job{
-				Env: map[string]string{
+				Env: map[string]string{ //nolint:gosec
 					"GITHUB_TOKEN": "${{github.token}}",
 				},
 				Steps: []*workflow.Step{
@@ -50,7 +50,7 @@ func TestJobSecretsPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 			cfg:    &config.Config{},
 			jobCtx: &policy.JobContext{},
 			job: &workflow.Job{
-				Env: map[string]string{
+				Env: map[string]string{ //nolint:gosec
 					"GITHUB_TOKEN": "${{github.token}}",
 				},
 				Steps: []*workflow.Step{
@@ -63,7 +63,7 @@ func TestJobSecretsPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 			cfg:    &config.Config{},
 			jobCtx: &policy.JobContext{},
 			job: &workflow.Job{
-				Env: map[string]string{
+				Env: map[string]string{ //nolint:gosec
 					"GITHUB_TOKEN": "${{secrets.GITHUB_TOKEN}}",
 				},
 				Steps: []*workflow.Step{
@@ -78,7 +78,7 @@ func TestJobSecretsPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 			cfg:    &config.Config{},
 			jobCtx: &policy.JobContext{},
 			job: &workflow.Job{
-				Env: map[string]string{
+				Env: map[string]string{ //nolint:gosec
 					"GITHUB_TOKEN": "${{github.token}}",
 				},
 				Steps: []*workflow.Step{
