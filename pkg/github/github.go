@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -24,8 +25,12 @@ type (
 	RepositoryContent           = github.RepositoryContent
 )
 
-func New(ctx context.Context, logger *slog.Logger) *Client {
-	return github.NewClient(getHTTPClientForGitHub(ctx, logger, getGitHubToken()))
+func New(ctx context.Context, logger *slog.Logger) (*Client, error) {
+	client, err := github.NewClient(github.WithHTTPClient(getHTTPClientForGitHub(ctx, logger, getGitHubToken())))
+	if err != nil {
+		return nil, fmt.Errorf("create a GitHub client: %w", err)
+	}
+	return client, nil
 }
 
 func getGitHubToken() string {
