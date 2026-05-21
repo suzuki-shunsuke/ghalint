@@ -50,7 +50,10 @@ func (r *Runner) Action(ctx context.Context, logger *slogutil.Logger, args *Args
 		return fmt.Errorf("get the root directory: %w", err)
 	}
 
-	gh := github.New(ctx, logger.Logger)
+	gh, err := github.New(ctx, logger.Logger)
+	if err != nil {
+		return fmt.Errorf("create a GitHub client: %w", err)
+	}
 
 	ctrl := schema.New(r.fs, logger.Logger, gh.Repositories, rootDir)
 
