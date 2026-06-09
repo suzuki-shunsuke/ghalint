@@ -9,7 +9,7 @@ jobs:
     secrets:
       TAKUMI_GUARD_BOT_ID: ${{secrets.TAKUMI_GUARD_BOT_ID}}
     with:
-      aqua_version: v2.59.1
+      aqua_version: v2.60.0
       go-version-file: go.mod
     permissions:
       contents: write
