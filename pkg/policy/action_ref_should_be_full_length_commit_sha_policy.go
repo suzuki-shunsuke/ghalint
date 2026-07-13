@@ -3,7 +3,6 @@ package policy
 import (
 	"errors"
 	"log/slog"
-	"path"
 	"regexp"
 	"strings"
 
@@ -82,7 +81,7 @@ func (p *ActionRefShouldBeSHAPolicy) excluded(action string, excludes []*config.
 		if exclude.PolicyName != p.Name() {
 			continue
 		}
-		if f, _ := path.Match(exclude.ActionName, action); f {
+		if f, _ := config.MatchActionName(exclude.ActionName, action); f {
 			return true
 		}
 	}
