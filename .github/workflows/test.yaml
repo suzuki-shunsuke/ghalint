@@ -15,7 +15,7 @@ jobs:
       contents: read
       id-token: write
   status-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
     timeout-minutes: 10
     permissions: {}
