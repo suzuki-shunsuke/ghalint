@@ -34,6 +34,17 @@ func TestValidate(t *testing.T) { //nolint:funlen
 			isErr: true,
 		},
 		{
+			name: "action_name double-star glob pattern",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "my-private-org/actions/**",
+					},
+				},
+			},
+		},
+		{
 			name: "workflow_file_path is required",
 			cfg: &config.Config{
 				Excludes: []*config.Exclude{

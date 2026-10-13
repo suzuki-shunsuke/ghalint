@@ -172,6 +172,20 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 			},
 		},
 		{
+			name: "exclude with double-star glob pattern",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "my-private-org/actions/**",
+					},
+				},
+			},
+			step: &workflow.Step{
+				Uses: "my-private-org/actions/foo/bar@main",
+			},
+		},
+		{
 			name:  "step error",
 			isErr: true,
 			cfg: &config.Config{
