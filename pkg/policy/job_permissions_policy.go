@@ -18,7 +18,10 @@ func (p *JobPermissionsPolicy) ID() string {
 	return "001"
 }
 
-func (p *JobPermissionsPolicy) ApplyJob(_ *slog.Logger, _ *config.Config, jobCtx *JobContext, job *workflow.Job) error {
+func (p *JobPermissionsPolicy) ApplyJob(_ *slog.Logger, cfg *config.Config, jobCtx *JobContext, job *workflow.Job) error {
+	if checkExcludes(p.Name(), jobCtx, cfg) {
+		return nil
+	}
 	wf := jobCtx.Workflow.Workflow
 	wfPermissions := wf.Permissions.Permissions()
 	if wfPermissions != nil && len(wfPermissions) == 0 {
