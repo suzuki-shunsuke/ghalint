@@ -11,6 +11,7 @@ jobs:
     with:
       aqua_version: v2.65.2
       go-version-file: go.mod
+      packslip: true
     permissions:
       contents: write
       id-token: write
