@@ -11,7 +11,7 @@ USAGE:
    ghalint [global options] [command [command options]]
 
 VERSION:
-   1.5.6
+   1.5.7
 
 COMMANDS:
    run              lint GitHub Actions Workflows
@@ -37,10 +37,15 @@ NAME:
    ghalint run - lint GitHub Actions Workflows
 
 USAGE:
-   ghalint run
+   ghalint run [options]
 
 OPTIONS:
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --log-color string          log color [$GHALINT_LOG_COLOR]
+   --log-level string          log level [$GHALINT_LOG_LEVEL]
+   --config string, -c string  configuration file path [$GHALINT_CONFIG]
 ```
 
 ## ghalint run-action
@@ -51,10 +56,15 @@ NAME:
    ghalint run-action - lint actions
 
 USAGE:
-   ghalint run-action [arguments...]
+   ghalint run-action [options] [files ...] 
 
 OPTIONS:
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --log-color string          log color [$GHALINT_LOG_COLOR]
+   --log-level string          log level [$GHALINT_LOG_LEVEL]
+   --config string, -c string  configuration file path [$GHALINT_CONFIG]
 ```
 
 ## ghalint experiment
@@ -75,6 +85,11 @@ COMMANDS:
 
 OPTIONS:
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --log-color string          log color [$GHALINT_LOG_COLOR]
+   --log-level string          log level [$GHALINT_LOG_LEVEL]
+   --config string, -c string  configuration file path [$GHALINT_CONFIG]
 ```
 
 ### experiment validate-input
@@ -85,13 +100,18 @@ NAME:
    ghalint experiment validate-input - validate action inputs
 
 USAGE:
-   ghalint experiment validate-input
+   ghalint experiment validate-input [options]
 
 DESCRIPTION:
    validate action inputs
 
 OPTIONS:
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --log-color string          log color [$GHALINT_LOG_COLOR]
+   --log-level string          log level [$GHALINT_LOG_LEVEL]
+   --config string, -c string  configuration file path [$GHALINT_CONFIG]
 ```
 
 ## ghalint version
@@ -102,11 +122,16 @@ NAME:
    ghalint version - Show version
 
 USAGE:
-   ghalint version
+   ghalint version [options]
 
 OPTIONS:
    --json, -j  Output version in JSON format
    --help, -h  show help
+
+GLOBAL OPTIONS:
+   --log-color string          log color [$GHALINT_LOG_COLOR]
+   --log-level string          log level [$GHALINT_LOG_LEVEL]
+   --config string, -c string  configuration file path [$GHALINT_CONFIG]
 ```
 
 ## ghalint completion
@@ -117,7 +142,7 @@ NAME:
    ghalint completion - Output shell completion script for bash, zsh, fish, or Powershell
 
 USAGE:
-   ghalint completion
+   ghalint completion [command [command options]]
 
 DESCRIPTION:
    Output shell completion script for bash, zsh, fish, or Powershell.
@@ -133,8 +158,70 @@ DESCRIPTION:
    ghalint completion fish > ~/.config/fish/completions/ghalint.fish
 
    # Powershell
-   Output the script to path/to/autocomplete/ghalint.ps1 an run it.
+   Output the script to path/to/autocomplete/ghalint.ps1 and run it.
 
+
+COMMANDS:
+   bash  Output bash completion script
+   zsh   Output zsh completion script
+   fish  Output fish completion script
+   pwsh  Output pwsh completion script
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### completion bash
+
+```console
+$ completion bash --help
+NAME:
+   ghalint completion bash - Output bash completion script
+
+USAGE:
+   ghalint completion bash [options]
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### completion zsh
+
+```console
+$ completion zsh --help
+NAME:
+   ghalint completion zsh - Output zsh completion script
+
+USAGE:
+   ghalint completion zsh [options]
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### completion fish
+
+```console
+$ completion fish --help
+NAME:
+   ghalint completion fish - Output fish completion script
+
+USAGE:
+   ghalint completion fish [options]
+
+OPTIONS:
+   --help, -h  show help
+```
+
+### completion pwsh
+
+```console
+$ completion pwsh --help
+NAME:
+   ghalint completion pwsh - Output pwsh completion script
+
+USAGE:
+   ghalint completion pwsh [options]
 
 OPTIONS:
    --help, -h  show help
