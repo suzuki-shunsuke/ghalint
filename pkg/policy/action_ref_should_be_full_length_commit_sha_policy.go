@@ -36,8 +36,22 @@ func (p *ActionRefShouldBeSHAPolicy) ApplyJob(_ *slog.Logger, cfg *config.Config
 	return p.apply(cfg, job.Uses)
 }
 
-func (p *ActionRefShouldBeSHAPolicy) ApplyStep(_ *slog.Logger, cfg *config.Config, _ *StepContext, step *workflow.Step) error {
+// ApplyStep validates steps of workflows and actions.
+// Actions in workflows locked by the lockfile are ignored because the lockfile locks them to commits.
+// Steps of action files are always validated because callers of the action files don't necessarily use the lockfile.
+func (p *ActionRefShouldBeSHAPolicy) ApplyStep(_ *slog.Logger, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) error {
+	if p.locked(stepCtx, step.Uses) {
+		return nil
+	}
 	return p.apply(cfg, step.Uses)
+}
+
+func (p *ActionRefShouldBeSHAPolicy) locked(stepCtx *StepContext, uses string) bool {
+	if stepCtx == nil || stepCtx.Job == nil {
+		return false
+	}
+	lf := stepCtx.Job.Workflow.Lockfile
+	return lf != nil && lf.Locked(stepCtx.Job.Workflow.FilePath, uses)
 }
 
 func (p *ActionRefShouldBeSHAPolicy) apply(cfg *config.Config, uses string) error {

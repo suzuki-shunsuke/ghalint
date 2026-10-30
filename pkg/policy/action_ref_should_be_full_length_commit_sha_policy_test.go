@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
@@ -134,11 +135,47 @@ func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
-		name  string
-		cfg   *config.Config
-		step  *workflow.Step
-		isErr bool
+		name    string
+		cfg     *config.Config
+		stepCtx *policy.StepContext
+		step    *workflow.Step
+		isErr   bool
 	}{
+		{
+			name:    "locked by the lockfile",
+			cfg:     &config.Config{},
+			stepCtx: workflowStepContext(testLockfile()),
+			step: &workflow.Step{
+				Uses: "actions/checkout@v6",
+			},
+		},
+		{
+			name:    "not locked by the lockfile",
+			isErr:   true,
+			cfg:     &config.Config{},
+			stepCtx: workflowStepContext(testLockfile()),
+			step: &workflow.Step{
+				Uses: "actions/setup-go@v6",
+			},
+		},
+		{
+			name:    "lockfile doesn't exist",
+			isErr:   true,
+			cfg:     &config.Config{},
+			stepCtx: workflowStepContext(nil),
+			step: &workflow.Step{
+				Uses: "actions/checkout@v6",
+			},
+		},
+		{
+			name:    "action file",
+			isErr:   true,
+			cfg:     &config.Config{},
+			stepCtx: &policy.StepContext{Action: &workflow.Action{}},
+			step: &workflow.Step{
+				Uses: "actions/checkout@v6",
+			},
+		},
 		{
 			name: "exclude",
 			cfg: &config.Config{
@@ -259,7 +296,7 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyStep(logger, d.cfg, nil, d.step); err != nil {
+			if err := p.ApplyStep(logger, d.cfg, d.stepCtx, d.step); err != nil {
 				if d.isErr {
 					return
 				}
@@ -269,5 +306,34 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 				t.Fatal("error must be returned")
 			}
 		})
+	}
+}
+
+func testLockfile() *lockfile.Lockfile {
+	return &lockfile.Lockfile{
+		Workflows: map[string][]string{
+			".github/workflows/test.yaml": {
+				"actions/checkout@v6",
+			},
+		},
+		Dependencies: map[string]*lockfile.Dependency{
+			"actions/checkout@v6": {
+				Ref:    "v6",
+				Commit: "1af3b93b6815bc44a9784bd300feb67ff0d1eeb3",
+			},
+		},
+	}
+}
+
+func workflowStepContext(lf *lockfile.Lockfile) *policy.StepContext {
+	return &policy.StepContext{
+		FilePath: ".github/workflows/test.yaml",
+		Job: &policy.JobContext{
+			Name: "test",
+			Workflow: &policy.WorkflowContext{
+				FilePath: ".github/workflows/test.yaml",
+				Lockfile: lf,
+			},
+		},
 	}
 }
