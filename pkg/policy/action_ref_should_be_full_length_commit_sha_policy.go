@@ -36,7 +36,14 @@ func (p *ActionRefShouldBeSHAPolicy) ApplyJob(_ *slog.Logger, cfg *config.Config
 	return p.apply(cfg, job.Uses)
 }
 
-func (p *ActionRefShouldBeSHAPolicy) ApplyStep(_ *slog.Logger, cfg *config.Config, _ *StepContext, step *workflow.Step) error {
+// ApplyStep validates steps of workflows and actions.
+// If the lockfile is enabled, actions in workflows are validated by action_should_be_locked instead,
+// so only Docker images are validated.
+// Steps of action files are always validated because callers of the action files don't necessarily use the lockfile.
+func (p *ActionRefShouldBeSHAPolicy) ApplyStep(_ *slog.Logger, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) error {
+	if stepCtx != nil && stepCtx.Job != nil && LockfileEnabled(cfg) && !strings.HasPrefix(step.Uses, "docker://") {
+		return nil
+	}
 	return p.apply(cfg, step.Uses)
 }
 
