@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
@@ -16,6 +17,9 @@ type validateJob struct {
 	logger  *slog.Logger
 	gh      GitHub
 	rootDir string
+	// workflow is the path of the workflow file the job is in.
+	workflow string
+	lockfile *lockfile.Lockfile
 }
 
 func (v *validateJob) validate(ctx context.Context) error {
@@ -30,10 +34,12 @@ func (v *validateJob) validate(ctx context.Context) error {
 	failed := false
 	for _, step := range v.job.Steps {
 		vs := &validateStep{
-			step:    step,
-			logger:  v.logger,
-			gh:      v.gh,
-			rootDir: v.rootDir,
+			step:     step,
+			logger:   v.logger,
+			gh:       v.gh,
+			rootDir:  v.rootDir,
+			workflow: v.workflow,
+			lockfile: v.lockfile,
 		}
 		if err := vs.validate(ctx); err != nil {
 			failed = true

@@ -211,6 +211,8 @@ action.yml
 
 This command uses a GitHub access token with `contents:read` permission to download actions and reusable workflows.
 It downloads them into `XDG_DATA_HOME/ghalint`.
+
+If an action in a workflow is locked by the [workflow dependency lockfile](https://docs.github.com/en/enterprise-cloud@latest/actions/concepts/security/workflow-dependency-lockfiles) `.github/workflows/actions.lock`, the command validates inputs against the locked commit, which GitHub Actions runs, instead of resolving the ref through the GitHub API.
 You can pass a GitHub access token by environment variables `GITHUB_TOKEN` or `GHALINT_GITHUB_TOKEN`.
 You can also manage it by secret stores such as GNOME Keyring, Windows Credential Manager, and macOS Keychain.
 

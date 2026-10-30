@@ -178,3 +178,38 @@ func TestLockfile_Locked(t *testing.T) {
 		})
 	}
 }
+
+func TestLockfile_Commit(t *testing.T) {
+	t.Parallel()
+	lf, err := lockfile.Parse([]byte(testLockfile))
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := []struct {
+		name         string
+		lockfile     *lockfile.Lockfile
+		workflowPath string
+		uses         string
+		exp          string
+	}{
+		{name: "locked", lockfile: lf, workflowPath: ".github/workflows/ci.yml", uses: "actions/checkout@v6", exp: "3d3c42e5aac5ba805825da76410c181273ba90b1"},
+		{name: "sub-action path", lockfile: lf, workflowPath: ".github/workflows/ci.yml", uses: "actions/cache/save@v4.2.0", exp: "1bd1e32a3bdc45362d1e726936510720a7c30a57"},
+		{name: "owner and repo are case insensitive", lockfile: lf, workflowPath: ".github/workflows/ci.yml", uses: "Actions/Checkout@v6", exp: "3d3c42e5aac5ba805825da76410c181273ba90b1"},
+		{name: "different ref", lockfile: lf, workflowPath: ".github/workflows/ci.yml", uses: "actions/checkout@v5"},
+		{name: "different workflow", lockfile: lf, workflowPath: ".github/workflows/test.yml", uses: "actions/checkout@v6"},
+		{name: "action file", lockfile: lf, uses: "actions/checkout@v6"},
+		{name: "nil lockfile", workflowPath: ".github/workflows/ci.yml", uses: "actions/checkout@v6"},
+	}
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
+			t.Parallel()
+			sha, ok := d.lockfile.Commit(d.workflowPath, d.uses)
+			if ok != (d.exp != "") {
+				t.Fatalf("got ok %v, wanted %v", ok, d.exp != "")
+			}
+			if sha != d.exp {
+				t.Fatalf("got %q, wanted %q", sha, d.exp)
+			}
+		})
+	}
+}
