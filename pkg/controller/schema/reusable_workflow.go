@@ -172,19 +172,17 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 		}
 		return nil
 	}
-	// <owner>/<repo>[/<path>]@<ref>
-	fullPath, ref, ok := strings.Cut(v.job.Uses, "@")
-	if !ok {
-		return fmt.Errorf("invalid job.uses format: %s", v.job.Uses)
+	r, err := parseRemoteRef(v.job.Uses)
+	if err != nil {
+		return fmt.Errorf("parse job.uses: %w", err)
 	}
-	elems := strings.Split(fullPath, "/")
-	owner := elems[0]
-	repo := elems[1]
-	path := strings.Join(elems[2:], "/")
-	sha := ref
-	if !fullCommitSHAPattern.MatchString(ref) {
+	owner := r.Owner
+	repo := r.Repo
+	path := r.Path
+	sha := r.Ref
+	if !fullCommitSHAPattern.MatchString(sha) {
 		// Get SHA of actions
-		s, _, err := v.gh.GetCommitSHA1(ctx, owner, repo, ref, "")
+		s, _, err := v.gh.GetCommitSHA1(ctx, owner, repo, sha, "")
 		if err != nil {
 			return fmt.Errorf("get commit SHA1: %w", err)
 		}
@@ -192,7 +190,10 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 	}
 	// Download actions and store them in $GHALINT_ROOT_DIR/actions
 	// Check if the action file exists
-	cachePath := filepath.Join(v.rootDir, "actions", owner, repo, sha, path)
+	cachePath, err := r.cachePath(v.rootDir, sha)
+	if err != nil {
+		return err
+	}
 	if err := readReusableWorkflow(cachePath, wf); err == nil {
 		return nil
 	} else if !errors.Is(err, fs.ErrNotExist) {

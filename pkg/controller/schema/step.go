@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
@@ -25,8 +24,6 @@ type validateStep struct {
 	rootDir string
 }
 
-var fullCommitSHAPattern = regexp.MustCompile(`\b[0-9a-f]{40}\b`)
-
 func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) error { //nolint:cyclop
 	if strings.HasPrefix(v.step.Uses, "./") {
 		// local action
@@ -35,19 +32,17 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 		}
 		return nil
 	}
-	// <owner>/<repo>[/<path>]@<ref>
-	fullPath, ref, ok := strings.Cut(v.step.Uses, "@")
-	if !ok {
-		return fmt.Errorf("invalid action format: %s", v.step.Uses)
+	r, err := parseRemoteRef(v.step.Uses)
+	if err != nil {
+		return fmt.Errorf("parse the action: %w", err)
 	}
-	elems := strings.Split(fullPath, "/")
-	owner := elems[0]
-	repo := elems[1]
-	path := strings.Join(elems[2:], "/")
-	sha := ref
-	if !fullCommitSHAPattern.MatchString(ref) {
+	owner := r.Owner
+	repo := r.Repo
+	path := r.Path
+	sha := r.Ref
+	if !fullCommitSHAPattern.MatchString(sha) {
 		// Get SHA of actions
-		s, _, err := v.gh.GetCommitSHA1(ctx, owner, repo, ref, "")
+		s, _, err := v.gh.GetCommitSHA1(ctx, owner, repo, sha, "")
 		if err != nil {
 			return fmt.Errorf("get commit SHA1: %w", err)
 		}
@@ -55,7 +50,10 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 	}
 	// Download actions and store them in $GHALINT_ROOT_DIR/actions
 	// Check if the action file exists
-	cachePath := filepath.Join(v.rootDir, "actions", owner, repo, sha, path, "action.yaml")
+	cachePath, err := r.cachePath(v.rootDir, sha, "action.yaml")
+	if err != nil {
+		return err
+	}
 	if err := workflow.ReadAction(cachePath, action); err == nil {
 		return nil
 	} else if !errors.Is(err, fs.ErrNotExist) {
