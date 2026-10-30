@@ -38,8 +38,6 @@ func (p *ActionRefShouldBeSHAPolicy) ApplyJob(_ *slog.Logger, cfg *config.Config
 
 // ApplyStep validates steps of workflows and actions.
 // Actions in workflows locked by the lockfile are ignored because the lockfile locks them to commits.
-// If ghalint fails to read the lockfile, actions in workflows are ignored too
-// because they may be locked and the read error already fails the run.
 // Steps of action files are always validated because callers of the action files don't necessarily use the lockfile.
 func (p *ActionRefShouldBeSHAPolicy) ApplyStep(_ *slog.Logger, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) error {
 	if p.locked(stepCtx, step.Uses) {

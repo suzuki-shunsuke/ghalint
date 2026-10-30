@@ -45,12 +45,9 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 	failed := false
 	lf, err := lockfile.Read(c.fs)
 	if err != nil {
-		// The run fails with this error, and policies are applied regardless.
-		// Actions that the lockfile can lock aren't validated because they may be locked,
-		// and reporting each of them would bury the cause.
-		slogerr.WithError(logger, err).Error("read the lockfile", "lockfile", lockfile.Path)
-		failed = true
-		lf = lockfile.Invalid()
+		// A repository whose actions are all pinned by commit SHA doesn't need the lockfile, so this isn't an error.
+		// Actions are validated as if the lockfile didn't exist, so unpinned actions fail the run.
+		slogerr.WithError(logger, err).Warn("read the lockfile. Actions are validated as if the lockfile didn't exist", "lockfile", lockfile.Path)
 	}
 	for _, filePath := range filePaths {
 		logger := logger.With("workflow_file_path", filePath)

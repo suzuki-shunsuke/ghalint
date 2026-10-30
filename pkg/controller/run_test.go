@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"bytes"
+	"fmt"
 	"log/slog"
 	"strings"
 	"testing"
@@ -36,12 +37,14 @@ dependencies:
     repo_id: 197814629
 `
 
+const testInvalidLockfile = "version: 'v0.0.3'\nfoo: bar\n"
+
 const (
 	logReadLockfile = "read the lockfile"
 	logStepViolates = "the step violates policies"
 )
 
-func TestController_Run_lockfile(t *testing.T) {
+func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
 		name     string
@@ -79,11 +82,18 @@ func TestController_Run_lockfile(t *testing.T) {
 			noLogs: []string{logReadLockfile},
 		},
 		{
-			// The step isn't reported because the action may be locked.
-			name:     "lockfile is invalid",
+			// Actions are validated as if the lockfile didn't exist.
+			name:     "lockfile is invalid and action isn't pinned",
 			ref:      "v6",
-			lockfile: "version: 'v0.0.3'\nfoo: bar\n",
+			lockfile: testInvalidLockfile,
 			isErr:    true,
+			logs:     []string{logReadLockfile, logStepViolates},
+		},
+		{
+			// It's just a warning if all actions are pinned by SHA.
+			name:     "lockfile is invalid and action is pinned by SHA",
+			ref:      "3d3c42e5aac5ba805825da76410c181273ba90b1",
+			lockfile: testInvalidLockfile,
 			logs:     []string{logReadLockfile},
 			noLogs:   []string{logStepViolates},
 		},
@@ -111,7 +121,7 @@ func TestController_Run_lockfile(t *testing.T) {
 func newFs(t *testing.T, ref, lf string) afero.Fs {
 	t.Helper()
 	fs := afero.NewMemMapFs()
-	if err := afero.WriteFile(fs, ".github/workflows/test.yaml", []byte(strings.Replace(testWorkflow, "%s", ref, 1)), 0o644); err != nil {
+	if err := afero.WriteFile(fs, ".github/workflows/test.yaml", []byte(fmt.Sprintf(testWorkflow, ref)), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if lf == "" {

@@ -125,8 +125,6 @@ func TestLockfile_Locked(t *testing.T) {
 		{name: "docker image", lockfile: lf, workflowPath: ".github/workflows/ci.yml", uses: "docker://actions/checkout:v6"},
 		{name: "local action", lockfile: lf, workflowPath: ".github/workflows/ci.yml", uses: "./.github/actions/foo"},
 		{name: "nil lockfile", workflowPath: ".github/workflows/ci.yml", uses: "actions/checkout@v6"},
-		{name: "invalid lockfile", lockfile: lockfile.Invalid(), workflowPath: ".github/workflows/test.yml", uses: "actions/setup-go@v6", exp: true},
-		{name: "docker image in invalid lockfile", lockfile: lockfile.Invalid(), workflowPath: ".github/workflows/test.yml", uses: "docker://rhysd/actionlint:latest"},
 	}
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
