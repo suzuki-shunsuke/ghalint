@@ -16,7 +16,7 @@ func (r *Runner) RunAction(ctx context.Context, logger *slogutil.Logger, args *R
 		return fmt.Errorf("set log level: %w", err)
 	}
 
-	ctrl := act.New(r.fs)
+	ctrl := act.New()
 
 	return ctrl.Run(ctx, logger.Logger, args.Config, args.Files...) //nolint:wrapcheck
 }

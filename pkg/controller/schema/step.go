@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -20,7 +20,6 @@ import (
 type validateStep struct {
 	step    *workflow.Step
 	logger  *slog.Logger
-	fs      afero.Fs
 	gh      GitHub
 	rootDir string
 }
@@ -56,10 +55,10 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 	// Download actions and store them in $GHALINT_ROOT_DIR/actions
 	// Check if the action file exists
 	cachePath := filepath.Join(v.rootDir, "actions", owner, repo, sha, path, "action.yaml")
-	if f, err := afero.Exists(v.fs, cachePath); err != nil {
+	if f, err := exists(cachePath); err != nil {
 		return fmt.Errorf("check if the action file exists: %w", err)
 	} else if f {
-		if err := workflow.ReadAction(v.fs, cachePath, action); err != nil {
+		if err := workflow.ReadAction(cachePath, action); err != nil {
 			return fmt.Errorf("read a cached action file: %w", err)
 		}
 		return nil
@@ -75,10 +74,10 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 		return fmt.Errorf("download action file: %w", err)
 	}
 	// write action.yaml to $GHALINT_ROOT_DIR/actions/<owner>/<repo>/<path>
-	if err := v.fs.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
+	if err := os.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
 		return fmt.Errorf("create action directory: %w", err)
 	}
-	if err := afero.WriteFile(v.fs, cachePath, []byte(content), filePermission); err != nil {
+	if err := os.WriteFile(cachePath, []byte(content), filePermission); err != nil {
 		return fmt.Errorf("write action file: %w", err)
 	}
 	if err := yaml.Unmarshal([]byte(content), action); err != nil {
@@ -170,13 +169,13 @@ func (v *validateStep) readLocalAction(action *workflow.Action) error {
 	found := false
 	for _, file := range []string{"action.yaml", "action.yml"} {
 		p := filepath.Join(v.step.Uses, file)
-		if f, err := afero.Exists(v.fs, p); err != nil {
+		if f, err := exists(p); err != nil {
 			return fmt.Errorf("check if the action file exists: %w", err)
 		} else if !f {
 			continue
 		}
 		found = true
-		if err := workflow.ReadAction(v.fs, p, action); err != nil {
+		if err := workflow.ReadAction(p, action); err != nil {
 			return fmt.Errorf("read a local action file: %w", err)
 		}
 	}

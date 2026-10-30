@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
 )
 
 func (c *Controller) runWorkflow(ctx context.Context) error {
-	filePaths, err := workflow.List(c.fs)
+	filePaths, err := workflow.List()
 	if err != nil {
 		return fmt.Errorf("find workflow files: %w", err)
 	}
@@ -23,7 +22,6 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 		vw := &validateWorkflow{
 			workflow: filePath,
 			logger:   logger,
-			fs:       c.fs,
 			gh:       c.gh,
 			rootDir:  c.rootDir,
 		}
@@ -43,7 +41,6 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 type validateWorkflow struct {
 	workflow string
 	logger   *slog.Logger
-	fs       afero.Fs
 	gh       GitHub
 	rootDir  string
 }
@@ -52,7 +49,7 @@ func (v *validateWorkflow) validate(ctx context.Context) error {
 	wf := &workflow.Workflow{
 		FilePath: v.workflow,
 	}
-	if err := workflow.Read(v.fs, v.workflow, wf); err != nil {
+	if err := workflow.Read(v.workflow, wf); err != nil {
 		return fmt.Errorf("read a workflow file: %w", err)
 	}
 	failed := false
@@ -60,7 +57,6 @@ func (v *validateWorkflow) validate(ctx context.Context) error {
 		vj := &validateJob{
 			job:     job,
 			logger:  v.logger.With("job_key", name),
-			fs:      v.fs,
 			gh:      v.gh,
 			rootDir: v.rootDir,
 		}

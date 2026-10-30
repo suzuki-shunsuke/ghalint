@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller"
 	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 )
@@ -46,7 +47,6 @@ const (
 )
 
 func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
-	t.Parallel()
 	data := []struct {
 		name     string
 		ref      string
@@ -112,11 +112,14 @@ func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
 	}
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
-			t.Parallel()
-			fs := newFs(t, d.ref, d.lockfile)
+			t.Chdir(t.TempDir())
+			writeFile(t, ".github/workflows/test.yaml", fmt.Sprintf(testWorkflow, d.ref))
+			if d.lockfile != "" {
+				writeFile(t, lockfile.Path, d.lockfile)
+			}
 			buf := &bytes.Buffer{}
 			logger := slog.New(slog.NewTextHandler(buf, nil))
-			err := controller.New(fs).Run(t.Context(), logger, "")
+			err := controller.New().Run(t.Context(), logger, "")
 			if d.isErr && err == nil {
 				t.Fatal("error must be returned")
 			}
@@ -128,21 +131,15 @@ func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
 	}
 }
 
-// newFs returns a file system with a workflow using actions/checkout@<ref> and the lockfile.
-// The lockfile isn't created if it's empty.
-func newFs(t *testing.T, ref, lf string) afero.Fs {
+// writeFile writes a file relative to the current directory, creating its parent directories.
+func writeFile(t *testing.T, p, content string) {
 	t.Helper()
-	fs := afero.NewMemMapFs()
-	if err := afero.WriteFile(fs, ".github/workflows/test.yaml", []byte(fmt.Sprintf(testWorkflow, ref)), 0o644); err != nil {
+	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if lf == "" {
-		return fs
-	}
-	if err := afero.WriteFile(fs, lockfile.Path, []byte(lf), 0o644); err != nil {
+	if err := os.WriteFile(p, []byte(content), 0o644); err != nil { //nolint:gosec
 		t.Fatal(err)
 	}
-	return fs
 }
 
 func assertLogs(t *testing.T, out string, logs, noLogs []string) {
@@ -160,15 +157,12 @@ func assertLogs(t *testing.T, out string, logs, noLogs []string) {
 }
 
 func TestController_Run_noWorkflow(t *testing.T) {
-	t.Parallel()
+	t.Chdir(t.TempDir())
 	// The lockfile has a broken entry, but it isn't read because there is no workflow.
-	fs := afero.NewMemMapFs()
-	if err := afero.WriteFile(fs, lockfile.Path, []byte(testInvalidLockfile), 0o644); err != nil {
-		t.Fatal(err)
-	}
+	writeFile(t, lockfile.Path, testInvalidLockfile)
 	buf := &bytes.Buffer{}
 	logger := slog.New(slog.NewTextHandler(buf, nil))
-	if err := controller.New(fs).Run(t.Context(), logger, ""); err != nil {
+	if err := controller.New().Run(t.Context(), logger, ""); err != nil {
 		t.Fatal(err)
 	}
 	assertLogs(t, buf.String(), nil, []string{logReadLockfile})

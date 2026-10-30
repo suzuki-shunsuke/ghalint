@@ -3,20 +3,15 @@ package controller
 import (
 	"log/slog"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
-type Controller struct {
-	fs afero.Fs
-}
+type Controller struct{}
 
-func New(fs afero.Fs) *Controller {
-	return &Controller{
-		fs: fs,
-	}
+func New() *Controller {
+	return &Controller{}
 }
 
 type WorkflowPolicy interface {

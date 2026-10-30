@@ -19,7 +19,7 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		return err
 	}
 
-	filePaths, err := workflow.List(c.fs)
+	filePaths, err := workflow.List()
 	if err != nil {
 		return fmt.Errorf("find workflow files: %w", err)
 	}
@@ -43,7 +43,7 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
 	failed := false
-	lf, lfErr := lockfile.Read(c.fs, filePaths)
+	lf, lfErr := lockfile.Read(filePaths)
 	if lfErr != nil {
 		// A repository whose actions are all pinned by commit SHA doesn't need the lockfile, so this isn't an error.
 		// Actions are validated as if the lockfile didn't exist, so unpinned actions fail the run.
@@ -65,7 +65,7 @@ func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, w
 	wf := &workflow.Workflow{
 		FilePath: filePath,
 	}
-	if err := workflow.Read(c.fs, filePath, wf); err != nil {
+	if err := workflow.Read(filePath, wf); err != nil {
 		slogerr.WithError(logger, err).Error("read a workflow file")
 		return true
 	}
@@ -185,12 +185,12 @@ func (c *Controller) applyStepPolicy(logger *slog.Logger, cfg *config.Config, wf
 
 func (c *Controller) readConfig(cfg *config.Config, cfgFilePath string) error {
 	if cfgFilePath == "" {
-		if c := config.Find(c.fs); c != "" {
+		if c := config.Find(); c != "" {
 			cfgFilePath = c
 		}
 	}
 	if cfgFilePath != "" {
-		if err := config.Read(c.fs, cfg, cfgFilePath); err != nil {
+		if err := config.Read(cfg, cfgFilePath); err != nil {
 			return fmt.Errorf("read a configuration file: %w", slogerr.With(err,
 				"config_file", cfgFilePath,
 			))

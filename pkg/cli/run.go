@@ -16,7 +16,7 @@ func (r *Runner) Run(ctx context.Context, logger *slogutil.Logger, args *RunArgs
 		return fmt.Errorf("set log color: %w", err)
 	}
 
-	ctrl := controller.New(r.fs)
+	ctrl := controller.New()
 
 	return ctrl.Run(ctx, logger.Logger, args.Config) //nolint:wrapcheck
 }

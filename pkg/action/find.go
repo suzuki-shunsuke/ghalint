@@ -2,11 +2,10 @@ package action
 
 import (
 	"fmt"
-
-	"github.com/spf13/afero"
+	"path/filepath"
 )
 
-func Find(fs afero.Fs) ([]string, error) {
+func Find() ([]string, error) {
 	patterns := []string{
 		"action.yaml",
 		"action.yml",
@@ -20,7 +19,7 @@ func Find(fs afero.Fs) ([]string, error) {
 
 	files := []string{}
 	for _, pattern := range patterns {
-		matches, err := afero.Glob(fs, pattern)
+		matches, err := filepath.Glob(pattern)
 		if err != nil {
 			return nil, fmt.Errorf("check if the action file exists: %w", err)
 		}

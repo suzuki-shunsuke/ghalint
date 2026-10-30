@@ -3,7 +3,6 @@ package cli
 import (
 	"context"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli/experiment"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli/experiment/validateinput"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli/gflags"
@@ -23,10 +22,7 @@ type RunActionArgs struct {
 }
 
 func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error { //nolint:funlen
-	fs := afero.NewOsFs()
-	runner := &Runner{
-		fs: fs,
-	}
+	runner := &Runner{}
 	gf := &gflags.GlobalFlags{}
 	runArgs := &RunArgs{
 		GlobalFlags: gf,
@@ -92,11 +88,9 @@ func Run(ctx context.Context, logger *slogutil.Logger, env *urfave.Env) error { 
 					},
 				},
 			},
-			experiment.New(logger, fs, validateInputArgs),
+			experiment.New(logger, validateInputArgs),
 		},
 	}).Run(ctx, env.Args)
 }
 
-type Runner struct {
-	fs afero.Fs
-}
+type Runner struct{}
