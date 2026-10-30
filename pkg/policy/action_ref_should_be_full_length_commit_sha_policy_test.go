@@ -1,13 +1,17 @@
 package policy_test
 
 import (
+	"bytes"
+	"errors"
 	"log/slog"
+	"strings"
 	"testing"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) { //nolint:funlen
@@ -305,6 +309,54 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 			}
 			if d.isErr {
 				t.Fatal("error must be returned")
+			}
+		})
+	}
+}
+
+func TestActionRefShouldBeSHAPolicy_ApplyStep_lockfileError(t *testing.T) {
+	t.Parallel()
+	data := []struct {
+		name          string
+		uses          string
+		isErr         bool
+		lockfileError bool
+	}{
+		{
+			name:          "action isn't pinned",
+			uses:          "actions/checkout@v6",
+			isErr:         true,
+			lockfileError: true,
+		},
+		{
+			name:  "docker image isn't managed by the lockfile",
+			uses:  "docker://rhysd/actionlint:latest",
+			isErr: true,
+		},
+		{
+			name: "action is pinned by SHA",
+			uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+		},
+	}
+	p := policy.NewActionRefShouldBeSHAPolicy()
+	logger := slog.New(slog.DiscardHandler)
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
+			t.Parallel()
+			stepCtx := workflowStepContext(nil)
+			stepCtx.Job.Workflow.LockfileError = errors.New("lockfile version v0.0.4 is newer than this binary supports")
+			err := p.ApplyStep(logger, &config.Config{}, stepCtx, &workflow.Step{Uses: d.uses})
+			if (err != nil) != d.isErr {
+				t.Fatalf("isErr is %v but the error is %v", d.isErr, err)
+			}
+			if err == nil {
+				return
+			}
+			// Attributes of the error are output by slogerr.WithError.
+			buf := &bytes.Buffer{}
+			slogerr.WithError(slog.New(slog.NewTextHandler(buf, nil)), err).Error("test")
+			if got := strings.Contains(buf.String(), "lockfile_error"); got != d.lockfileError {
+				t.Fatalf("lockfile_error should be %v: %s", d.lockfileError, buf.String())
 			}
 		})
 	}

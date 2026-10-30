@@ -42,6 +42,11 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		policy.NewActionRefShouldBeSHAPolicy(),
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
+	if len(filePaths) == 0 {
+		// Nothing is validated.
+		// The lockfile isn't read because the parser validates all entries if no workflow file path is given.
+		return nil
+	}
 	failed := false
 	lf, lfErr := lockfile.Read(c.fs, filePaths...)
 	if lfErr != nil {

@@ -158,3 +158,18 @@ func assertLogs(t *testing.T, out string, logs, noLogs []string) {
 		}
 	}
 }
+
+func TestController_Run_noWorkflow(t *testing.T) {
+	t.Parallel()
+	// The lockfile has a broken entry, but it isn't read because there is no workflow.
+	fs := afero.NewMemMapFs()
+	if err := afero.WriteFile(fs, lockfile.Path, []byte(testInvalidLockfile), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	buf := &bytes.Buffer{}
+	logger := slog.New(slog.NewTextHandler(buf, nil))
+	if err := controller.New(fs).Run(t.Context(), logger, ""); err != nil {
+		t.Fatal(err)
+	}
+	assertLogs(t, buf.String(), nil, []string{logReadLockfile})
+}
