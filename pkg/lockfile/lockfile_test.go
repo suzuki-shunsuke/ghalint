@@ -27,8 +27,9 @@ dependencies:
 
 func TestRead(t *testing.T) {
 	t.Parallel()
+	workflows := []string{".github/workflows/ci.yml"}
 	afs := afero.NewMemMapFs()
-	lf, err := lockfile.Read(afs)
+	lf, err := lockfile.Read(afs, workflows)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,12 +39,28 @@ func TestRead(t *testing.T) {
 	if err := afero.WriteFile(afs, lockfile.Path, []byte(testLockfile), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	lf, err = lockfile.Read(afs)
+	lf, err = lockfile.Read(afs, workflows)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if lf == nil {
 		t.Fatal("lockfile should be returned")
+	}
+}
+
+func TestRead_noWorkflow(t *testing.T) {
+	t.Parallel()
+	// The lockfile is broken, but it isn't read because no workflow is given.
+	afs := afero.NewMemMapFs()
+	if err := afero.WriteFile(afs, lockfile.Path, []byte("version: 'v0.0.3'\nfoo: bar\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	lf, err := lockfile.Read(afs, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lf != nil {
+		t.Fatal("lockfile should be nil if no workflow is given")
 	}
 }
 

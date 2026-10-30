@@ -21,10 +21,15 @@ type Lockfile struct {
 	file parserlock.File
 }
 
-// Read reads and validates the lockfile. It returns nil without an error if the lockfile doesn't exist.
-// If workflowFilePaths are given, required fields are validated only for entries those workflows reference,
+// Read reads and validates the lockfile for the workflows.
+// Required fields are validated only for entries those workflows reference,
 // so a broken entry that no workflow uses doesn't make the whole lockfile unreadable.
-func Read(afs afero.Fs, workflowFilePaths ...string) (*Lockfile, error) {
+// It returns nil without an error if the lockfile doesn't exist or no workflow is given.
+func Read(afs afero.Fs, workflowFilePaths []string) (*Lockfile, error) {
+	if len(workflowFilePaths) == 0 {
+		// The parser validates all entries if no workflow file path is given.
+		return nil, nil //nolint:nilnil
+	}
 	b, err := afero.ReadFile(afs, Path)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -36,7 +41,8 @@ func Read(afs afero.Fs, workflowFilePaths ...string) (*Lockfile, error) {
 }
 
 // Parse parses and validates the content of a lockfile.
-// See Read about workflowFilePaths.
+// If workflowFilePaths are given, required fields are validated only for entries those workflows reference.
+// Otherwise, all entries are validated.
 func Parse(b []byte, workflowFilePaths ...string) (*Lockfile, error) {
 	paths := make([]string, len(workflowFilePaths))
 	for i, p := range workflowFilePaths {

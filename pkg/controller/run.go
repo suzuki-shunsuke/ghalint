@@ -42,13 +42,8 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		policy.NewActionRefShouldBeSHAPolicy(),
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
-	if len(filePaths) == 0 {
-		// Nothing is validated.
-		// The lockfile isn't read because the parser validates all entries if no workflow file path is given.
-		return nil
-	}
 	failed := false
-	lf, lfErr := lockfile.Read(c.fs, filePaths...)
+	lf, lfErr := lockfile.Read(c.fs, filePaths)
 	if lfErr != nil {
 		// A repository whose actions are all pinned by commit SHA doesn't need the lockfile, so this isn't an error.
 		// Actions are validated as if the lockfile didn't exist, so unpinned actions fail the run.
