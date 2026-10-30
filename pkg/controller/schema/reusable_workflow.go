@@ -176,15 +176,14 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 	if err != nil {
 		return fmt.Errorf("parse job.uses: %w", err)
 	}
-	if r.Path == "" {
-		return slogerr.With(errors.New("the format must be <owner>/<repo>/<path>@<ref>"), "uses", v.job.Uses) //nolint:wrapcheck
+	if !reusableWorkflowPathPattern.MatchString(r.Path) {
+		return formatError(reusableWorkflowFormat, v.job.Uses)
 	}
 	sha, err := r.resolveSHA(ctx, v.gh)
 	if err != nil {
 		return err
 	}
-	// Download actions and store them in $GHALINT_ROOT_DIR/actions
-	// Check if the action file exists
+	// Read the cached workflow file $GHALINT_ROOT_DIR/actions/<owner>/<repo>/<sha>/<path>
 	cachePath, err := r.cachePath(v.rootDir, sha)
 	if err != nil {
 		return fmt.Errorf("get the cache path: %w", err)
@@ -194,7 +193,7 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 	} else if !errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("read a cached workflow file: %w", err)
 	}
-	// Download a wofklow file
+	// Download the workflow file
 	content, _, _, err := v.gh.GetContents(ctx, r.Owner, r.Repo, r.Path, &github.RepositoryContentGetOptions{
 		Ref: sha,
 	})

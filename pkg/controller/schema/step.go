@@ -41,8 +41,7 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 	if err != nil {
 		return err
 	}
-	// Download actions and store them in $GHALINT_ROOT_DIR/actions
-	// Check if the action file exists
+	// Read the cached action file $GHALINT_ROOT_DIR/actions/<owner>/<repo>/<sha>/<path>/action.yaml
 	cachePath, err := r.cachePath(v.rootDir, sha, "action.yaml")
 	if err != nil {
 		return fmt.Errorf("get the cache path: %w", err)
@@ -53,16 +52,11 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 		return fmt.Errorf("read a cached action file: %w", err)
 	}
 	// Download action.yaml or action.yml
-	content, err := v.download(ctx, &downloadInput{
-		Owner: r.Owner,
-		Repo:  r.Repo,
-		Path:  r.Path,
-		Ref:   sha,
-	})
+	content, err := v.download(ctx, r, sha)
 	if err != nil {
 		return fmt.Errorf("download action file: %w", err)
 	}
-	// write action.yaml to $GHALINT_ROOT_DIR/actions/<owner>/<repo>/<path>
+	// Cache the action file
 	if err := os.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
 		return fmt.Errorf("create action directory: %w", err)
 	}
@@ -80,17 +74,10 @@ const (
 	dirPermission  = 0o755
 )
 
-type downloadInput struct {
-	Owner string
-	Repo  string
-	Path  string
-	Ref   string
-}
-
-func (v *validateStep) download(ctx context.Context, input *downloadInput) (string, error) {
+func (v *validateStep) download(ctx context.Context, r *remoteRef, sha string) (string, error) {
 	for _, file := range []string{"action.yaml", "action.yml"} {
-		content, _, _, err := v.gh.GetContents(ctx, input.Owner, input.Repo, path.Join(input.Path, file), &github.RepositoryContentGetOptions{
-			Ref: input.Ref,
+		content, _, _, err := v.gh.GetContents(ctx, r.Owner, r.Repo, path.Join(r.Path, file), &github.RepositoryContentGetOptions{
+			Ref: sha,
 		})
 		if err != nil {
 			slogerr.WithError(v.logger, err).Debug("get action file")

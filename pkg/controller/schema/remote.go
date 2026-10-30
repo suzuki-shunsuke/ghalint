@@ -11,7 +11,23 @@ import (
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
-var fullCommitSHAPattern = regexp.MustCompile(`^[0-9a-f]{40}$`)
+var (
+	fullCommitSHAPattern = regexp.MustCompile(`^[0-9a-f]{40}$`)
+	// ownerRepoPattern is the characters GitHub allows in owner and repository names.
+	// owner and repo are put into GitHub API URLs without escaping.
+	ownerRepoPattern = regexp.MustCompile(`^[A-Za-z0-9_.-]+$`)
+	// reusableWorkflowPathPattern is the path of a reusable workflow, which must be in .github/workflows.
+	reusableWorkflowPathPattern = regexp.MustCompile(`^\.github/workflows/[^/]+\.ya?ml$`)
+)
+
+const (
+	remoteActionFormat     = "<owner>/<repo>[/<path>]@<ref>"
+	reusableWorkflowFormat = "<owner>/<repo>/.github/workflows/<file>.y(a)ml@<ref>"
+)
+
+func formatError(format, uses string) error {
+	return slogerr.With(errors.New("the format must be "+format), "uses", uses) //nolint:wrapcheck
+}
 
 // remoteRef is a remote action or reusable workflow `<owner>/<repo>[/<path>]@<ref>`.
 type remoteRef struct {
@@ -22,20 +38,24 @@ type remoteRef struct {
 }
 
 // parseRemoteRef parses `<owner>/<repo>[/<path>]@<ref>`.
-// It rejects empty, `.`, and `..` path elements so that the cache path can't escape the cache directory.
+// It rejects empty, `.`, and `..` path elements so that the cache path can't escape the cache directory,
+// and owner and repo with characters GitHub doesn't allow.
 func parseRemoteRef(uses string) (*remoteRef, error) {
 	fullPath, ref, ok := strings.Cut(uses, "@")
 	if !ok || ref == "" {
-		return nil, slogerr.With(errors.New("the format must be <owner>/<repo>[/<path>]@<ref>"), "uses", uses) //nolint:wrapcheck
+		return nil, formatError(remoteActionFormat, uses)
 	}
 	elems := strings.Split(fullPath, "/")
 	if len(elems) < 2 { //nolint:mnd
-		return nil, slogerr.With(errors.New("the format must be <owner>/<repo>[/<path>]@<ref>"), "uses", uses) //nolint:wrapcheck
+		return nil, formatError(remoteActionFormat, uses)
 	}
 	for _, elem := range elems {
-		if elem == "" || elem == "." || elem == ".." || strings.Contains(elem, `\`) {
+		if !validPathElement(elem) {
 			return nil, slogerr.With(errors.New("the path includes an invalid element"), "uses", uses) //nolint:wrapcheck
 		}
+	}
+	if !ownerRepoPattern.MatchString(elems[0]) || !ownerRepoPattern.MatchString(elems[1]) {
+		return nil, slogerr.With(errors.New("owner or repo includes an invalid character"), "uses", uses) //nolint:wrapcheck
 	}
 	return &remoteRef{
 		Owner: elems[0],
@@ -43,6 +63,12 @@ func parseRemoteRef(uses string) (*remoteRef, error) {
 		Path:  strings.Join(elems[2:], "/"),
 		Ref:   ref,
 	}, nil
+}
+
+// validPathElement reports whether elem can be a path element of the cache path.
+// A backslash is a path separator on Windows.
+func validPathElement(elem string) bool {
+	return elem != "" && elem != "." && elem != ".." && !strings.Contains(elem, `\`)
 }
 
 // resolveSHA returns the full length commit SHA of the ref.

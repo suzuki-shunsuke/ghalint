@@ -46,6 +46,10 @@ func Test_parseRemoteRef(t *testing.T) {
 		{name: "current directory", uses: "owner/repo/./foo@v1", isErr: true},
 		{name: "backslash", uses: `owner/repo/..\..\foo@v1`, isErr: true},
 		{name: "docker", uses: "docker://alpine@sha256:abc", isErr: true},
+		{name: "query in owner", uses: "own?x=/repo@v1", isErr: true},
+		{name: "fragment in repo", uses: "owner/repo#frag@v1", isErr: true},
+		{name: "colon in owner", uses: "own:er/repo@v1", isErr: true},
+		{name: "percent in repo", uses: "owner/re%2Fpo@v1", isErr: true},
 	}
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
@@ -160,14 +164,28 @@ func Test_invalidUses(t *testing.T) {
 
 func Test_invalidReusableWorkflow(t *testing.T) {
 	t.Parallel()
-	// The workflow path is required. gh is nil, so the test panics if the GitHub API is called.
-	vj := &validateJob{
-		job:     &workflow.Job{Uses: "owner/repo@" + testSHA},
-		logger:  slog.New(slog.DiscardHandler),
-		rootDir: t.TempDir(),
-	}
-	if err := vj.read(t.Context(), &ReusableWorkflow{}); err == nil {
-		t.Fatal("error must be returned")
+	// The workflow path must be .github/workflows/<file>.y(a)ml.
+	// gh is nil, so the test panics if the GitHub API is called.
+	for _, p := range []string{
+		"",
+		"/README.md",
+		"/.github/workflows",
+		"/.github/workflows/test.txt",
+		"/.github/workflows/sub/test.yaml",
+		"/foo/.github/workflows/test.yaml",
+	} {
+		uses := "owner/repo" + p + "@" + testSHA
+		t.Run(uses, func(t *testing.T) {
+			t.Parallel()
+			vj := &validateJob{
+				job:     &workflow.Job{Uses: uses},
+				logger:  slog.New(slog.DiscardHandler),
+				rootDir: t.TempDir(),
+			}
+			if err := vj.read(t.Context(), &ReusableWorkflow{}); err == nil {
+				t.Fatal("error must be returned")
+			}
+		})
 	}
 }
 
@@ -208,7 +226,7 @@ func Test_downloadDirectory(t *testing.T) {
 		t.Fatal("error must be returned")
 	}
 	vj := &validateJob{
-		job:     &workflow.Job{Uses: "owner/repo/.github/workflows@v1"},
+		job:     &workflow.Job{Uses: "owner/repo/.github/workflows/test.yaml@v1"},
 		logger:  slog.New(slog.DiscardHandler),
 		gh:      directoryGitHub{},
 		rootDir: t.TempDir(),
