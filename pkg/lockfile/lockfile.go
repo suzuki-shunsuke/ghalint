@@ -42,6 +42,12 @@ func Parse(b []byte) (*Lockfile, error) {
 	return &Lockfile{file: f}, nil
 }
 
+// Lockable reports whether uses is a repository action, which the lockfile can lock.
+// Local actions, Docker images, and reusable workflows aren't.
+func Lockable(uses string) bool {
+	return parserlock.ParseActionRef(uses) != nil
+}
+
 // Locked reports whether the action uses is locked for the workflow.
 // It returns false if lf is nil or uses isn't a repository action, such as a local action, a Docker image, or a reusable workflow.
 // The lockfile records actions as canonical keys `owner/repo@ref`, where owner and repo are lowercased and a sub-action path is dropped.

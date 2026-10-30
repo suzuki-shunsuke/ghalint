@@ -169,6 +169,37 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 			},
 		},
 		{
+			name: "lockfile is invalid",
+			cfg:  &config.Config{},
+			stepCtx: &policy.StepContext{
+				Job: &policy.JobContext{
+					Workflow: &policy.WorkflowContext{
+						FilePath:        ".github/workflows/test.yaml",
+						LockfileInvalid: true,
+					},
+				},
+			},
+			step: &workflow.Step{
+				Uses: "actions/setup-go@v6",
+			},
+		},
+		{
+			name:  "docker image is validated even if lockfile is invalid",
+			isErr: true,
+			cfg:   &config.Config{},
+			stepCtx: &policy.StepContext{
+				Job: &policy.JobContext{
+					Workflow: &policy.WorkflowContext{
+						FilePath:        ".github/workflows/test.yaml",
+						LockfileInvalid: true,
+					},
+				},
+			},
+			step: &workflow.Step{
+				Uses: "docker://rhysd/actionlint:latest",
+			},
+		},
+		{
 			name:    "action file",
 			isErr:   true,
 			cfg:     &config.Config{},

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
@@ -38,6 +39,8 @@ func (p *ActionRefShouldBeSHAPolicy) ApplyJob(_ *slog.Logger, cfg *config.Config
 
 // ApplyStep validates steps of workflows and actions.
 // Actions in workflows locked by the lockfile are ignored because the lockfile locks them to commits.
+// If ghalint fails to read the lockfile, actions in workflows are ignored too
+// because they may be locked and the read error already fails the run.
 // Steps of action files are always validated because callers of the action files don't necessarily use the lockfile.
 func (p *ActionRefShouldBeSHAPolicy) ApplyStep(_ *slog.Logger, cfg *config.Config, stepCtx *StepContext, step *workflow.Step) error {
 	if p.locked(stepCtx, step.Uses) {
@@ -50,7 +53,11 @@ func (p *ActionRefShouldBeSHAPolicy) locked(stepCtx *StepContext, uses string) b
 	if stepCtx == nil || stepCtx.Job == nil || stepCtx.Job.Workflow == nil {
 		return false
 	}
-	return stepCtx.Job.Workflow.Lockfile.Locked(stepCtx.Job.Workflow.FilePath, uses)
+	wfCtx := stepCtx.Job.Workflow
+	if wfCtx.LockfileInvalid {
+		return lockfile.Lockable(uses)
+	}
+	return wfCtx.Lockfile.Locked(wfCtx.FilePath, uses)
 }
 
 func (p *ActionRefShouldBeSHAPolicy) apply(cfg *config.Config, uses string) error {
