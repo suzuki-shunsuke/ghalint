@@ -16,7 +16,7 @@ type Controller struct {
 func New(logger *slog.Logger, gh GitHub, rootDir string) *Controller {
 	return &Controller{
 		logger:  logger,
-		gh:      gh,
+		gh:      newSHACache(gh),
 		rootDir: rootDir,
 	}
 }
