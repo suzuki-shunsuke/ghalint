@@ -1,10 +1,17 @@
 package policy
 
-import "github.com/suzuki-shunsuke/ghalint/pkg/workflow"
+import (
+	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
+	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
+)
 
 type WorkflowContext struct {
 	FilePath string
 	Workflow *workflow.Workflow
+	// Lockfile is nil if the lockfile doesn't exist or ghalint fails to read it.
+	Lockfile *lockfile.Lockfile
+	// LockfileError is the error ghalint got when reading the lockfile.
+	LockfileError error
 }
 
 type JobContext struct {
