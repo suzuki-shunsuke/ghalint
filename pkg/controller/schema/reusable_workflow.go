@@ -172,38 +172,36 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 		}
 		return nil
 	}
-	// <owner>/<repo>[/<path>]@<ref>
-	fullPath, ref, ok := strings.Cut(v.job.Uses, "@")
-	if !ok {
-		return fmt.Errorf("invalid job.uses format: %s", v.job.Uses)
+	r, err := parseRemoteRef(v.job.Uses)
+	if err != nil {
+		return fmt.Errorf("parse job.uses: %w", err)
 	}
-	elems := strings.Split(fullPath, "/")
-	owner := elems[0]
-	repo := elems[1]
-	path := strings.Join(elems[2:], "/")
-	sha := ref
-	if !fullCommitSHAPattern.MatchString(ref) {
-		// Get SHA of actions
-		s, _, err := v.gh.GetCommitSHA1(ctx, owner, repo, ref, "")
-		if err != nil {
-			return fmt.Errorf("get commit SHA1: %w", err)
-		}
-		sha = s
+	if !reusableWorkflowPathPattern.MatchString(r.Path) {
+		return formatError(reusableWorkflowFormat, v.job.Uses)
 	}
-	// Download actions and store them in $GHALINT_ROOT_DIR/actions
-	// Check if the action file exists
-	cachePath := filepath.Join(v.rootDir, "actions", owner, repo, sha, path)
+	sha, err := r.resolveSHA(ctx, v.gh)
+	if err != nil {
+		return err
+	}
+	// Read the cached workflow file $GHALINT_ROOT_DIR/actions/<owner>/<repo>/<sha>/<path>
+	cachePath, err := r.cachePath(v.rootDir, sha)
+	if err != nil {
+		return fmt.Errorf("get the cache path: %w", err)
+	}
 	if err := readReusableWorkflow(cachePath, wf); err == nil {
 		return nil
 	} else if !errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("read a cached workflow file: %w", err)
 	}
-	// Download a wofklow file
-	content, _, _, err := v.gh.GetContents(ctx, owner, repo, path, &github.RepositoryContentGetOptions{
+	// Download the workflow file
+	content, _, _, err := v.gh.GetContents(ctx, r.Owner, r.Repo, r.Path, &github.RepositoryContentGetOptions{
 		Ref: sha,
 	})
 	if err != nil {
 		return fmt.Errorf("download workflow file: %w", err)
+	}
+	if content == nil {
+		return slogerr.With(errors.New("the workflow path isn't a file"), "uses", v.job.Uses) //nolint:wrapcheck
 	}
 	// write workflow to the cache dir
 	if err := os.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
