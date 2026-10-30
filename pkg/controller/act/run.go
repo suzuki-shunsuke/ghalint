@@ -49,12 +49,12 @@ func (c *Controller) listFiles(args ...string) ([]string, error) {
 		return args, nil
 	}
 
-	return action.Find(c.fs) //nolint:wrapcheck
+	return action.Find() //nolint:wrapcheck
 }
 
 func (c *Controller) validateAction(logger *slog.Logger, cfg *config.Config, stepPolicies []controller.StepPolicy, filePath string) bool {
 	action := &workflow.Action{}
-	if err := workflow.ReadAction(c.fs, filePath, action); err != nil {
+	if err := workflow.ReadAction(filePath, action); err != nil {
 		slogerr.WithError(logger, err).Error("read an action file")
 		return true
 	}
@@ -112,12 +112,12 @@ func (c *Controller) applyStepPolicy(logger *slog.Logger, cfg *config.Config, st
 
 func (c *Controller) readConfig(cfg *config.Config, cfgFilePath string) error {
 	if cfgFilePath == "" {
-		if c := config.Find(c.fs); c != "" {
+		if c := config.Find(); c != "" {
 			cfgFilePath = c
 		}
 	}
 	if cfgFilePath != "" {
-		if err := config.Read(c.fs, cfg, cfgFilePath); err != nil {
+		if err := config.Read(cfg, cfgFilePath); err != nil {
 			return fmt.Errorf("read a configuration file: %w", slogerr.With(err,
 				"config_file", cfgFilePath,
 			))

@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"slices"
 
 	parserlock "github.com/github/actions-lockfile/go/pkg/lockfile"
-	"github.com/spf13/afero"
 )
 
 // Path is the path of the lockfile from the repository root.
@@ -25,12 +25,12 @@ type Lockfile struct {
 // Required fields are validated only for entries those workflows reference,
 // so a broken entry that no workflow uses doesn't make the whole lockfile unreadable.
 // It returns nil without an error if the lockfile doesn't exist or no workflow is given.
-func Read(afs afero.Fs, workflowFilePaths []string) (*Lockfile, error) {
+func Read(workflowFilePaths []string) (*Lockfile, error) {
 	if len(workflowFilePaths) == 0 {
 		// The parser validates all entries if no workflow file path is given.
 		return nil, nil //nolint:nilnil
 	}
-	b, err := afero.ReadFile(afs, Path)
+	b, err := os.ReadFile(Path)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil, nil //nolint:nilnil

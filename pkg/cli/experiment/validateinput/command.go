@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/adrg/xdg"
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/cli/gflags"
 	"github.com/suzuki-shunsuke/ghalint/pkg/controller/schema"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
@@ -19,10 +18,8 @@ type Args struct {
 	*gflags.GlobalFlags
 }
 
-func New(logger *slogutil.Logger, fs afero.Fs, args *Args) *cli.Command {
-	runner := &Runner{
-		fs: fs,
-	}
+func New(logger *slogutil.Logger, args *Args) *cli.Command {
+	runner := &Runner{}
 	return &cli.Command{
 		Name:        "validate-input",
 		Usage:       "validate action inputs",
@@ -33,9 +30,7 @@ func New(logger *slogutil.Logger, fs afero.Fs, args *Args) *cli.Command {
 	}
 }
 
-type Runner struct {
-	fs afero.Fs
-}
+type Runner struct{}
 
 func (r *Runner) Action(ctx context.Context, logger *slogutil.Logger, args *Args) error {
 	if err := logger.SetLevel(args.LogLevel); err != nil {
@@ -55,7 +50,7 @@ func (r *Runner) Action(ctx context.Context, logger *slogutil.Logger, args *Args
 		return fmt.Errorf("create a GitHub client: %w", err)
 	}
 
-	ctrl := schema.New(r.fs, logger.Logger, gh.Repositories, rootDir)
+	ctrl := schema.New(logger.Logger, gh.Repositories, rootDir)
 
 	return ctrl.Run(ctx) //nolint:wrapcheck
 }

@@ -1,15 +1,7 @@
 package act
 
-import (
-	"github.com/spf13/afero"
-)
+type Controller struct{}
 
-type Controller struct {
-	fs afero.Fs
-}
-
-func New(fs afero.Fs) *Controller {
-	return &Controller{
-		fs: fs,
-	}
+func New() *Controller {
+	return &Controller{}
 }

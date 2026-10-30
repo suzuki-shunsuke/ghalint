@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/action"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 func (c *Controller) runActions(ctx context.Context) error {
-	filePaths, err := action.Find(c.fs)
+	filePaths, err := action.Find()
 	if err != nil {
 		return fmt.Errorf("find action files: %w", err)
 	}
@@ -23,7 +22,6 @@ func (c *Controller) runActions(ctx context.Context) error {
 		vw := &validateAction{
 			action:  filePath,
 			logger:  logger,
-			fs:      c.fs,
 			gh:      c.gh,
 			rootDir: c.rootDir,
 		}
@@ -41,14 +39,13 @@ func (c *Controller) runActions(ctx context.Context) error {
 type validateAction struct {
 	action  string
 	logger  *slog.Logger
-	fs      afero.Fs
 	gh      GitHub
 	rootDir string
 }
 
 func (v *validateAction) validate(ctx context.Context) error {
 	act := &workflow.Action{}
-	if err := workflow.ReadAction(v.fs, v.action, act); err != nil {
+	if err := workflow.ReadAction(v.action, act); err != nil {
 		return fmt.Errorf("read an action file: %w", err)
 	}
 	failed := false
@@ -56,7 +53,6 @@ func (v *validateAction) validate(ctx context.Context) error {
 		vs := &validateStep{
 			step:    step,
 			logger:  v.logger,
-			fs:      v.fs,
 			gh:      v.gh,
 			rootDir: v.rootDir,
 		}

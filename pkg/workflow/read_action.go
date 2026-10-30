@@ -4,14 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"gopkg.in/yaml.v3"
 )
 
-func ReadAction(fs afero.Fs, p string, action *Action) error {
-	f, err := fs.Open(p)
+func ReadAction(p string, action *Action) error {
+	f, err := os.Open(p)
 	if err != nil {
 		return fmt.Errorf("open an action file: %w", err)
 	}

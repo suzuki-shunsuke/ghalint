@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"gopkg.in/yaml.v3"
 )
@@ -32,7 +32,7 @@ func (e *Exclude) FilePath() string {
 	return e.ActionFilePath
 }
 
-func Find(fs afero.Fs) string {
+func Find() string {
 	filePaths := []string{
 		"ghalint.yaml",
 		".ghalint.yaml",
@@ -43,15 +43,15 @@ func Find(fs afero.Fs) string {
 	}
 
 	for _, filePath := range filePaths {
-		if _, err := fs.Stat(filePath); err == nil {
+		if _, err := os.Stat(filePath); err == nil {
 			return filePath
 		}
 	}
 	return ""
 }
 
-func Read(fs afero.Fs, cfg *Config, filePath string) error {
-	f, err := fs.Open(filePath)
+func Read(cfg *Config, filePath string) error {
+	f, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("open a configuration file: %w", err)
 	}

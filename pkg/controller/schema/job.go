@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
@@ -15,7 +14,6 @@ import (
 type validateJob struct {
 	job     *workflow.Job
 	logger  *slog.Logger
-	fs      afero.Fs
 	gh      GitHub
 	rootDir string
 }
@@ -33,7 +31,6 @@ func (v *validateJob) validate(ctx context.Context) error {
 	for _, step := range v.job.Steps {
 		vs := &validateStep{
 			step:    step,
-			fs:      v.fs,
 			logger:  v.logger,
 			gh:      v.gh,
 			rootDir: v.rootDir,

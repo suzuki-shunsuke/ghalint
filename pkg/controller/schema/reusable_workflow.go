@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"maps"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -145,8 +146,8 @@ func (v *validateJob) validateWorkflow(wf *ReusableWorkflow) error {
 	return nil
 }
 
-func readReusableWorkflow(fs afero.Fs, p string, wf *ReusableWorkflow) error {
-	f, err := fs.Open(p)
+func readReusableWorkflow(p string, wf *ReusableWorkflow) error {
+	f, err := os.Open(p)
 	if err != nil {
 		return fmt.Errorf("open a workflow file: %w", err)
 	}
@@ -166,7 +167,7 @@ func readReusableWorkflow(fs afero.Fs, p string, wf *ReusableWorkflow) error {
 func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //nolint:cyclop
 	if strings.HasPrefix(v.job.Uses, "./") {
 		// local workflow
-		if err := readReusableWorkflow(v.fs, v.job.Uses, wf); err != nil {
+		if err := readReusableWorkflow(v.job.Uses, wf); err != nil {
 			return fmt.Errorf("read a local workflow file: %w", err)
 		}
 		return nil
@@ -192,13 +193,10 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 	// Download actions and store them in $GHALINT_ROOT_DIR/actions
 	// Check if the action file exists
 	cachePath := filepath.Join(v.rootDir, "actions", owner, repo, sha, path)
-	if f, err := afero.Exists(v.fs, cachePath); err != nil {
-		return fmt.Errorf("check if the workflow file exists: %w", err)
-	} else if f {
-		if err := readReusableWorkflow(v.fs, cachePath, wf); err != nil {
-			return fmt.Errorf("read a cached workflow file: %w", err)
-		}
+	if err := readReusableWorkflow(cachePath, wf); err == nil {
 		return nil
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("read a cached workflow file: %w", err)
 	}
 	// Download a wofklow file
 	content, _, _, err := v.gh.GetContents(ctx, owner, repo, path, &github.RepositoryContentGetOptions{
@@ -208,7 +206,7 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 		return fmt.Errorf("download workflow file: %w", err)
 	}
 	// write workflow to the cache dir
-	if err := v.fs.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
+	if err := os.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
 		return fmt.Errorf("create workflow directory: %w", err)
 	}
 	c, err := content.GetContent()
@@ -216,7 +214,7 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 		return fmt.Errorf("get content: %w", err)
 	}
 	b := []byte(c)
-	if err := afero.WriteFile(v.fs, cachePath, b, filePermission); err != nil {
+	if err := os.WriteFile(cachePath, b, filePermission); err != nil {
 		return fmt.Errorf("write workflow file: %w", err)
 	}
 	if err := yaml.Unmarshal(b, wf); err != nil {

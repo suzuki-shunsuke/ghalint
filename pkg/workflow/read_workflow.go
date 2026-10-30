@@ -4,14 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"gopkg.in/yaml.v3"
 )
 
-func Read(fs afero.Fs, p string, wf *Workflow) error {
-	f, err := fs.Open(p)
+func Read(p string, wf *Workflow) error {
+	f, err := os.Open(p)
 	if err != nil {
 		return fmt.Errorf("open a workflow file: %w", err)
 	}

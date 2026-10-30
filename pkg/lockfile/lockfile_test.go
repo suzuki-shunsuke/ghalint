@@ -1,9 +1,10 @@
 package lockfile_test
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 )
 
@@ -25,21 +26,29 @@ dependencies:
     repo_id: 197814629
 `
 
+// writeLockfile writes the lockfile to the temporary directory, which is the current directory.
+func writeLockfile(t *testing.T, content string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(lockfile.Path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(lockfile.Path, []byte(content), 0o644); err != nil { //nolint:gosec
+		t.Fatal(err)
+	}
+}
+
 func TestRead(t *testing.T) {
-	t.Parallel()
+	t.Chdir(t.TempDir())
 	workflows := []string{".github/workflows/ci.yml"}
-	afs := afero.NewMemMapFs()
-	lf, err := lockfile.Read(afs, workflows)
+	lf, err := lockfile.Read(workflows)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if lf != nil {
 		t.Fatal("lockfile should be nil if it doesn't exist")
 	}
-	if err := afero.WriteFile(afs, lockfile.Path, []byte(testLockfile), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	lf, err = lockfile.Read(afs, workflows)
+	writeLockfile(t, testLockfile)
+	lf, err = lockfile.Read(workflows)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,13 +58,10 @@ func TestRead(t *testing.T) {
 }
 
 func TestRead_noWorkflow(t *testing.T) {
-	t.Parallel()
+	t.Chdir(t.TempDir())
 	// The lockfile is broken, but it isn't read because no workflow is given.
-	afs := afero.NewMemMapFs()
-	if err := afero.WriteFile(afs, lockfile.Path, []byte("version: 'v0.0.3'\nfoo: bar\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	lf, err := lockfile.Read(afs, nil)
+	writeLockfile(t, "version: 'v0.0.3'\nfoo: bar\n")
+	lf, err := lockfile.Read(nil)
 	if err != nil {
 		t.Fatal(err)
 	}

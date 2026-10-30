@@ -4,20 +4,17 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 )
 
 type Controller struct {
-	fs      afero.Fs
 	logger  *slog.Logger
 	gh      GitHub
 	rootDir string
 }
 
-func New(fs afero.Fs, logger *slog.Logger, gh GitHub, rootDir string) *Controller {
+func New(logger *slog.Logger, gh GitHub, rootDir string) *Controller {
 	return &Controller{
-		fs:      fs,
 		logger:  logger,
 		gh:      gh,
 		rootDir: rootDir,
