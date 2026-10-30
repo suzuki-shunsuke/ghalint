@@ -34,6 +34,42 @@ func TestValidate(t *testing.T) { //nolint:funlen
 			isErr: true,
 		},
 		{
+			name: "action_name is required to exclude action_should_be_locked",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_should_be_locked",
+					},
+				},
+			},
+			isErr: true,
+		},
+		{
+			name: "exclude action_should_be_locked",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "action_should_be_locked",
+						ActionName: "actions/*",
+					},
+					{
+						PolicyName: "action_ref_should_be_full_length_commit_sha",
+						ActionName: "actions/*",
+					},
+				},
+			},
+		},
+		{
+			name: "exclude lockfile_is_required",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "lockfile_is_required",
+					},
+				},
+			},
+		},
+		{
 			name: "workflow_file_path is required",
 			cfg: &config.Config{
 				Excludes: []*config.Exclude{

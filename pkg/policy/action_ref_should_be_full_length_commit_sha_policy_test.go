@@ -134,11 +134,53 @@ func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	data := []struct {
-		name  string
-		cfg   *config.Config
-		step  *workflow.Step
-		isErr bool
+		name    string
+		cfg     *config.Config
+		stepCtx *policy.StepContext
+		step    *workflow.Step
+		isErr   bool
 	}{
+		{
+			name:    "workflow step is validated by action_should_be_locked if the lockfile is enabled",
+			cfg:     &config.Config{},
+			stepCtx: workflowStepContext(),
+			step: &workflow.Step{
+				Uses: "actions/checkout@v6",
+			},
+		},
+		{
+			name:    "docker image in workflow step is validated even if the lockfile is enabled",
+			isErr:   true,
+			cfg:     &config.Config{},
+			stepCtx: workflowStepContext(),
+			step: &workflow.Step{
+				Uses: "docker://rhysd/actionlint:latest",
+			},
+		},
+		{
+			name: "workflow step is validated if the lockfile is disabled",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "lockfile_is_required",
+					},
+				},
+			},
+			isErr:   true,
+			stepCtx: workflowStepContext(),
+			step: &workflow.Step{
+				Uses: "actions/checkout@v6",
+			},
+		},
+		{
+			name:    "action step is validated even if the lockfile is enabled",
+			isErr:   true,
+			cfg:     &config.Config{},
+			stepCtx: &policy.StepContext{Action: &workflow.Action{}},
+			step: &workflow.Step{
+				Uses: "actions/checkout@v6",
+			},
+		},
 		{
 			name: "exclude",
 			cfg: &config.Config{
@@ -259,7 +301,7 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			if err := p.ApplyStep(logger, d.cfg, nil, d.step); err != nil {
+			if err := p.ApplyStep(logger, d.cfg, d.stepCtx, d.step); err != nil {
 				if d.isErr {
 					return
 				}
@@ -269,5 +311,17 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 				t.Fatal("error must be returned")
 			}
 		})
+	}
+}
+
+func workflowStepContext() *policy.StepContext {
+	return &policy.StepContext{
+		FilePath: ".github/workflows/test.yaml",
+		Job: &policy.JobContext{
+			Name: "test",
+			Workflow: &policy.WorkflowContext{
+				FilePath: ".github/workflows/test.yaml",
+			},
+		},
 	}
 }

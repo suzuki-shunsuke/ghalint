@@ -22,6 +22,25 @@ ghalint is a command line tool to check GitHub Actions Workflows and action.yaml
 lintnet is a general purpose linter powered by Jsonnet.
 We've ported ghalint to [the lintnet module](https://github.com/lintnet-modules/ghalint), so you can migrate ghalint to lintnet!
 
+## Workflow dependency lockfile
+
+[GitHub Actions workflow lockfiles are generally available](https://github.blog/changelog/2026-10-28-github-actions-workflow-lockfiles-are-generally-available/).
+ghalint requires the lockfile `.github/workflows/actions.lock` and actions in workflows to be managed by it.
+Actions pinned by commit SHA aren't allowed because the lockfile locks actions recursively.
+Reusable workflows still need to be pinned by full length commit SHA because the lockfile doesn't pin them.
+Actions in action files such as `action.yaml` also need to be pinned by full length commit SHA because callers of the action files don't necessarily use the lockfile.
+
+- [lockfile_is_required](docs/policies/014.md)
+- [action_should_be_locked](docs/policies/015.md)
+- [action_ref_should_be_full_length_commit_sha](docs/policies/008.md)
+
+If you don't use the lockfile, exclude [lockfile_is_required](docs/policies/014.md).
+
+```yaml
+excludes:
+  - policy_name: lockfile_is_required
+```
+
 ## Policies
 
 ### 1. Workflow Policies
@@ -38,6 +57,8 @@ We've ported ghalint to [the lintnet module](https://github.com/lintnet-modules/
 1. [github_app_should_limit_permissions](docs/policies/010.md): GitHub Actions issuing GitHub Access tokens from GitHub Apps should limit permissions
 1. [job_timeout_minutes_is_required](docs/policies/012.md): All jobs should set [timeout-minutes](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idtimeout-minutes)
 1. [checkout_persist_credentials_should_be_false](docs/policies/013.md): [actions/checkout](https://github.com/actions/checkout)'s input `persist-credentials` should be `false`
+1. [lockfile_is_required](docs/policies/014.md): The workflow dependency lockfile `.github/workflows/actions.lock` is required
+1. [action_should_be_locked](docs/policies/015.md): Actions in workflows should be managed by the lockfile
 
 ### 2. Action Policies
 
@@ -125,6 +146,8 @@ You can disable the following policies.
 - [job_secrets](docs/policies/006.md)
 - [action_ref_should_be_full_length_commit_sha](docs/policies/008.md)
 - [github_app_should_limit_repositories](docs/policies/009.md)
+- [lockfile_is_required](docs/policies/014.md)
+- [action_should_be_locked](docs/policies/015.md)
 
 e.g.
 

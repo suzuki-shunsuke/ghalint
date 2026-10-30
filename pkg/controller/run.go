@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
+	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 	"github.com/suzuki-shunsuke/ghalint/pkg/policy"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -21,6 +22,10 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 	filePaths, err := workflow.List(c.fs)
 	if err != nil {
 		return fmt.Errorf("find workflow files: %w", err)
+	}
+	lf, err := lockfile.Read(c.fs)
+	if err != nil {
+		return slogerr.With(err, "lockfile", lockfile.Path) //nolint:wrapcheck
 	}
 	wfPolicies := []WorkflowPolicy{
 		policy.NewWorkflowSecretsPolicy(),
@@ -39,12 +44,18 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		&policy.GitHubAppShouldLimitRepositoriesPolicy{},
 		&policy.GitHubAppShouldLimitPermissionsPolicy{},
 		policy.NewActionRefShouldBeSHAPolicy(),
+		policy.NewActionShouldBeLockedPolicy(),
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
 	failed := false
+	lockfilePolicy := &policy.LockfileIsRequiredPolicy{}
+	if err := lockfilePolicy.Apply(cfg, lf); err != nil {
+		slogerr.WithError(withPolicyReference(logger, lockfilePolicy), err).Error("the repository violates policies")
+		failed = true
+	}
 	for _, filePath := range filePaths {
 		logger := logger.With("workflow_file_path", filePath)
-		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath) {
+		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath, lf) {
 			failed = true
 		}
 	}
@@ -54,7 +65,7 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 	return nil
 }
 
-func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string) bool {
+func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string, lf *lockfile.Lockfile) bool {
 	wf := &workflow.Workflow{
 		FilePath: filePath,
 	}
@@ -66,6 +77,7 @@ func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, w
 	wfCtx := &policy.WorkflowContext{
 		FilePath: filePath,
 		Workflow: wf,
+		Lockfile: lf,
 	}
 
 	failed := false
