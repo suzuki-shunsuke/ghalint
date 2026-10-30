@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
-	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
@@ -54,9 +53,6 @@ func (p *ActionRefShouldBeSHAPolicy) locked(stepCtx *StepContext, uses string) b
 		return false
 	}
 	wfCtx := stepCtx.Job.Workflow
-	if wfCtx.LockfileInvalid {
-		return lockfile.Lockable(uses)
-	}
 	return wfCtx.Lockfile.Locked(wfCtx.FilePath, uses)
 }
 

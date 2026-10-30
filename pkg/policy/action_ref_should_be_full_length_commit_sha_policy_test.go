@@ -174,8 +174,8 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 			stepCtx: &policy.StepContext{
 				Job: &policy.JobContext{
 					Workflow: &policy.WorkflowContext{
-						FilePath:        ".github/workflows/test.yaml",
-						LockfileInvalid: true,
+						FilePath: ".github/workflows/test.yaml",
+						Lockfile: lockfile.Invalid(),
 					},
 				},
 			},
@@ -190,8 +190,8 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 			stepCtx: &policy.StepContext{
 				Job: &policy.JobContext{
 					Workflow: &policy.WorkflowContext{
-						FilePath:        ".github/workflows/test.yaml",
-						LockfileInvalid: true,
+						FilePath: ".github/workflows/test.yaml",
+						Lockfile: lockfile.Invalid(),
 					},
 				},
 			},

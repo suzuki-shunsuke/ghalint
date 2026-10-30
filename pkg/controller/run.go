@@ -43,7 +43,6 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
 	failed := false
-	lfCtx := &lockfileContext{}
 	lf, err := lockfile.Read(c.fs)
 	if err != nil {
 		// The run fails with this error, and policies are applied regardless.
@@ -51,12 +50,11 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		// and reporting each of them would bury the cause.
 		slogerr.WithError(logger, err).Error("read the lockfile", "lockfile", lockfile.Path)
 		failed = true
-		lfCtx.invalid = true
+		lf = lockfile.Invalid()
 	}
-	lfCtx.lockfile = lf
 	for _, filePath := range filePaths {
 		logger := logger.With("workflow_file_path", filePath)
-		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath, lfCtx) {
+		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath, lf) {
 			failed = true
 		}
 	}
@@ -66,7 +64,7 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 	return nil
 }
 
-func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string, lfCtx *lockfileContext) bool {
+func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string, lf *lockfile.Lockfile) bool {
 	wf := &workflow.Workflow{
 		FilePath: filePath,
 	}
@@ -76,10 +74,9 @@ func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, w
 	}
 
 	wfCtx := &policy.WorkflowContext{
-		FilePath:        filePath,
-		Workflow:        wf,
-		Lockfile:        lfCtx.lockfile,
-		LockfileInvalid: lfCtx.invalid,
+		FilePath: filePath,
+		Workflow: wf,
+		Lockfile: lf,
 	}
 
 	failed := false
@@ -103,11 +100,6 @@ func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, w
 	}
 
 	return failed
-}
-
-type lockfileContext struct {
-	lockfile *lockfile.Lockfile
-	invalid  bool
 }
 
 type Policy interface {

@@ -8,10 +8,9 @@ import (
 type WorkflowContext struct {
 	FilePath string
 	Workflow *workflow.Workflow
-	// Lockfile is nil if the lockfile doesn't exist or ghalint fails to read it.
+	// Lockfile is nil if the lockfile doesn't exist.
+	// It's lockfile.Invalid() if ghalint fails to read the lockfile.
 	Lockfile *lockfile.Lockfile
-	// LockfileInvalid is true if ghalint fails to read the lockfile.
-	LockfileInvalid bool
 }
 
 type JobContext struct {

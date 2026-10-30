@@ -125,31 +125,14 @@ func TestLockfile_Locked(t *testing.T) {
 		{name: "docker image", lockfile: lf, workflowPath: ".github/workflows/ci.yml", uses: "docker://actions/checkout:v6"},
 		{name: "local action", lockfile: lf, workflowPath: ".github/workflows/ci.yml", uses: "./.github/actions/foo"},
 		{name: "nil lockfile", workflowPath: ".github/workflows/ci.yml", uses: "actions/checkout@v6"},
+		{name: "invalid lockfile", lockfile: lockfile.Invalid(), workflowPath: ".github/workflows/test.yml", uses: "actions/setup-go@v6", exp: true},
+		{name: "docker image in invalid lockfile", lockfile: lockfile.Invalid(), workflowPath: ".github/workflows/test.yml", uses: "docker://rhysd/actionlint:latest"},
 	}
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 			if got := d.lockfile.Locked(d.workflowPath, d.uses); got != d.exp {
 				t.Fatalf("got %v, wanted %v", got, d.exp)
-			}
-		})
-	}
-}
-
-func TestLockable(t *testing.T) {
-	t.Parallel()
-	data := map[string]bool{
-		"actions/checkout@v6":              true,
-		"actions/cache/save@v4.2.0":        true,
-		"docker://rhysd/actionlint:latest": false,
-		"./.github/actions/foo":            false,
-		"suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v10.2.0": false,
-	}
-	for uses, exp := range data {
-		t.Run(uses, func(t *testing.T) {
-			t.Parallel()
-			if got := lockfile.Lockable(uses); got != exp {
-				t.Fatalf("got %v, wanted %v", got, exp)
 			}
 		})
 	}
