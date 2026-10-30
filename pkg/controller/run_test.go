@@ -59,6 +59,14 @@ func TestController_Run_lockfile(t *testing.T) {
 			noLogs:   []string{logReadLockfile, logStepViolates},
 		},
 		{
+			name:     "lockfile exists but action isn't locked",
+			ref:      "v5",
+			lockfile: testLockfile,
+			isErr:    true,
+			logs:     []string{logStepViolates},
+			noLogs:   []string{logReadLockfile},
+		},
+		{
 			name:   "lockfile doesn't exist and action is pinned by SHA",
 			ref:    "3d3c42e5aac5ba805825da76410c181273ba90b1",
 			noLogs: []string{logReadLockfile, logStepViolates},
