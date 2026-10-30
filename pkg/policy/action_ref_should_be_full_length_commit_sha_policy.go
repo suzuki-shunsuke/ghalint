@@ -47,11 +47,10 @@ func (p *ActionRefShouldBeSHAPolicy) ApplyStep(_ *slog.Logger, cfg *config.Confi
 }
 
 func (p *ActionRefShouldBeSHAPolicy) locked(stepCtx *StepContext, uses string) bool {
-	if stepCtx == nil || stepCtx.Job == nil {
+	if stepCtx == nil || stepCtx.Job == nil || stepCtx.Job.Workflow == nil {
 		return false
 	}
-	lf := stepCtx.Job.Workflow.Lockfile
-	return lf != nil && lf.Locked(stepCtx.Job.Workflow.FilePath, uses)
+	return stepCtx.Job.Workflow.Lockfile.Locked(stepCtx.Job.Workflow.FilePath, uses)
 }
 
 func (p *ActionRefShouldBeSHAPolicy) apply(cfg *config.Config, uses string) error {

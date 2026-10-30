@@ -23,10 +23,6 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 	if err != nil {
 		return fmt.Errorf("find workflow files: %w", err)
 	}
-	lf, err := lockfile.Read(c.fs)
-	if err != nil {
-		return slogerr.With(err, "lockfile", lockfile.Path) //nolint:wrapcheck
-	}
 	wfPolicies := []WorkflowPolicy{
 		policy.NewWorkflowSecretsPolicy(),
 	}
@@ -47,6 +43,13 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
 	failed := false
+	lf, err := lockfile.Read(c.fs)
+	if err != nil {
+		// Other policies don't depend on the lockfile, so they are applied regardless.
+		// Actions are validated as if the lockfile didn't exist.
+		slogerr.WithError(logger, err).Error("read the lockfile", "lockfile", lockfile.Path)
+		failed = true
+	}
 	for _, filePath := range filePaths {
 		logger := logger.With("workflow_file_path", filePath)
 		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath, lf) {

@@ -4,6 +4,7 @@ go 1.27.3
 
 require (
 	github.com/adrg/xdg v0.5.3
+	github.com/github/actions-lockfile/go v0.0.6
 	github.com/google/go-github/v93 v93.0.0
 	github.com/spf13/afero v1.15.0
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0

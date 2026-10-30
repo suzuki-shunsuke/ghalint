@@ -134,6 +134,7 @@ func TestActionRefShouldBeSHAPolicy_ApplyJob(t *testing.T) { //nolint:funlen
 
 func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 	t.Parallel()
+	lf := testLockfile(t)
 	data := []struct {
 		name    string
 		cfg     *config.Config
@@ -144,7 +145,7 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 		{
 			name:    "locked by the lockfile",
 			cfg:     &config.Config{},
-			stepCtx: workflowStepContext(testLockfile()),
+			stepCtx: workflowStepContext(lf),
 			step: &workflow.Step{
 				Uses: "actions/checkout@v6",
 			},
@@ -153,7 +154,7 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 			name:    "not locked by the lockfile",
 			isErr:   true,
 			cfg:     &config.Config{},
-			stepCtx: workflowStepContext(testLockfile()),
+			stepCtx: workflowStepContext(lf),
 			step: &workflow.Step{
 				Uses: "actions/setup-go@v6",
 			},
@@ -309,20 +310,23 @@ func TestActionRefShouldBeSHAPolicy_ApplyStep(t *testing.T) { //nolint:funlen
 	}
 }
 
-func testLockfile() *lockfile.Lockfile {
-	return &lockfile.Lockfile{
-		Workflows: map[string][]string{
-			".github/workflows/test.yaml": {
-				"actions/checkout@v6",
-			},
-		},
-		Dependencies: map[string]*lockfile.Dependency{
-			"actions/checkout@v6": {
-				Ref:    "v6",
-				Commit: "1af3b93b6815bc44a9784bd300feb67ff0d1eeb3",
-			},
-		},
+func testLockfile(t *testing.T) *lockfile.Lockfile {
+	t.Helper()
+	lf, err := lockfile.Parse([]byte(`version: 'v0.0.3'
+workflows:
+  '.github/workflows/test.yaml':
+    - 'actions/checkout@v6'
+dependencies:
+  'actions/checkout@v6':
+    ref: 'v6'
+    commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
+    owner_id: 44036562
+    repo_id: 197814629
+`))
+	if err != nil {
+		t.Fatal(err)
 	}
+	return lf
 }
 
 func workflowStepContext(lf *lockfile.Lockfile) *policy.StepContext {
