@@ -1,10 +1,12 @@
 package schema
 
 import (
+	"context"
 	"log/slog"
 	"path/filepath"
 	"testing"
 
+	"github.com/suzuki-shunsuke/ghalint/pkg/github"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 )
 
@@ -153,5 +155,65 @@ func Test_invalidUses(t *testing.T) {
 				t.Fatal("error must be returned")
 			}
 		})
+	}
+}
+
+func Test_invalidReusableWorkflow(t *testing.T) {
+	t.Parallel()
+	// The workflow path is required. gh is nil, so the test panics if the GitHub API is called.
+	vj := &validateJob{
+		job:     &workflow.Job{Uses: "owner/repo@" + testSHA},
+		logger:  slog.New(slog.DiscardHandler),
+		rootDir: t.TempDir(),
+	}
+	if err := vj.read(t.Context(), &ReusableWorkflow{}); err == nil {
+		t.Fatal("error must be returned")
+	}
+}
+
+func Test_validateStep_validate_docker(t *testing.T) {
+	t.Parallel()
+	// Docker container actions are skipped. gh is nil, so the test panics if the GitHub API is called.
+	vs := &validateStep{
+		step:    &workflow.Step{Uses: "docker://alpine@sha256:abc"},
+		logger:  slog.New(slog.DiscardHandler),
+		rootDir: t.TempDir(),
+	}
+	if err := vs.validate(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// directoryGitHub returns a directory listing for any path.
+type directoryGitHub struct{}
+
+func (directoryGitHub) GetCommitSHA1(_ context.Context, _, _, _, _ string) (string, *github.Response, error) {
+	return testSHA, nil, nil
+}
+
+func (directoryGitHub) GetContents(_ context.Context, _, _, _ string, _ *github.RepositoryContentGetOptions) (*github.RepositoryContent, []*github.RepositoryContent, *github.Response, error) {
+	return nil, []*github.RepositoryContent{}, nil, nil
+}
+
+// It must return an error instead of panicking if the path is a directory.
+func Test_downloadDirectory(t *testing.T) {
+	t.Parallel()
+	vs := &validateStep{
+		step:    &workflow.Step{Uses: "owner/repo@v1"},
+		logger:  slog.New(slog.DiscardHandler),
+		gh:      directoryGitHub{},
+		rootDir: t.TempDir(),
+	}
+	if err := vs.readAction(t.Context(), &workflow.Action{}); err == nil {
+		t.Fatal("error must be returned")
+	}
+	vj := &validateJob{
+		job:     &workflow.Job{Uses: "owner/repo/.github/workflows@v1"},
+		logger:  slog.New(slog.DiscardHandler),
+		gh:      directoryGitHub{},
+		rootDir: t.TempDir(),
+	}
+	if err := vj.read(t.Context(), &ReusableWorkflow{}); err == nil {
+		t.Fatal("error must be returned")
 	}
 }

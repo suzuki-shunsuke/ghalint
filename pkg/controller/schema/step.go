@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -36,23 +37,15 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 	if err != nil {
 		return fmt.Errorf("parse the action: %w", err)
 	}
-	owner := r.Owner
-	repo := r.Repo
-	path := r.Path
-	sha := r.Ref
-	if !fullCommitSHAPattern.MatchString(sha) {
-		// Get SHA of actions
-		s, _, err := v.gh.GetCommitSHA1(ctx, owner, repo, sha, "")
-		if err != nil {
-			return fmt.Errorf("get commit SHA1: %w", err)
-		}
-		sha = s
+	sha, err := r.resolveSHA(ctx, v.gh)
+	if err != nil {
+		return err
 	}
 	// Download actions and store them in $GHALINT_ROOT_DIR/actions
 	// Check if the action file exists
 	cachePath, err := r.cachePath(v.rootDir, sha, "action.yaml")
 	if err != nil {
-		return err
+		return fmt.Errorf("get the cache path: %w", err)
 	}
 	if err := workflow.ReadAction(cachePath, action); err == nil {
 		return nil
@@ -61,9 +54,9 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 	}
 	// Download action.yaml or action.yml
 	content, err := v.download(ctx, &downloadInput{
-		Owner: owner,
-		Repo:  repo,
-		Path:  path,
+		Owner: r.Owner,
+		Repo:  r.Repo,
+		Path:  r.Path,
 		Ref:   sha,
 	})
 	if err != nil {
@@ -96,11 +89,15 @@ type downloadInput struct {
 
 func (v *validateStep) download(ctx context.Context, input *downloadInput) (string, error) {
 	for _, file := range []string{"action.yaml", "action.yml"} {
-		content, _, _, err := v.gh.GetContents(ctx, input.Owner, input.Repo, filepath.Join(input.Path, file), &github.RepositoryContentGetOptions{
+		content, _, _, err := v.gh.GetContents(ctx, input.Owner, input.Repo, path.Join(input.Path, file), &github.RepositoryContentGetOptions{
 			Ref: input.Ref,
 		})
 		if err != nil {
 			slogerr.WithError(v.logger, err).Debug("get action file")
+			continue
+		}
+		if content == nil {
+			// The path is a directory
 			continue
 		}
 		s, err := content.GetContent()
@@ -112,9 +109,10 @@ func (v *validateStep) download(ctx context.Context, input *downloadInput) (stri
 	return "", errors.New("action file can't be downloaded")
 }
 
-func (v *validateStep) validate(ctx context.Context) error {
+func (v *validateStep) validate(ctx context.Context) error { //nolint:cyclop
 	// Validate inputs
-	if v.step.Uses == "" {
+	// Docker container actions have no action file and no inputs to validate.
+	if v.step.Uses == "" || strings.HasPrefix(v.step.Uses, "docker://") {
 		return nil
 	}
 	v.logger = v.logger.With("action", v.step.Uses)

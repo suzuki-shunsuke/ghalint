@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -42,6 +43,19 @@ func parseRemoteRef(uses string) (*remoteRef, error) {
 		Path:  strings.Join(elems[2:], "/"),
 		Ref:   ref,
 	}, nil
+}
+
+// resolveSHA returns the full length commit SHA of the ref.
+// It calls the GitHub API only if the ref isn't a full length commit SHA.
+func (r *remoteRef) resolveSHA(ctx context.Context, gh GitHub) (string, error) {
+	if fullCommitSHAPattern.MatchString(r.Ref) {
+		return r.Ref, nil
+	}
+	sha, _, err := gh.GetCommitSHA1(ctx, r.Owner, r.Repo, r.Ref, "")
+	if err != nil {
+		return "", fmt.Errorf("get commit SHA1: %w", err)
+	}
+	return sha, nil
 }
 
 // cachePath returns `<rootDir>/actions/<owner>/<repo>/<sha>/<path>/<elems...>`.

@@ -176,23 +176,18 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 	if err != nil {
 		return fmt.Errorf("parse job.uses: %w", err)
 	}
-	owner := r.Owner
-	repo := r.Repo
-	path := r.Path
-	sha := r.Ref
-	if !fullCommitSHAPattern.MatchString(sha) {
-		// Get SHA of actions
-		s, _, err := v.gh.GetCommitSHA1(ctx, owner, repo, sha, "")
-		if err != nil {
-			return fmt.Errorf("get commit SHA1: %w", err)
-		}
-		sha = s
+	if r.Path == "" {
+		return slogerr.With(errors.New("the format must be <owner>/<repo>/<path>@<ref>"), "uses", v.job.Uses) //nolint:wrapcheck
+	}
+	sha, err := r.resolveSHA(ctx, v.gh)
+	if err != nil {
+		return err
 	}
 	// Download actions and store them in $GHALINT_ROOT_DIR/actions
 	// Check if the action file exists
 	cachePath, err := r.cachePath(v.rootDir, sha)
 	if err != nil {
-		return err
+		return fmt.Errorf("get the cache path: %w", err)
 	}
 	if err := readReusableWorkflow(cachePath, wf); err == nil {
 		return nil
@@ -200,11 +195,14 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 		return fmt.Errorf("read a cached workflow file: %w", err)
 	}
 	// Download a wofklow file
-	content, _, _, err := v.gh.GetContents(ctx, owner, repo, path, &github.RepositoryContentGetOptions{
+	content, _, _, err := v.gh.GetContents(ctx, r.Owner, r.Repo, r.Path, &github.RepositoryContentGetOptions{
 		Ref: sha,
 	})
 	if err != nil {
 		return fmt.Errorf("download workflow file: %w", err)
+	}
+	if content == nil {
+		return slogerr.With(errors.New("the workflow path isn't a file"), "uses", v.job.Uses) //nolint:wrapcheck
 	}
 	// write workflow to the cache dir
 	if err := os.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
