@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -55,13 +56,10 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 	// Download actions and store them in $GHALINT_ROOT_DIR/actions
 	// Check if the action file exists
 	cachePath := filepath.Join(v.rootDir, "actions", owner, repo, sha, path, "action.yaml")
-	if f, err := exists(cachePath); err != nil {
-		return fmt.Errorf("check if the action file exists: %w", err)
-	} else if f {
-		if err := workflow.ReadAction(cachePath, action); err != nil {
-			return fmt.Errorf("read a cached action file: %w", err)
-		}
+	if err := workflow.ReadAction(cachePath, action); err == nil {
 		return nil
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("read a cached action file: %w", err)
 	}
 	// Download action.yaml or action.yml
 	content, err := v.download(ctx, &downloadInput{
@@ -169,15 +167,13 @@ func (v *validateStep) readLocalAction(action *workflow.Action) error {
 	found := false
 	for _, file := range []string{"action.yaml", "action.yml"} {
 		p := filepath.Join(v.step.Uses, file)
-		if f, err := exists(p); err != nil {
-			return fmt.Errorf("check if the action file exists: %w", err)
-		} else if !f {
-			continue
-		}
-		found = true
 		if err := workflow.ReadAction(p, action); err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
 			return fmt.Errorf("read a local action file: %w", err)
 		}
+		found = true
 	}
 	if !found {
 		return errors.New("local action file not found")

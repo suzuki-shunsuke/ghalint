@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
@@ -192,13 +193,10 @@ func (v *validateJob) read(ctx context.Context, wf *ReusableWorkflow) error { //
 	// Download actions and store them in $GHALINT_ROOT_DIR/actions
 	// Check if the action file exists
 	cachePath := filepath.Join(v.rootDir, "actions", owner, repo, sha, path)
-	if f, err := exists(cachePath); err != nil {
-		return fmt.Errorf("check if the workflow file exists: %w", err)
-	} else if f {
-		if err := readReusableWorkflow(cachePath, wf); err != nil {
-			return fmt.Errorf("read a cached workflow file: %w", err)
-		}
+	if err := readReusableWorkflow(cachePath, wf); err == nil {
 		return nil
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("read a cached workflow file: %w", err)
 	}
 	// Download a wofklow file
 	content, _, _, err := v.gh.GetContents(ctx, owner, repo, path, &github.RepositoryContentGetOptions{
