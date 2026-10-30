@@ -22,7 +22,9 @@ type Lockfile struct {
 }
 
 // Read reads and validates the lockfile. It returns nil without an error if the lockfile doesn't exist.
-func Read(afs afero.Fs) (*Lockfile, error) {
+// If workflowFilePaths are given, required fields are validated only for entries those workflows reference,
+// so a broken entry that no workflow uses doesn't make the whole lockfile unreadable.
+func Read(afs afero.Fs, workflowFilePaths ...string) (*Lockfile, error) {
 	b, err := afero.ReadFile(afs, Path)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -30,16 +32,27 @@ func Read(afs afero.Fs) (*Lockfile, error) {
 		}
 		return nil, fmt.Errorf("read a lockfile: %w", err)
 	}
-	return Parse(b)
+	return Parse(b, workflowFilePaths...)
 }
 
 // Parse parses and validates the content of a lockfile.
-func Parse(b []byte) (*Lockfile, error) {
-	f, err := parserlock.Parse(b)
+// See Read about workflowFilePaths.
+func Parse(b []byte, workflowFilePaths ...string) (*Lockfile, error) {
+	paths := make([]string, len(workflowFilePaths))
+	for i, p := range workflowFilePaths {
+		paths[i] = filepath.ToSlash(p)
+	}
+	f, err := parserlock.Parse(b, paths...)
 	if err != nil {
 		return nil, fmt.Errorf("parse a lockfile: %w", err)
 	}
 	return &Lockfile{file: f}, nil
+}
+
+// Lockable reports whether uses is a repository action, which the lockfile can lock.
+// Local actions, Docker images, and reusable workflows aren't.
+func Lockable(uses string) bool {
+	return parserlock.ParseActionRef(uses) != nil
 }
 
 // Locked reports whether the action uses is locked for the workflow.

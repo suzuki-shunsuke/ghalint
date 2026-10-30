@@ -40,8 +40,9 @@ dependencies:
 const testInvalidLockfile = "version: 'v0.0.3'\nfoo: bar\n"
 
 const (
-	logReadLockfile = "read the lockfile"
-	logStepViolates = "the step violates policies"
+	logLockfileError = "lockfile_error"
+	logReadLockfile  = "read the lockfile"
+	logStepViolates  = "the step violates policies"
 )
 
 func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
@@ -70,6 +71,17 @@ func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
 			noLogs:   []string{logReadLockfile},
 		},
 		{
+			// Required fields are validated only for entries the workflows reference.
+			name: "lockfile has a broken entry that no workflow uses",
+			ref:  "v6",
+			lockfile: testLockfile + `  'actions/setup-go@v6':
+    ref: 'v6'
+    owner_id: 44036562
+    repo_id: 192624594
+`,
+			noLogs: []string{logReadLockfile, logStepViolates},
+		},
+		{
 			name:   "lockfile doesn't exist and action is pinned by SHA",
 			ref:    "3d3c42e5aac5ba805825da76410c181273ba90b1",
 			noLogs: []string{logReadLockfile, logStepViolates},
@@ -79,7 +91,7 @@ func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
 			ref:    "v6",
 			isErr:  true,
 			logs:   []string{logStepViolates},
-			noLogs: []string{logReadLockfile},
+			noLogs: []string{logReadLockfile, logLockfileError},
 		},
 		{
 			// Actions are validated as if the lockfile didn't exist.
@@ -87,7 +99,7 @@ func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
 			ref:      "v6",
 			lockfile: testInvalidLockfile,
 			isErr:    true,
-			logs:     []string{logReadLockfile, logStepViolates},
+			logs:     []string{logReadLockfile, logStepViolates, logLockfileError},
 		},
 		{
 			// It's just a warning if all actions are pinned by SHA.
@@ -95,7 +107,7 @@ func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
 			ref:      "3d3c42e5aac5ba805825da76410c181273ba90b1",
 			lockfile: testInvalidLockfile,
 			logs:     []string{logReadLockfile},
-			noLogs:   []string{logStepViolates},
+			noLogs:   []string{logStepViolates, logLockfileError},
 		},
 	}
 	for _, d := range data {

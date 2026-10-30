@@ -43,15 +43,15 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
 	failed := false
-	lf, err := lockfile.Read(c.fs)
-	if err != nil {
+	lf, lfErr := lockfile.Read(c.fs, filePaths...)
+	if lfErr != nil {
 		// A repository whose actions are all pinned by commit SHA doesn't need the lockfile, so this isn't an error.
 		// Actions are validated as if the lockfile didn't exist, so unpinned actions fail the run.
-		slogerr.WithError(logger, err).Warn("read the lockfile. Actions are validated as if the lockfile didn't exist", "lockfile", lockfile.Path)
+		slogerr.WithError(logger, lfErr).Warn("read the lockfile. Actions are validated as if the lockfile didn't exist", "lockfile", lockfile.Path)
 	}
 	for _, filePath := range filePaths {
 		logger := logger.With("workflow_file_path", filePath)
-		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath, lf) {
+		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath, lf, lfErr) {
 			failed = true
 		}
 	}
@@ -61,7 +61,7 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 	return nil
 }
 
-func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string, lf *lockfile.Lockfile) bool {
+func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string, lf *lockfile.Lockfile, lfErr error) bool {
 	wf := &workflow.Workflow{
 		FilePath: filePath,
 	}
@@ -71,9 +71,10 @@ func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, w
 	}
 
 	wfCtx := &policy.WorkflowContext{
-		FilePath: filePath,
-		Workflow: wf,
-		Lockfile: lf,
+		FilePath:      filePath,
+		Workflow:      wf,
+		Lockfile:      lf,
+		LockfileError: lfErr,
 	}
 
 	failed := false

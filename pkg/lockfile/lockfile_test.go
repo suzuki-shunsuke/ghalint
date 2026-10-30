@@ -47,6 +47,26 @@ func TestRead(t *testing.T) {
 	}
 }
 
+func TestParse_workflowFilePaths(t *testing.T) {
+	t.Parallel()
+	// actions/setup-go@v6 lacks commit, but ci.yml doesn't use it.
+	content := testLockfile + `  'actions/setup-go@v6':
+    ref: 'v6'
+    owner_id: 44036562
+    repo_id: 192624594
+`
+	if _, err := lockfile.Parse([]byte(content)); err == nil {
+		t.Fatal("the broken entry should be rejected if workflow file paths aren't given")
+	}
+	lf, err := lockfile.Parse([]byte(content), ".github/workflows/ci.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !lf.Locked(".github/workflows/ci.yml", "actions/checkout@v6") {
+		t.Fatal("actions/checkout@v6 should be locked")
+	}
+}
+
 func TestParse(t *testing.T) {
 	t.Parallel()
 	data := []struct {
