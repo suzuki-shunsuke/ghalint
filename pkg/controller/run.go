@@ -48,6 +48,8 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 	if err != nil {
 		// Without the lockfile, ghalint can't tell which actions are locked, so versions of actions can't be validated properly.
 		// action_ref_should_be_full_length_commit_sha is skipped, and the other policies are applied.
+		// It's skipped for reusable workflows and Docker images too, though the current lockfile doesn't lock them,
+		// because the lockfile may have a newer schema version that locks them.
 		// The run fails even if no policy is violated.
 		failed = true
 		slogerr.WithError(logger, err).Error("read the lockfile. action_ref_should_be_full_length_commit_sha is skipped", "lockfile", lockfile.Path)
