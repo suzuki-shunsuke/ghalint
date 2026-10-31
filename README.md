@@ -121,6 +121,7 @@ Or pinning version:
 
 You can disable the following policies.
 
+- [job_permissions](docs/policies/001.md)
 - [deny_inherit_secrets](docs/policies/004.md)
 - [job_secrets](docs/policies/006.md)
 - [action_ref_should_be_full_length_commit_sha](docs/policies/008.md)
@@ -130,6 +131,9 @@ e.g.
 
 ```yaml
 excludes:
+  - policy_name: job_permissions
+    workflow_file_path: .github/workflows/actionlint.yaml
+    job_name: actionlint
   - policy_name: deny_inherit_secrets
     workflow_file_path: .github/workflows/actionlint.yaml
     job_name: actionlint
