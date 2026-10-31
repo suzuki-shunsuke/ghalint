@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	parserlock "github.com/github/actions-lockfile/go/pkg/lockfile"
 )
@@ -80,3 +81,25 @@ func (lf *Lockfile) Locked(workflowFilePath, uses string) bool {
 	_, ok = lf.file.Dependencies[key]
 	return ok
 }
+
+// Commit returns the commit SHA-1 the lockfile records for `owner/repo@ref`.
+// Dependencies are shared by all workflows, so a workflow isn't needed to look up the commit.
+// It returns false if lf is nil, the lockfile doesn't record the ref, or the commit isn't a SHA-1 digest.
+func (lf *Lockfile) Commit(owner, repo, ref string) (string, bool) {
+	if lf == nil {
+		return "", false
+	}
+	dep, ok := lf.file.Dependencies[parserlock.IndexKey(owner, repo, ref)]
+	if !ok {
+		return "", false
+	}
+	// The commit is an algo-prefixed digest such as sha1-<hex>.
+	// Entries that no workflow references aren't validated, so the digest is checked here.
+	sha, ok := strings.CutPrefix(dep.Commit, "sha1-")
+	if !ok || len(sha) != sha1HexLength || !parserlock.IsFullSha(sha) {
+		return "", false
+	}
+	return strings.ToLower(sha), true
+}
+
+const sha1HexLength = 40

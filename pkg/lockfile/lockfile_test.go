@@ -178,3 +178,53 @@ func TestLockfile_Locked(t *testing.T) {
 		})
 	}
 }
+
+func TestLockfile_Commit(t *testing.T) {
+	t.Parallel()
+	// actions/setup-go@v6 isn't referenced by any workflow, and actions/setup-node@v6 has a broken commit.
+	// Only entries ci.yml references are validated, so the broken commit is accepted by Parse.
+	content := testLockfile + `  'actions/setup-go@v6':
+    ref: 'v6'
+    commit: 'sha1-44694675825211faa026b3c33043df3e48a5fa00'
+    owner_id: 44036562
+    repo_id: 192624594
+  'actions/setup-node@v6':
+    ref: 'v6'
+    commit: 'sha1-xyz'
+    owner_id: 44036562
+    repo_id: 223024751
+`
+	lf, err := lockfile.Parse([]byte(content), ".github/workflows/ci.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := []struct {
+		name     string
+		lockfile *lockfile.Lockfile
+		owner    string
+		repo     string
+		ref      string
+		exp      string
+	}{
+		{name: "locked", lockfile: lf, owner: "actions", repo: "checkout", ref: "v6", exp: "3d3c42e5aac5ba805825da76410c181273ba90b1"},
+		{name: "owner and repo are case insensitive", lockfile: lf, owner: "Actions", repo: "Checkout", ref: "v6", exp: "3d3c42e5aac5ba805825da76410c181273ba90b1"},
+		{name: "no workflow references the entry", lockfile: lf, owner: "actions", repo: "setup-go", ref: "v6", exp: "44694675825211faa026b3c33043df3e48a5fa00"},
+		{name: "broken commit", lockfile: lf, owner: "actions", repo: "setup-node", ref: "v6"},
+		{name: "different ref", lockfile: lf, owner: "actions", repo: "checkout", ref: "v5"},
+		{name: "ref is case sensitive", lockfile: lf, owner: "actions", repo: "checkout", ref: "V6"},
+		{name: "not recorded", lockfile: lf, owner: "suzuki-shunsuke", repo: "ghalint", ref: "v1"},
+		{name: "nil lockfile", owner: "actions", repo: "checkout", ref: "v6"},
+	}
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
+			t.Parallel()
+			sha, ok := d.lockfile.Commit(d.owner, d.repo, d.ref)
+			if ok != (d.exp != "") {
+				t.Fatalf("got ok %v, wanted %v", ok, d.exp != "")
+			}
+			if sha != d.exp {
+				t.Fatalf("got %q, wanted %q", sha, d.exp)
+			}
+		})
+	}
+}
