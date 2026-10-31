@@ -41,9 +41,10 @@ dependencies:
 const testInvalidLockfile = "version: 'v0.0.3'\nfoo: bar\n"
 
 const (
-	logLockfileError = "lockfile_error"
-	logReadLockfile  = "read the lockfile"
-	logStepViolates  = "the step violates policies"
+	logReadLockfile = "read the lockfile"
+	logStepViolates = "the step violates policies"
+	logJobViolates  = "the job violates policies"
+	logSHAPolicy    = "policy_name=action_ref_should_be_full_length_commit_sha"
 )
 
 func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
@@ -91,23 +92,25 @@ func TestController_Run_lockfile(t *testing.T) { //nolint:funlen
 			ref:    "v6",
 			isErr:  true,
 			logs:   []string{logStepViolates},
-			noLogs: []string{logReadLockfile, logLockfileError},
+			noLogs: []string{logReadLockfile},
 		},
 		{
-			// Actions are validated as if the lockfile didn't exist.
+			// action_ref_should_be_full_length_commit_sha is skipped, but the run fails.
 			name:     "lockfile is invalid and action isn't pinned",
 			ref:      "v6",
 			lockfile: testInvalidLockfile,
 			isErr:    true,
-			logs:     []string{logReadLockfile, logStepViolates, logLockfileError},
+			logs:     []string{logReadLockfile},
+			noLogs:   []string{logStepViolates},
 		},
 		{
-			// It's just a warning if all actions are pinned by SHA.
+			// The run fails even if all actions are pinned by SHA.
 			name:     "lockfile is invalid and action is pinned by SHA",
 			ref:      "3d3c42e5aac5ba805825da76410c181273ba90b1",
 			lockfile: testInvalidLockfile,
+			isErr:    true,
 			logs:     []string{logReadLockfile},
-			noLogs:   []string{logStepViolates, logLockfileError},
+			noLogs:   []string{logStepViolates},
 		},
 	}
 	for _, d := range data {
@@ -166,4 +169,36 @@ func TestController_Run_noWorkflow(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertLogs(t, buf.String(), nil, []string{logReadLockfile})
+}
+
+// testWorkflowViolations has an unpinned action, an unpinned reusable workflow, and a job without timeout-minutes.
+const testWorkflowViolations = `on: push
+permissions: {}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+  reusable:
+    uses: suzuki-shunsuke/go-release-workflow/.github/workflows/release.yaml@v10
+    permissions: {}
+`
+
+func TestController_Run_invalidLockfileOtherPolicies(t *testing.T) {
+	// If the lockfile is invalid, action_ref_should_be_full_length_commit_sha is skipped
+	// for both actions and reusable workflows, but the other policies are applied.
+	t.Chdir(t.TempDir())
+	writeFile(t, ".github/workflows/test.yaml", testWorkflowViolations)
+	writeFile(t, lockfile.Path, testInvalidLockfile)
+	buf := &bytes.Buffer{}
+	logger := slog.New(slog.NewTextHandler(buf, nil))
+	if err := controller.New().Run(t.Context(), logger, ""); err == nil {
+		t.Fatalf("error must be returned\n%s", buf.String())
+	}
+	assertLogs(t, buf.String(),
+		[]string{logReadLockfile, logJobViolates, "policy_name=job_timeout_minutes_is_required"},
+		[]string{logSHAPolicy, logStepViolates})
 }
