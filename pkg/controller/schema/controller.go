@@ -10,13 +10,16 @@ import (
 type Controller struct {
 	logger  *slog.Logger
 	gh      GitHub
+	shas    *shaCache
 	rootDir string
 }
 
 func New(logger *slog.Logger, gh GitHub, rootDir string) *Controller {
+	shas := newSHACache(gh)
 	return &Controller{
 		logger:  logger,
-		gh:      newSHACache(gh),
+		gh:      shas,
+		shas:    shas,
 		rootDir: rootDir,
 	}
 }

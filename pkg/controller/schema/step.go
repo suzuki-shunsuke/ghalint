@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/github"
-	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
@@ -24,10 +23,6 @@ type validateStep struct {
 	logger  *slog.Logger
 	gh      GitHub
 	rootDir string
-	// workflow is the path of the workflow file the step is in.
-	// It's empty if the step is in an action file.
-	workflow string
-	lockfile *lockfile.Lockfile
 }
 
 func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) error { //nolint:cyclop
@@ -42,7 +37,7 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 	if err != nil {
 		return fmt.Errorf("parse the action: %w", err)
 	}
-	sha, err := v.resolveSHA(ctx, r)
+	sha, err := r.resolveSHA(ctx, v.gh)
 	if err != nil {
 		return err
 	}
@@ -72,17 +67,6 @@ func (v *validateStep) readAction(ctx context.Context, action *workflow.Action) 
 		return fmt.Errorf("unmarshal action file: %w", err)
 	}
 	return nil
-}
-
-// resolveSHA returns the commit SHA of the action.
-// If the action is locked by the lockfile for the workflow, it returns the locked commit,
-// which GitHub Actions runs, instead of resolving the ref through the GitHub API.
-func (v *validateStep) resolveSHA(ctx context.Context, r *remoteRef) (string, error) {
-	if sha, ok := v.lockfile.Commit(v.workflow, v.step.Uses); ok {
-		v.logger.Debug("get the commit SHA from the lockfile", "sha", sha)
-		return sha, nil
-	}
-	return r.resolveSHA(ctx, v.gh)
 }
 
 const (

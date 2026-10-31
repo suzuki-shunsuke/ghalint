@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
 	"github.com/suzuki-shunsuke/ghalint/pkg/workflow"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 	"github.com/suzuki-shunsuke/urfave-cli-v3-util/urfave"
@@ -17,10 +16,6 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("find workflow files: %w", err)
 	}
-	lf, err := lockfile.Read(filePaths)
-	if err != nil {
-		slogerr.WithError(c.logger, err).Warn("read the lockfile. Commit SHAs of actions are resolved through the GitHub API", "lockfile", lockfile.Path)
-	}
 	failed := false
 	for _, filePath := range filePaths {
 		logger := c.logger.With("workflow_file_path", filePath)
@@ -29,7 +24,6 @@ func (c *Controller) runWorkflow(ctx context.Context) error {
 			logger:   logger,
 			gh:       c.gh,
 			rootDir:  c.rootDir,
-			lockfile: lf,
 		}
 		if err := vw.validate(ctx); err != nil {
 			failed = true
@@ -49,7 +43,6 @@ type validateWorkflow struct {
 	logger   *slog.Logger
 	gh       GitHub
 	rootDir  string
-	lockfile *lockfile.Lockfile
 }
 
 func (v *validateWorkflow) validate(ctx context.Context) error {
@@ -62,12 +55,10 @@ func (v *validateWorkflow) validate(ctx context.Context) error {
 	failed := false
 	for name, job := range wf.Jobs {
 		vj := &validateJob{
-			job:      job,
-			logger:   v.logger.With("job_key", name),
-			gh:       v.gh,
-			rootDir:  v.rootDir,
-			workflow: v.workflow,
-			lockfile: v.lockfile,
+			job:     job,
+			logger:  v.logger.With("job_key", name),
+			gh:      v.gh,
+			rootDir: v.rootDir,
 		}
 		if err := vj.validate(ctx); err != nil {
 			failed = true

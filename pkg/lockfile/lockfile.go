@@ -66,39 +66,40 @@ func Lockable(uses string) bool {
 // It returns false if lf is nil or uses isn't a repository action, such as a local action, a Docker image, or a reusable workflow.
 // The lockfile records actions as canonical keys `owner/repo@ref`, where owner and repo are lowercased and a sub-action path is dropped.
 func (lf *Lockfile) Locked(workflowFilePath, uses string) bool {
-	_, ok := lf.lookup(workflowFilePath, uses)
+	if lf == nil {
+		return false
+	}
+	ref := parserlock.ParseActionRef(uses)
+	if ref == nil {
+		return false
+	}
+	key := parserlock.IndexKey(ref.Owner, ref.Repo, ref.Ref)
+	keys, ok := lf.file.LookupWorkflow(filepath.ToSlash(workflowFilePath))
+	if !ok || !slices.Contains(keys, key) {
+		return false
+	}
+	_, ok = lf.file.Dependencies[key]
 	return ok
 }
 
-// Commit returns the commit SHA-1 the action uses is locked to for the workflow.
-// It returns false if the action isn't locked for the workflow, as Locked does,
-// or the commit isn't a SHA-1 digest.
-func (lf *Lockfile) Commit(workflowFilePath, uses string) (string, bool) {
-	dep, ok := lf.lookup(workflowFilePath, uses)
+// Commit returns the commit SHA-1 the lockfile records for `owner/repo@ref`.
+// Dependencies are shared by all workflows, so a workflow isn't needed to look up the commit.
+// It returns false if lf is nil, the lockfile doesn't record the ref, or the commit isn't a SHA-1 digest.
+func (lf *Lockfile) Commit(owner, repo, ref string) (string, bool) {
+	if lf == nil {
+		return "", false
+	}
+	dep, ok := lf.file.Dependencies[parserlock.IndexKey(owner, repo, ref)]
 	if !ok {
 		return "", false
 	}
 	// The commit is an algo-prefixed digest such as sha1-<hex>.
+	// Entries that no workflow references aren't validated, so the digest is checked here.
 	sha, ok := strings.CutPrefix(dep.Commit, "sha1-")
-	if !ok {
+	if !ok || len(sha) != sha1HexLength || !parserlock.IsFullSha(sha) {
 		return "", false
 	}
 	return strings.ToLower(sha), true
 }
 
-func (lf *Lockfile) lookup(workflowFilePath, uses string) (parserlock.Action, bool) {
-	if lf == nil {
-		return parserlock.Action{}, false
-	}
-	ref := parserlock.ParseActionRef(uses)
-	if ref == nil {
-		return parserlock.Action{}, false
-	}
-	key := parserlock.IndexKey(ref.Owner, ref.Repo, ref.Ref)
-	keys, ok := lf.file.LookupWorkflow(filepath.ToSlash(workflowFilePath))
-	if !ok || !slices.Contains(keys, key) {
-		return parserlock.Action{}, false
-	}
-	dep, ok := lf.file.Dependencies[key]
-	return dep, ok
-}
+const sha1HexLength = 40
