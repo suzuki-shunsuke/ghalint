@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"slices"
 
 	"github.com/suzuki-shunsuke/ghalint/pkg/config"
 	"github.com/suzuki-shunsuke/ghalint/pkg/lockfile"
@@ -43,15 +44,21 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 		&policy.CheckoutPersistCredentialShouldBeFalsePolicy{},
 	}
 	failed := false
-	lf, lfErr := lockfile.Read(filePaths)
-	if lfErr != nil {
-		// A repository whose actions are all pinned by commit SHA doesn't need the lockfile, so this isn't an error.
-		// Actions are validated as if the lockfile didn't exist, so unpinned actions fail the run.
-		slogerr.WithError(logger, lfErr).Warn("read the lockfile. Actions are validated as if the lockfile didn't exist", "lockfile", lockfile.Path)
+	lf, err := lockfile.Read(filePaths)
+	if err != nil {
+		// Without the lockfile, ghalint can't tell which actions are locked, so versions of actions can't be validated properly.
+		// action_ref_should_be_full_length_commit_sha is skipped, and the other policies are applied.
+		// It's skipped for reusable workflows and Docker images too, though the current lockfile doesn't lock them,
+		// because the lockfile may have a newer schema version that locks them.
+		// The run fails even if no policy is violated.
+		failed = true
+		slogerr.WithError(logger, err).Error("read the lockfile. action_ref_should_be_full_length_commit_sha is skipped", "lockfile", lockfile.Path)
+		jobPolicies = slices.DeleteFunc(jobPolicies, isActionRefShouldBeSHAPolicy)
+		stepPolicies = slices.DeleteFunc(stepPolicies, isActionRefShouldBeSHAPolicy)
 	}
 	for _, filePath := range filePaths {
 		logger := logger.With("workflow_file_path", filePath)
-		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath, lf, lfErr) {
+		if c.validateWorkflow(logger, cfg, wfPolicies, jobPolicies, stepPolicies, filePath, lf) {
 			failed = true
 		}
 	}
@@ -61,7 +68,12 @@ func (c *Controller) Run(_ context.Context, logger *slog.Logger, cfgFilePath str
 	return nil
 }
 
-func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string, lf *lockfile.Lockfile, lfErr error) bool {
+func isActionRefShouldBeSHAPolicy[T Policy](p T) bool {
+	_, ok := any(p).(*policy.ActionRefShouldBeSHAPolicy)
+	return ok
+}
+
+func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, wfPolicies []WorkflowPolicy, jobPolicies []JobPolicy, stepPolicies []StepPolicy, filePath string, lf *lockfile.Lockfile) bool {
 	wf := &workflow.Workflow{
 		FilePath: filePath,
 	}
@@ -71,10 +83,9 @@ func (c *Controller) validateWorkflow(logger *slog.Logger, cfg *config.Config, w
 	}
 
 	wfCtx := &policy.WorkflowContext{
-		FilePath:      filePath,
-		Workflow:      wf,
-		Lockfile:      lf,
-		LockfileError: lfErr,
+		FilePath: filePath,
+		Workflow: wf,
+		Lockfile: lf,
 	}
 
 	failed := false

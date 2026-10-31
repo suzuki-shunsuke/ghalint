@@ -8,10 +8,9 @@ import (
 type WorkflowContext struct {
 	FilePath string
 	Workflow *workflow.Workflow
-	// Lockfile is nil if the lockfile doesn't exist or ghalint fails to read it.
+	// Lockfile is nil if the lockfile doesn't exist.
+	// If ghalint fails to read the lockfile, action_ref_should_be_full_length_commit_sha isn't applied.
 	Lockfile *lockfile.Lockfile
-	// LockfileError is the error ghalint got when reading the lockfile.
-	LockfileError error
 }
 
 type JobContext struct {
