@@ -57,6 +57,41 @@ func TestValidate(t *testing.T) { //nolint:funlen
 			isErr: true,
 		},
 		{
+			name: "workflow_file_path is required to exclude job_permissions",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName: "job_permissions",
+					},
+				},
+			},
+			isErr: true,
+		},
+		{
+			name: "job_name is required to exclude job_permissions",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName:       "job_permissions",
+						WorkflowFilePath: ".github/workflows/foo.yaml",
+					},
+				},
+			},
+			isErr: true,
+		},
+		{
+			name: "job_permissions pass",
+			cfg: &config.Config{
+				Excludes: []*config.Exclude{
+					{
+						PolicyName:       "job_permissions",
+						WorkflowFilePath: ".github/workflows/foo.yaml",
+						JobName:          "foo",
+					},
+				},
+			},
+		},
+		{
 			name: "disallowed policy",
 			cfg: &config.Config{
 				Excludes: []*config.Exclude{
