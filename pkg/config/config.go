@@ -95,8 +95,8 @@ func validate(exclude *Exclude) error { //nolint:cyclop
 		if exclude.ActionName == "" {
 			return errors.New(`action_name is required to exclude action_ref_should_be_full_length_commit_sha`)
 		}
-		if _, err := path.Match(exclude.ActionName, ""); err != nil {
-			return fmt.Errorf("action_name must be a glob pattern: %w", slogerr.With(err, "pattern_reference", "https://pkg.go.dev/path#Match"))
+		if _, err := MatchActionName(exclude.ActionName, ""); err != nil {
+			return fmt.Errorf("action_name must be a glob pattern: %w", slogerr.With(err, "pattern_reference", "https://pkg.go.dev/path#Match (plus ** across /)"))
 		}
 	case "job_secrets":
 		if exclude.WorkflowFilePath == "" {
